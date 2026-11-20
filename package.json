@@ -1,0 +1,18 @@
+{
+  "name": "damarindo-hris",
+  "private": true,
+  "description": "DAMARINDO GROUP HRIS (monorepo)",
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev:api": "pnpm --filter @hris/api dev",
+    "dev:web": "pnpm --filter @hris/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:integration": "pnpm --filter @hris/api test:integration",
+    "db:migrate": "pnpm --filter @hris/api db:migrate",
+    "db:rollback": "pnpm --filter @hris/api db:rollback"
+  }
+}

@@ -28,7 +28,14 @@ Branch kerja; commit atomik berbahasa Indonesia; jangan push ke `main`; PR/merge
 Tes ditulis bersama kode. Fitur tanpa tes isolasi perusahaan & tes izin tidak dianggap selesai.
 
 ## Perintah
-Belum ada (diisi setelah irisan 2B): install, dev, lint, typecheck, test, test:integration, build, db:migrate.
+Prasyarat: Node 22, pnpm 10, PostgreSQL 16. Salin `.env.example` ke `.env` dan isi sendiri (jangan commit).
+- `pnpm install` — pasang dependency
+- `pnpm dev:api` / `pnpm dev:web` — jalankan pengembangan (API :3001, web :3000)
+- `pnpm lint` / `pnpm typecheck` / `pnpm test` — cek kualitas dan tes unit
+- `pnpm test:integration` — tes integrasi (butuh `TEST_DATABASE_URL`, PostgreSQL asli)
+- `pnpm build` — build semua aplikasi
+- `pnpm db:migrate` / `pnpm db:rollback` — migrasi SQL di `db/migrations/` (butuh `DATABASE_URL`)
+- OpenAPI: `GET /openapi.json`, UI di `/docs`.
 
 ## Rujukan
 `docs/requirements.md`, `architecture.md`, `database.md`, `rbac.md`, `security.md`, `recruitment-workflow.md`, `attendance-workflow.md`, `payroll-workflow.md`, `development-roadmap.md`, `decision-log.md`.

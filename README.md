@@ -5,6 +5,8 @@ HRIS Outsourcing DAMARINDO GROUP (rencana: proprietary). Stack: Next.js + NestJS
 ## Struktur
 - `CLAUDE.md` — konteks dan aturan untuk Claude Code
 - `.claude/rules/` — aturan keamanan, koding, dan alur git
+- `apps/api` — NestJS (REST + OpenAPI); `apps/web` — Next.js (PWA, mobile-first)
+- `db/migrations/` — migrasi SQL PostgreSQL
 - `docs/` — arsitektur dan panduan kontribusi
 - `.github/` — CI, template PR, CODEOWNERS
 
