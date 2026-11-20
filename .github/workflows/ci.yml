@@ -2,30 +2,121 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "claude/**"]
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  secret-scan:
+  pindai-rahasia:
+    name: Pindai rahasia (gitleaks)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Pindai rahasia
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # CLI via image resmi: tidak butuh lisensi seperti gitleaks-action untuk repo organisasi.
+      - name: Jalankan gitleaks
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.3 \
+            detect --source /repo --no-banner --redact --verbose
 
-  hygiene:
+  kebersihan-repo:
+    name: Cek berkas sensitif
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cek berkas rahasia terlarang
+      - name: Tolak berkas rahasia yang ter-track
         run: |
-          if git ls-files | grep -E '(^|/)\.env($|\.)|\.pem$|\.key$|\.keystore$' | grep -v '\.env\.example$'; then
-            echo "Berkas sensitif terdeteksi"; exit 1
+          if git ls-files | grep -E '(^|/)\.env($|\.)|\.pem$|\.key$|\.p12$|\.pfx$|\.keystore$|\.jks$' | grep -v '\.env\.example$'; then
+            echo "Berkas sensitif terdeteksi di repo"; exit 1
           fi
+
+  kualitas:
+    name: Lint, tipe, tes unit, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:scripts
+      - run: pnpm build
+
+  integrasi:
+    name: Integrasi (PostgreSQL) dan migrasi
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          # Kredensial sementara khusus service CI yang dibuang setelah job; bukan rahasia aplikasi.
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_ephemeral_db
+          POSTGRES_DB: hris_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci_user -d hris_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://ci_user:ci_ephemeral_db@localhost:5432/hris_test
+      TEST_DATABASE_URL: postgres://ci_user:ci_ephemeral_db@localhost:5432/hris_test
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Migrasi naik, turun, naik lagi
+        run: |
+          pnpm db:migrate
+          pnpm db:rollback
+          pnpm db:migrate
+      - name: Tes integrasi
+        run: pnpm test:integration
+
+  kontrak-openapi:
+    name: Deteksi perubahan kontrak OpenAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm export:openapi
+      - name: Pastikan dokumen OpenAPI yang di-commit mutakhir
+        run: |
+          git diff --exit-code docs/openapi/openapi.json || {
+            echo "Kontrak OpenAPI berubah. Jalankan 'pnpm export:openapi' dan commit hasilnya."; exit 1; }
+
+  rantai-pasok:
+    name: Audit dependency dan lisensi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit kerentanan (produksi, tingkat tinggi ke atas)
+        run: pnpm audit --prod --audit-level=high
+      - name: Kebijakan lisensi
+        run: pnpm check:licenses
