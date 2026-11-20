@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pindai rahasia
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cek berkas rahasia terlarang
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\.)|\.pem$|\.key$|\.keystore$' | grep -v '\.env\.example$'; then
+            echo "Berkas sensitif terdeteksi"; exit 1
+          fi

@@ -1,0 +1,32 @@
+# Rahasia — jangan pernah di-commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*
+secrets*
+*.keystore
+*.jks
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Build / dependency (umum)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+coverage/
+*.log
+
+# Claude Code lokal
+.claude/settings.local.json
