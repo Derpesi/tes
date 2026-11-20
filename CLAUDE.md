@@ -1,17 +1,34 @@
-# CLAUDE.md
+# CLAUDE.md — DAMARINDO GROUP HRIS
 
 ## Proyek
-Fondasi pengembangan aplikasi profesional yang dapat dipakai ulang. Stack belum dipilih; jangan memilih stack sebelum kebutuhan proyek jelas dan dicatat sebagai ADR di `docs/architecture/`.
+HRIS outsourcing multi-perusahaan (PT. Damarindo Mandiri, PT. OSI, PT. Pancormas Perkasa; perusahaan baru lewat master data tanpa ubah kode).
+Proprietary. Modular monolith: Next.js (`apps/web`) + NestJS (`apps/api`) + PostgreSQL. REST + OpenAPI.
+Keputusan ada di `docs/architecture/` (ADR) dan `docs/decision-log.md`. Pisahkan KEPUTUSAN dari ASUMSI.
 
 ## Bahasa
-Komunikasi, dokumentasi, dan pesan commit dalam bahasa Indonesia. Identifier kode dalam bahasa Inggris.
+Komunikasi, UI, pesan validasi, laporan, dokumen: Bahasa Indonesia. Identifier kode: bahasa Inggris.
 
-## Aturan inti
-- Aturan rinci ada di `.claude/rules/` (keamanan, koding, git).
-- Jangan pernah membaca, menampilkan, atau meng-commit rahasia/kredensial.
-- Bekerja di branch kerja; jangan push ke `main`. Jangan membuat PR kecuali diminta.
-- Jangan menambah dependency atau folder kosong tanpa kebutuhan nyata.
-- Minta persetujuan sebelum tindakan sulit dibatalkan atau berdampak keluar.
+## Aturan keras (tidak boleh dilanggar)
+- Tidak ada portal/akun/login/dashboard rekanan. Rekanan = master data internal.
+- Member: Google OIDC saja. Staff: password HRIS + MFA wajib. Jangan minta password Gmail.
+- Isolasi perusahaan ditegakkan di backend + RLS, bukan filter frontend.
+- Karyawan aktif diblokir melamar di backend (403), bukan hanya disembunyikan di UI.
+- Tidak ada face recognition otomatis. Selfie hanya untuk petugas berwenang, bucket privat, retensi dapat dikonfigurasi.
+- Tidak ada absensi offline. QR statis = pengenal titik, bukan rahasia.
+- Payroll tahap awal = rekap & ekspor. Dilarang: hitung gaji final, slip, transfer dana otomatis.
+- Uang: NUMERIC/Decimal, bukan float. Tarif/aturan regulasi = data berversi, bukan konstanta.
+- Jangan mengarang klausul hukum PKWT; template resmi menyusul. Tombol "setuju" bukan tanda tangan sah.
+- Tidak ada kredensial/email/OTP default; tidak ada Super Admin permanen.
+- Jangan membuat logo pengganti. Jangan gunakan data pekerja nyata untuk tes.
+- Jangan baca/tampilkan/commit rahasia. Jangan ubah visibilitas repo/lisensi tanpa persetujuan eksplisit.
+
+## Alur kerja
+Kerja per fase; tiap fase: acceptance criteria → implementasi → tes → review → persetujuan pemilik.
+Branch kerja; commit atomik berbahasa Indonesia; jangan push ke `main`; PR/merge/deploy hanya atas permintaan.
+Tes ditulis bersama kode. Fitur tanpa tes isolasi perusahaan & tes izin tidak dianggap selesai.
 
 ## Perintah
-Belum ada (menunggu pemilihan stack). Tambahkan perintah build/test/lint di sini saat tersedia.
+Belum ada (diisi setelah irisan 2B): install, dev, lint, typecheck, test, test:integration, build, db:migrate.
+
+## Rujukan
+`docs/requirements.md`, `architecture.md`, `database.md`, `rbac.md`, `security.md`, `recruitment-workflow.md`, `attendance-workflow.md`, `payroll-workflow.md`, `development-roadmap.md`, `decision-log.md`.

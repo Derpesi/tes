@@ -1,5 +1,10 @@
 # Arsitektur
 
-Belum ada keputusan arsitektur. Catat setiap keputusan penting sebagai ADR bernama `NNNN-judul.md` dengan bagian: Konteks, Keputusan, Konsekuensi.
+Catat setiap keputusan penting sebagai ADR bernama `NNNN-judul.md` dengan bagian Status, Konteks, Keputusan, Konsekuensi.
 
-Keputusan pertama yang tertunda: pemilihan stack teknologi (menunggu kebutuhan proyek).
+| ADR | Judul | Status |
+|---|---|---|
+| 0001 | Technology Stack | Disetujui |
+| 0002 | Usulan Pilihan Teknis Turunan | Diusulkan |
+
+Ringkasan arsitektur: `../architecture.md`. Daftar keputusan dan asumsi: `../decision-log.md`.

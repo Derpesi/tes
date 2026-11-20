@@ -1,6 +1,6 @@
 # tes
 
-Repositori fondasi pengembangan aplikasi profesional. Stack teknologi belum dipilih; keputusan dicatat di `docs/architecture/`.
+HRIS Outsourcing DAMARINDO GROUP (rencana: proprietary). Stack: Next.js + NestJS + PostgreSQL, modular monolith (ADR-0001). Keputusan dicatat di `docs/architecture/` dan `docs/decision-log.md`.
 
 ## Struktur
 - `CLAUDE.md` — konteks dan aturan untuk Claude Code
@@ -9,4 +9,4 @@ Repositori fondasi pengembangan aplikasi profesional. Stack teknologi belum dipi
 - `.github/` — CI, template PR, CODEOWNERS
 
 ## Lisensi
-MIT — lihat `LICENSE`.
+Berkas `LICENSE` (MIT) masih bersifat sementara. Keputusan: repo private dan proprietary; perubahan lisensi menunggu persetujuan eksplisit (lihat `docs/decision-log.md`, D-02).
