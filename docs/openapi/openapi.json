@@ -1799,6 +1799,328 @@
           "Database Member (staff)"
         ]
       }
+    },
+    "/vacancies": {
+      "get": {
+        "operationId": "RecruitmentController_daftarLowongan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      },
+      "post": {
+        "operationId": "RecruitmentController_buatLowongan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lowongan dibuat berstatus DRAFT (tidak terlihat member)"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/vacancies/{id}": {
+      "get": {
+        "operationId": "RecruitmentController_detailLowongan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      },
+      "patch": {
+        "operationId": "RecruitmentController_ubahLowongan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/vacancies/{id}/open": {
+      "post": {
+        "operationId": "RecruitmentController_bukaLowongan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/vacancies/{id}/close": {
+      "post": {
+        "operationId": "RecruitmentController_tutupLowongan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/applications": {
+      "get": {
+        "operationId": "RecruitmentController_daftarLamaran",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/applications/{id}": {
+      "get": {
+        "operationId": "RecruitmentController_detailLamaran",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail lamaran dengan profil ringkas pelamar tanpa NIK dan tanpa kontak"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/applications/{id}/stage": {
+      "post": {
+        "operationId": "RecruitmentController_tahap",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/applications/{id}/accept": {
+      "post": {
+        "operationId": "RecruitmentController_terima",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "INTERVIEW -> DITERIMA -> MENUNGGU_PKWT (PKWT di Fase 6)"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/applications/{id}/reject": {
+      "post": {
+        "operationId": "RecruitmentController_tolak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (staff)"
+        ]
+      }
+    },
+    "/member/eligibility": {
+      "get": {
+        "operationId": "MemberRecruitmentController_eligibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Apakah member boleh melamar (aturan yang sama dengan penegakan di backend)"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      }
+    },
+    "/member/vacancies": {
+      "get": {
+        "operationId": "MemberRecruitmentController_daftarLowongan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lowongan DIBUKA semua perusahaan Group; tanpa catatan internal"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      }
+    },
+    "/member/vacancies/{id}": {
+      "get": {
+        "operationId": "MemberRecruitmentController_detailLowongan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      }
+    },
+    "/member/applications": {
+      "post": {
+        "operationId": "MemberRecruitmentController_melamar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Melamar (CanApply: karyawan aktif ditolak 403)"
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      },
+      "get": {
+        "operationId": "MemberRecruitmentController_daftarLamaran",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      }
+    },
+    "/member/applications/{id}/withdraw": {
+      "post": {
+        "operationId": "MemberRecruitmentController_tarik",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Lowongan dan Lamaran (member)"
+        ]
+      }
     }
   },
   "info": {

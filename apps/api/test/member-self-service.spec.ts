@@ -9,6 +9,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
 import request from 'supertest';
+import { urlAplikasiTanpaBypass } from './helpers/role-app';
 
 const DB_URL = process.env.TEST_DATABASE_URL;
 const jalan = DB_URL ? describe : describe.skip;
@@ -42,7 +43,7 @@ jalan('self-service member: biodata, dokumen terenkripsi, dan pengajuan verifika
     const { AppModule } = await import('../src/app.module');
     const { konfigurasiApp } = await import('../src/app.factory');
     const { SessionService } = await import('../src/auth/session.service');
-    process.env.DATABASE_URL = DB_URL;
+    process.env.DATABASE_URL = await urlAplikasiTanpaBypass(DB_URL!);
     const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = mod.createNestApplication();
     konfigurasiApp(app);

@@ -233,6 +233,22 @@ ada('member dan lowongan: invarian skema dan isolasi RLS', () => {
       }, { memberRead: true, memberPersonId: person1 });
     });
 
+    it('member tetap membaca lowongan yang pernah dilamar (meski ditutup) tetapi tidak dapat melamar ulang ke lowongan tertutup', async () => {
+      const pelamar = await buatPerson();
+      const q = sisipLowongan(A, 'DIBUKA', null, `Akan ditutup ${unik()}`);
+      const vid = await dalamScope(pool, [A], async (c) => (await c.query(`${q.text} RETURNING id`, q.values)).rows[0].id as string, { commit: true });
+      const lid = await dalamScope(pool, [], async (c) => (await c.query(`INSERT INTO job_applications (company_id, vacancy_id, person_id) VALUES ($1, $2, $3) RETURNING id`, [A, vid, pelamar])).rows[0].id as string, { memberRead: true, memberPersonId: pelamar, commit: true });
+      await dalamScope(pool, [A], async (c) => void (await c.query(`UPDATE job_vacancies SET status = 'DITUTUP' WHERE id = $1`, [vid])), { commit: true });
+      await dalamScope(pool, [], async (c) => {
+        expect((await c.query(`SELECT id FROM job_vacancies WHERE id = $1`, [vid])).rowCount).toBe(1); // lowongan yang pernah dilamar tetap terbaca
+        expect((await c.query(`SELECT id FROM job_vacancies WHERE id = $1`, [lowongan.A.ditutup])).rowCount).toBe(0); // yang lain tidak
+        await c.query(`UPDATE job_applications SET status = 'DITARIK' WHERE id = $1`, [lid]);
+        await harusGagal(c, `INSERT INTO job_applications (company_id, vacancy_id, person_id) VALUES ($1, $2, $3)`, [A, vid, pelamar], /row-level security/); // tertutup: tidak boleh melamar ulang
+      }, { memberRead: true, memberPersonId: pelamar });
+      // orang lain tidak ikut melihat lowongan tertutup itu
+      await dalamScope(pool, [], async (c) => expect((await c.query(`SELECT id FROM job_vacancies WHERE id = $1`, [vid])).rowCount).toBe(0), { memberRead: true, memberPersonId: await buatPerson() });
+    });
+
     it('bukti efektif: tanpa kebijakan member_read lowongan tidak terlihat; setelah dilepas kebijakan, tes akan mendeteksinya', async () => {
       await pool.query(`ALTER TABLE job_vacancies DISABLE ROW LEVEL SECURITY`);
       try {
