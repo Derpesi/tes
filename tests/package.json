@@ -6,7 +6,7 @@
     "lint": "eslint \"**/*.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --config jest.config.js --testPathPatterns 'helpers/.*\\.spec\\.ts$|rbac-matrix/.*\\.spec\\.ts$'",
-    "test:integration": "jest --config jest.config.js --runInBand --testPathPatterns '(tenant-isolation|auth|master-data|member)/.*\\.spec\\.ts$'"
+    "test:integration": "jest --config jest.config.js --runInBand --testPathPatterns '(tenant-isolation|auth|master-data|member|contract)/.*\\.spec\\.ts$'"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

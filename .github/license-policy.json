@@ -20,7 +20,8 @@
   "perluTinjauPrefiks": [
     "LGPL",
     "MPL",
-    "CC-BY"
+    "CC-BY",
+    "Zlib"
   ],
   "pengecualian": [
     {
@@ -45,6 +46,12 @@
       "paket": "caniuse-lite",
       "lisensi": "CC-BY-4.0",
       "alasan": "Data kompatibilitas browser untuk tooling build; wajib atribusi",
+      "status": "DIAJUKAN, menunggu persetujuan pemilik"
+    },
+    {
+      "paket": "pako",
+      "lisensi": "(MIT AND Zlib)",
+      "alasan": "Dependency transitif pdf-lib (pembuat PDF PKWT). Zlib adalah lisensi permisif setara MIT; tidak dimodifikasi",
       "status": "DIAJUKAN, menunggu persetujuan pemilik"
     }
   ]

@@ -1800,6 +1800,136 @@
         ]
       }
     },
+    "/pkwt/templates/variabel": {
+      "get": {
+        "operationId": "TemplatesController_variabel",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Variabel yang boleh dipakai di isi template"
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      }
+    },
+    "/pkwt/templates": {
+      "get": {
+        "operationId": "TemplatesController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      },
+      "post": {
+        "operationId": "TemplatesController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Membuat versi baru template (BELUM_DIVERIFIKASI); tidak dapat dipakai untuk kontrak sebelum diverifikasi"
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      }
+    },
+    "/pkwt/templates/{id}": {
+      "get": {
+        "operationId": "TemplatesController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      },
+      "patch": {
+        "operationId": "TemplatesController_ubah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      }
+    },
+    "/pkwt/templates/{id}/verify": {
+      "post": {
+        "operationId": "TemplatesController_verifikasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mencatat verifikasi hukum template (pemverifikasi bukan pembuat)"
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      }
+    },
+    "/pkwt/templates/{id}/archive": {
+      "post": {
+        "operationId": "TemplatesController_arsipkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Template PKWT"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
