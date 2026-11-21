@@ -14,6 +14,267 @@
           "Kesehatan"
         ]
       }
+    },
+    "/auth/staff/invitation/accept": {
+      "post": {
+        "operationId": "StaffAuthController_terimaUndangan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "password"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Undangan diterima; lanjutkan pendaftaran verifikasi dua langkah"
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/login": {
+      "post": {
+        "operationId": "StaffAuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kata sandi benar; lanjutkan verifikasi dua langkah"
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/mfa/verify": {
+      "post": {
+        "operationId": "StaffAuthController_verifikasiMfa",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Kode TOTP 6 digit atau kode pemulihan"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/mfa/enroll/start": {
+      "post": {
+        "operationId": "StaffAuthController_mulaiDaftarMfa",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/mfa/enroll/confirm": {
+      "post": {
+        "operationId": "StaffAuthController_konfirmasiDaftarMfa",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kode pemulihan ditampilkan SEKALI; simpan di tempat aman"
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/password/forgot": {
+      "post": {
+        "operationId": "StaffAuthController_lupaPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/staff/password/reset": {
+      "post": {
+        "operationId": "StaffAuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "password"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "StaffAuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "operationId": "StaffAuthController_sesiSaatIni",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Informasi sesi saat ini, termasuk token CSRF"
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "StaffAuthController_saya",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Hanya dapat diakses sesi penuh (setelah verifikasi dua langkah)"
+          }
+        },
+        "tags": [
+          "Autentikasi Staff"
+        ]
+      }
     }
   },
   "info": {

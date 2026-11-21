@@ -26,6 +26,8 @@ const skema = z
     AUTH_HMAC_KEY: kunciBase64('AUTH_HMAC_KEY', { min: 32 }),
     APP_ENCRYPTION_KEY: kunciBase64('APP_ENCRYPTION_KEY', { tepat: 32 }),
     // Opsional sampai pemilik membuat kredensial; bila diisi harus lengkap (semua-atau-tidak-sama-sekali).
+    /** Jumlah proxy tepercaya di depan API (untuk IP klien yang benar). 0 = tidak ada. */
+    TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     SMTP_HOST: z.string().min(1).optional(),

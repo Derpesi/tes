@@ -4,7 +4,7 @@
   "description": "DAMARINDO GROUP HRIS (monorepo)",
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev:api": "pnpm --filter @hris/api dev",

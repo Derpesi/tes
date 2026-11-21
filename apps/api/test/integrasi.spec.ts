@@ -50,7 +50,7 @@ jalan('integrasi (PostgreSQL asli)', () => {
   it('error 404 berbahasa Indonesia dengan bentuk seragam', async () => {
     const res = await request(app.getHttpServer()).get('/tidak-ada').expect(404);
     expect(res.body).toMatchObject({ statusCode: 404, kode: 'HTTP_404' });
-    expect(res.body.pesan).toBeTruthy();
+    expect(res.body.pesan).toBe('Data tidak ditemukan');
   });
 
   it('audit_logs: INSERT boleh; UPDATE/DELETE tidak mengubah apa pun; TRUNCATE ditolak; trigger menolak bila kebijakan dilonggarkan', async () => {

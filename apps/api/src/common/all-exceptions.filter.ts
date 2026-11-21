@@ -22,14 +22,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     if (status >= 500) this.logger.error(exception instanceof Error ? exception.message : 'error tak dikenal');
 
+    // Pesan bawaan framework/library berbahasa Inggris tidak boleh bocor ke pengguna. Pesan khusus hanya
+    // dipakai bila exception membawa `kode` (dibuat oleh aplikasi ini, berbahasa Indonesia).
     let pesan = PESAN_STANDAR[status] ?? PESAN_STANDAR[500];
+    let kode = `HTTP_${status}`;
     if (exception instanceof HttpException && status < 500) {
       const r = exception.getResponse();
-      const m = typeof r === 'string' ? r : (r as { message?: string | string[] }).message;
-      if (m) pesan = Array.isArray(m) ? m.join('; ') : m;
-    } else if (exception instanceof HttpException) {
-      pesan = PESAN_STANDAR[status] ?? pesan;
+      if (typeof r === 'object' && r !== null && typeof (r as { kode?: unknown }).kode === 'string') {
+        const o = r as { kode: string; message?: string | string[] };
+        kode = o.kode;
+        if (o.message) pesan = Array.isArray(o.message) ? o.message.join('; ') : o.message;
+      }
     }
-    res.status(status).json({ statusCode: status, kode: `HTTP_${status}`, pesan });
+    res.status(status).json({ statusCode: status, kode, pesan });
   }
 }

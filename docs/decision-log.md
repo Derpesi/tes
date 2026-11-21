@@ -35,6 +35,12 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-11 | Penyedia email belum dipilih; dev memakai Mailpit lokal | Pemilik menentukan |
 | A-12 | Isolasi perusahaan via `set_config('app.company_ids')` per transaksi + `enable_tenant_rls` (ADR-0003, diusulkan) | Harness 2D, lalu modul pertama dan uji beban |
 | A-13 | ~~`audit_logs` dikecualikan sementara dari RLS~~ **DITUTUP di Fase 3A**: `audit_logs` memakai kebijakan RLS khusus (baca per scope atau global bila `app.audit_global`; tulis selalu boleh); pengecualian registri kosong | Tes `audit-rls` dan registri |
+| A-14 | Batas sesi staff: idle 30 menit, mutlak 8 jam; sesi tertunda (menunggu MFA/pendaftaran) 10 menit | Divalidasi pemilik |
+| A-15 | Kunci akun: 5 gagal berturut-turut (kata sandi atau MFA) mengunci 15 menit, juga untuk email tak terdaftar; undangan berlaku 7 hari, tautan reset 30 menit (maks 3 permintaan/jam/akun) | Divalidasi pemilik |
+| A-16 | argon2id (`@node-rs/argon2`) m=19 MiB, t=2, p=1 (minimum OWASP) | Disetel ulang setelah uji beban |
+| A-17 | TOTP via `otplib` 13 (toleransi ±30 detik, proteksi pakai-ulang); **tanpa OTP email**; 10 kode pemulihan sekali pakai | Pemilik |
+| A-18 | Pembatas laju per IP di memori (instance tunggal): 10 permintaan/menit untuk endpoint auth, 120/menit umum. Di balik proxy wajib set `TRUST_PROXY` | Redis dievaluasi bila perlu (A-06) |
+| A-19 | Node minimal 22.12 (otplib memakai dependency ESM yang dimuat lewat `require`) | CI memakai `.nvmrc` |
 
 ## Masih Terbuka
 Penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

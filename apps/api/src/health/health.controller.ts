@@ -2,12 +2,14 @@ import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/co
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Pool } from 'pg';
 import { POOL } from '../database/database.module';
+import { Public } from '../auth/decorators';
 
 @ApiTags('Kesehatan')
 @Controller('health')
 export class HealthController {
   constructor(@Inject(POOL) private readonly pool: Pool) {}
 
+  @Public()
   @Get()
   @ApiOkResponse({ description: 'Layanan dan database sehat' })
   async cek() {

@@ -18,6 +18,17 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 | Rahasia | Variabel lingkungan/secret manager; gitleaks di CI; repo private; `.env.example` tanpa nilai |
 | Pemulihan | Backup terenkripsi, uji restore berkala, rencana DR (RPO 24 jam, RTO 8 jam: asumsi) |
 
+## Autentikasi staff (Fase 3B)
+- **Alur:** undangan (token sekali pakai, 7 hari) → kata sandi → daftar TOTP (+10 kode pemulihan, ditampilkan sekali) → sesi penuh. Login: kata sandi → sesi *tertunda* → TOTP/kode pemulihan → sesi penuh. Sesi tertunda tidak dapat mengakses endpoint apa pun selain verifikasi MFA, info sesi, dan keluar.
+- **Sesi:** server-side; hanya hash token disimpan; cookie `__Host-sid` (`HttpOnly`, `Secure`, `Path=/`, `SameSite=Lax`, tanpa `Domain`); token dirotasi saat naik state; reset password mencabut semua sesi; akun nonaktif langsung tidak berlaku.
+- **CSRF:** `Origin` harus sama dengan `APP_BASE_URL` untuk semua method tulis (termasuk endpoint publik/login); sesi wajib membawa `X-CSRF-Token` yang diturunkan dari id sesi.
+- **Anti enumerasi:** pesan dan bentuk respons login/lupa kata sandi sama untuk email terdaftar dan tidak; hash tiruan menyamakan waktu. Kunci akun dihitung dari `login_attempts` (email di-HMAC) sehingga email tak dikenal berperilaku sama.
+- **Kunci akun:** 5 gagal berturut-turut (kata sandi atau MFA) → 15 menit; kegagalan MFA juga mencabut sesi tertunda.
+- **TOTP:** secret dienkripsi AES-256-GCM (AAD terikat user); kode tidak dapat dipakai ulang (dua lapis: `afterTimeStep` dan `UPDATE` atomik); kode pemulihan di-HMAC dan sekali pakai.
+- **Kata sandi:** argon2id; panjang 12–128; menolak kata umum sederhana dan yang memuat bagian email. Keterbatasan: daftar kata umum kecil dan **tidak** memeriksa daftar kebocoran (tidak ada layanan eksternal agar tidak mengirim data).
+- **Pesan error:** pesan bawaan framework/library tidak diteruskan; hanya pesan beralamat kode aplikasi (Indonesia) atau pesan standar.
+- **Keterbatasan yang diketahui:** (1) pembatas laju di memori, bukan lintas instance; (2) tidak ada OTP email; (3) waktu respons `lupa kata sandi` tidak sepenuhnya seragam; (4) `TRUST_PROXY` harus benar atau IP klien keliru; (5) pemulihan MFA lewat admin dengan persetujuan ganda menyusul di 3D.
+
 ## Role database aplikasi
 Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
 
