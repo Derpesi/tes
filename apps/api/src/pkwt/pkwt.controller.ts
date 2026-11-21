@@ -93,6 +93,14 @@ export class PkwtController {
     return this.svc.batalkan(a, i, b);
   }
 
+  @RequirePermission('pkwt.approve')
+  @Post(':id/terminate')
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'Mengakhiri kontrak AKTIF lebih awal dengan alasan; penempatan selesai dan status member menjadi KONTRAK_BERAKHIR' })
+  akhiri(@AksesStaff() a: Akses, @id('id') i: string, @Body(new ZodPipe(AlasanBody)) b: z.infer<typeof AlasanBody>) {
+    return this.svc.akhiri(a, i, b);
+  }
+
   @RequirePermission('pkwt.export')
   @Get(':id/pdf')
   @ApiOkResponse({ description: 'PDF dibangkitkan sesuai permintaan (tidak disimpan); setiap pencetakan diaudit' })

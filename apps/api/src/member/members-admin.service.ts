@@ -129,6 +129,28 @@ export class MembersAdminService {
     return { status: 'PROFIL_BELUM_LENGKAP' };
   }
 
+  /** Verifikasi HRD agar member yang kontraknya berakhir dapat melamar kembali (satu-satunya jalan kembali ke BELUM_DITEMPATKAN). */
+  async aktifkanKembali(a: Akses, id: string, b: z.infer<typeof KembalikanBody>) {
+    const c = await this.pool.connect();
+    try {
+      await c.query('BEGIN');
+      const r = await c.query(`SELECT id, person_id, status FROM member_profiles WHERE id = $1 FOR UPDATE`, [id]);
+      if (!r.rowCount) throw TDK_MEMBER();
+      if (r.rows[0].status !== 'KONTRAK_BERAKHIR') throw new ConflictException({ kode: 'TRANSISI_TIDAK_VALID', message: `Member berstatus ${r.rows[0].status}; hanya KONTRAK_BERAKHIR yang dapat diverifikasi untuk melamar kembali` });
+      const u = await c.query(`UPDATE member_profiles SET status = 'BELUM_DITEMPATKAN', updated_at = now() WHERE id = $1 AND status = 'KONTRAK_BERAKHIR'`, [id]);
+      if (!u.rowCount) throw new ConflictException({ kode: 'TRANSISI_TIDAK_VALID', message: 'Status member sudah berubah' });
+      await catatStatusMember(c, r.rows[0].person_id as string, 'KONTRAK_BERAKHIR', 'BELUM_DITEMPATKAN', a.userId, b.reason);
+      await c.query('COMMIT');
+    } catch (e) {
+      await c.query('ROLLBACK').catch(() => undefined);
+      throw e;
+    } finally {
+      c.release();
+    }
+    await this.audit.catat({ aksi: 'member.profile.reactivated', aktorId: a.userId, objek: 'member_profile', objekId: id });
+    return { status: 'BELUM_DITEMPATKAN' };
+  }
+
   /** Menyetujui: TERVERIFIKASI lalu BELUM_DITEMPATKAN (kedua langkah tercatat di riwayat). */
   async setujui(a: Akses, id: string) {
     const c = await this.pool.connect();

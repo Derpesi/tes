@@ -68,6 +68,14 @@ export class MembersController {
     return this.svc.kembalikan(a, i, b);
   }
 
+  @RequirePermission('member.review')
+  @Post(':id/reactivate')
+  @HttpCode(200)
+  @ApiOkResponse({ description: 'Verifikasi HRD agar member berstatus KONTRAK_BERAKHIR dapat melamar kembali (alasan wajib)' })
+  aktifkanKembali(@AksesStaff() a: Akses, @id('id') i: string, @Body(new ZodPipe(KembalikanBody)) b: z.infer<typeof KembalikanBody>) {
+    return this.svc.aktifkanKembali(a, i, b);
+  }
+
   @RequirePermission('member.approve')
   @Post(':id/approve')
   @HttpCode(200)

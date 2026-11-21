@@ -1777,6 +1777,29 @@
         ]
       }
     },
+    "/members/{id}/reactivate": {
+      "post": {
+        "operationId": "MembersController_aktifkanKembali",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verifikasi HRD agar member berstatus KONTRAK_BERAKHIR dapat melamar kembali (alasan wajib)"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
     "/members/{id}/approve": {
       "post": {
         "operationId": "MembersController_setujui",
@@ -2138,6 +2161,29 @@
         ]
       }
     },
+    "/pkwt/{id}/terminate": {
+      "post": {
+        "operationId": "PkwtController_akhiri",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mengakhiri kontrak AKTIF lebih awal dengan alasan; penempatan selesai dan status member menjadi KONTRAK_BERAKHIR"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
     "/pkwt/{id}/pdf": {
       "get": {
         "operationId": "PkwtController_pdf",
@@ -2314,6 +2360,193 @@
         },
         "tags": [
           "Kontrak PKWT"
+        ]
+      }
+    },
+    "/placements": {
+      "get": {
+        "operationId": "PlacementsController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      },
+      "post": {
+        "operationId": "PlacementsController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Merencanakan penempatan (DIRENCANAKAN); tumpang tindih ditolak database"
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}": {
+      "get": {
+        "operationId": "PlacementsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/approve": {
+      "post": {
+        "operationId": "PlacementsController_setujui",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DIRENCANAKAN -> MENUNGGU_KONTRAK (penyetuju bukan pembuat); aktif otomatis bila kontrak aktif dan tanggal mulai tiba"
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/suspend": {
+      "post": {
+        "operationId": "PlacementsController_tangguhkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/resume": {
+      "post": {
+        "operationId": "PlacementsController_lanjutkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/complete": {
+      "post": {
+        "operationId": "PlacementsController_selesaikan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/cancel": {
+      "post": {
+        "operationId": "PlacementsController_batalkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Penempatan"
+        ]
+      }
+    },
+    "/placements/{id}/move": {
+      "post": {
+        "operationId": "PlacementsController_pindahkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Memindahkan pekerja ke lokasi lain mulai tanggal pindah; penempatan baru memerlukan persetujuan"
+          }
+        },
+        "tags": [
+          "Penempatan"
         ]
       }
     },

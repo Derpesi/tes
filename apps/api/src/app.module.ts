@@ -7,6 +7,7 @@ import { AuditModule } from './audit/audit.module';
 import { MasterModule } from './master/master.module';
 import { MemberModule } from './member/member.module';
 import { PkwtModule } from './pkwt/pkwt.module';
+import { PlacementsModule } from './placements/placements.module';
 import { RecruitmentModule } from './recruitment/recruitment.module';
 import { AuthModule } from './auth/auth.module';
 import { opsiPinoHttp } from './common/log';
@@ -31,6 +32,7 @@ import { HealthController } from './health/health.controller';
     MasterModule,
     MemberModule,
     PkwtModule,
+    PlacementsModule,
     RecruitmentModule,
   ],
   controllers: [HealthController],

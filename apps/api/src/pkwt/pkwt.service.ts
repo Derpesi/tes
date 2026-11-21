@@ -9,6 +9,7 @@ import { BerkasMasuk, periksaUnggahan } from '../common/storage/upload';
 import { KUNCI, Kunci } from '../config/config.module';
 import { ScopedDb } from '../database/scoped-db';
 import type { Akses } from '../rbac/akses.service';
+import { ContractLifecycleService } from './lifecycle.service';
 import { NumberingService } from './numbering.service';
 import { buatPdf, tanggalPanjang } from './pdf';
 import { AlasanBody, DaftarKontrakQuery, KontrakBuat, KontrakUbah } from './schemas';
@@ -44,6 +45,7 @@ export class PkwtService {
     private readonly sdb: ScopedDb,
     private readonly audit: AuditService,
     private readonly nomor: NumberingService,
+    private readonly siklus: ContractLifecycleService,
     @Inject(KUNCI) private readonly kunci: Kunci,
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
   ) {}
@@ -240,6 +242,29 @@ export class PkwtService {
     }, 'pkwt.contract.cancelled');
   }
 
+  /** Memicu siklus hidup untuk satu orang; kegagalan tidak membatalkan operasi utama (worker interval menyusul). */
+  async picuSiklus(personId: string): Promise<void> {
+    try {
+      await this.siklus.prosesOrang(personId, new Date());
+    } catch (e) {
+      this.log.error(`Siklus kontrak (pemicu) gagal: ${(e as Error).message}`);
+    }
+  }
+
+  /** Mengakhiri kontrak AKTIF lebih awal (Direktur). Penempatan selesai dan status member menjadi KONTRAK_BERAKHIR oleh siklus. */
+  async akhiri(a: Akses, id: string, b: z.infer<typeof AlasanBody>) {
+    const k = await this.tx(a, async (c) => {
+      const kon = await this.muat(c, id, true);
+      this.lihatStatus(kon, ['AKTIF'], 'diakhiri lebih awal (hanya kontrak AKTIF)');
+      await c.query(`UPDATE employment_contracts SET status = 'DIAKHIRI_LEBIH_AWAL', ended_at = now(), end_reason = $2, updated_at = now() WHERE id = $1 AND status = 'AKTIF'`, [id, b.reason]);
+      await this.catat(c, kon, 'AKTIF', 'DIAKHIRI_LEBIH_AWAL', a.userId, b.reason);
+      return kon;
+    });
+    await this.audit.catat({ aksi: 'pkwt.contract.terminated', aktorId: a.userId, companyId: k.company_id as string, objek: 'employment_contract', objekId: id });
+    await this.picuSiklus(k.person_id as string);
+    return { status: 'DIAKHIRI_LEBIH_AWAL' };
+  }
+
   // ---------- PDF ----------
   /** Dibangkitkan sesuai permintaan dari data saat ini; NIK didekripsi saat itu juga dan tidak disimpan/dicatat. */
   async pdf(a: Akses, id: string): Promise<Buffer> {
@@ -347,6 +372,7 @@ export class PkwtService {
       return kon;
     });
     await this.audit.catat({ aksi: 'pkwt.document.verified', aktorId: a.userId, companyId: k.company_id as string, objek: 'contract_document', objekId: docId });
+    await this.picuSiklus(k.person_id as string); // bila tanggal mulai sudah tiba, kontrak langsung AKTIF
     return { status: 'DITANDATANGANI' };
   }
 
