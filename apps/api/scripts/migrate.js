@@ -1,4 +1,5 @@
 // Menjalankan migrasi SQL di db/migrations. Pemakaian: node scripts/migrate.js up|down
+// MIGRATE_SCHEMA (opsional): jalankan di skema terpisah (dipakai tes agar terisolasi).
 const path = require('node:path');
 const { runner } = require('node-pg-migrate');
 
@@ -12,12 +13,18 @@ if (!url) {
   console.error('DATABASE_URL belum diatur');
   process.exit(1);
 }
+const skema = process.env.MIGRATE_SCHEMA;
+if (skema && !/^[a-z_][a-z0-9_]{0,40}$/.test(skema)) {
+  console.error('MIGRATE_SCHEMA tidak valid');
+  process.exit(1);
+}
 runner({
   databaseUrl: url,
   dir: path.join(__dirname, '..', '..', '..', 'db', 'migrations'),
   direction: arah,
   count: arah === 'down' ? 1 : Infinity,
   migrationsTable: 'schema_migrations',
+  ...(skema ? { schema: skema, migrationsSchema: skema, createSchema: true } : {}),
   log: () => {},
 })
   .then((m) => console.log(`Migrasi ${arah}: ${m.length} berkas`))

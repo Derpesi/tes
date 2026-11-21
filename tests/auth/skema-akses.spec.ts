@@ -170,18 +170,16 @@ ada('skema akses dan RBAC di database', () => {
         await harusGagal(c, `INSERT INTO approval_requests (type, requested_by, subject_user_id, status, expires_at) VALUES ('RESET_MFA', $1, $1, 'DISETUJUI', now() + interval '1 day')`, [a], /approval_keputusan_lengkap/);
       }));
 
-    it('status bootstrap awal = false dan token bootstrap menyimpan hash (bukan token mentah)', async () => {
+    it('system_state memuat penanda bootstrap (boolean) dan tabel bootstrap_tokens sudah tidak ada', async () => {
       const r = await pool.query(`SELECT value FROM system_state WHERE key = 'bootstrapped'`);
-      expect(r.rows[0].value).toBe(false);
-      const kolom = await pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'bootstrap_tokens'`);
-      expect(kolom.rows.map((x) => x.column_name)).toEqual(expect.arrayContaining(['token_hash']));
-      expect(kolom.rows.map((x) => x.column_name)).not.toContain('token');
+      expect(typeof r.rows[0].value).toBe('boolean');
+      expect((await pool.query(`SELECT to_regclass('bootstrap_tokens') AS t`)).rows[0].t).toBeNull();
     });
 
     it('tabel sesi, undangan, reset, dan outbox tidak menyimpan token mentah', async () => {
       const kolom = await pool.query(
         `SELECT table_name, column_name FROM information_schema.columns
-          WHERE table_name IN ('sessions','staff_invitations','password_reset_tokens','bootstrap_tokens') AND column_name IN ('token','password','secret')`,
+          WHERE table_name IN ('sessions','staff_invitations','password_reset_tokens') AND column_name IN ('token','password','secret')`,
       );
       expect(kolom.rows).toEqual([]);
     });

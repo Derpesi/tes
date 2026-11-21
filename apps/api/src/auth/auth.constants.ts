@@ -15,6 +15,10 @@ export const TTL = {
   memberAbsoluteMs: 30 * 24 * 60 * 60 * 1000,
   /** Transaksi OIDC (dari start sampai callback). */
   oidcTransaksiMs: 10 * 60 * 1000,
+  /** Undangan admin bootstrap: lebih singkat dari undangan biasa. */
+  undanganBootstrapMs: 24 * 60 * 60 * 1000,
+  /** Umur peran IT Administrator bootstrap, dihitung sejak aktivasi. */
+  peranBootstrapMs: 7 * 24 * 60 * 60 * 1000,
   undanganMs: 7 * 24 * 60 * 60 * 1000,
   resetPasswordMs: 30 * 60 * 1000,
 } as const;

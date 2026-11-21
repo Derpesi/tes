@@ -20,7 +20,8 @@
     "test:scripts": "node --test scripts/lisensi.test.mjs",
     "check:licenses": "node scripts/lisensi.mjs",
     "test:isolation": "pnpm --filter @hris/tests test:integration",
-    "test:rbac": "pnpm --filter @hris/tests test"
+    "test:rbac": "pnpm --filter @hris/tests test",
+    "bootstrap": "pnpm --filter @hris/api bootstrap"
   },
   "pnpm": {
     "overrides": {

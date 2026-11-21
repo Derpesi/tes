@@ -7,6 +7,7 @@ import { ENV, KUNCI, Kunci } from '../config/config.module';
 import type { Env } from '../config/env';
 import { POOL } from '../database/tokens';
 import { NotificationService } from '../notifications/notification.service';
+import { BootstrapService } from './bootstrap.service';
 import { KUNCI_AKUN, PESAN_LOGIN_GAGAL, PESAN_MFA_GAGAL, TTL, normalisasiEmail } from './auth.constants';
 import { PasswordService, validasiPassword } from './password.service';
 import { SesiAktif, SesiBaru, SessionService } from './session.service';
@@ -30,6 +31,7 @@ export class StaffAuthService {
     private readonly totp: TotpService,
     private readonly notif: NotificationService,
     private readonly audit: AuditService,
+    private readonly bootstrap: BootstrapService,
   ) {}
 
   // ---------- util ----------
@@ -249,6 +251,7 @@ export class StaffAuthService {
     }
     await this.catatBerhasil(s.userId, eref, iref, 'LOGIN_OK');
     await this.audit.catat({ aksi: 'auth.mfa.enrolled', aktorId: s.userId });
+    await this.bootstrap.setelahAktivasi(s.userId); // peran bootstrap dihitung dari aktivasi; tutup bootstrap bila Direktur aktif
     await this.audit.catat({ aksi: 'auth.login.success', aktorId: s.userId, detail: { via: 'pendaftaran_mfa' } });
     return { recoveryCodes: kodeBaru, sesi: await this.sesi.rotasi(s, 'PENUH', ctx.userAgent) };
   }

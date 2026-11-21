@@ -28,7 +28,7 @@ export class InvitationService {
    * Mengundang staff dalam transaksi `c` milik pemanggil (tanpa BEGIN/COMMIT dan tanpa audit; pemanggil mengaudit
    * setelah commit). Email yang sudah punya kredensial ditolak; undangan lama dicabut bila dikirim ulang.
    */
-  async undangDi(c: PoolClient, p: { email: string; namaTampilan: string; diundangOleh: string | null; kirimEmail?: boolean }): Promise<HasilUndangan> {
+  async undangDi(c: PoolClient, p: { email: string; namaTampilan: string; diundangOleh: string | null; kirimEmail?: boolean; ttlMs?: number }): Promise<HasilUndangan> {
     const email = normalisasiEmail(p.email);
     const token = tokenAcak();
     const ada = await c.query(
@@ -48,7 +48,7 @@ export class InvitationService {
     }
     await c.query(
       `INSERT INTO staff_invitations (user_id, token_hash, invited_by, expires_at) VALUES ($1, $2, $3, now() + ($4 * interval '1 millisecond'))`,
-      [userId, sha256(token), p.diundangOleh, TTL.undanganMs],
+      [userId, sha256(token), p.diundangOleh, p.ttlMs ?? TTL.undanganMs],
     );
     const link = `${this.env.APP_BASE_URL}/undangan?token=${token}`;
     if (p.kirimEmail !== false) {

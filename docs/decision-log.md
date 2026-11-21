@@ -25,6 +25,7 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-18 | Sembilan peran dan permission bersifat **tetap** (seed dari `docs/rbac.md`); belum ada UI untuk mengedit peran/permission |
 | D-19 | Reset MFA = akun kembali ke undangan (kata sandi, MFA, kode pemulihan dihapus; sesi dicabut) |
 | D-20 | Tidak ada yang dapat mengubah peran/scope/status akunnya sendiri. Matriks dikoreksi: modul *Pengguna & role* diberi `V` untuk Direktur dan IT |
+| D-21 | Bootstrap memakai undangan staff biasa (token 256-bit ber-hash, TTL 24 jam) yang tautannya **dicetak sekali ke terminal interaktif** (CLI menolak non-TTY); tabel `bootstrap_tokens` dihapus. Peran IT Administrator awal berumur 7 hari sejak aktivasi; bootstrap ditutup otomatis saat Direktur pertama aktif |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |

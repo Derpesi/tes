@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuditModule } from '../audit/audit.module';
 import { RbacModule } from '../rbac/rbac.module';
 import { AuthGuard } from './auth.guard';
+import { BootstrapService } from './bootstrap.service';
 import { InvitationService } from './invitation.service';
 import { MemberAuthController } from './member-auth.controller';
 import { MemberAuthService } from './member-auth.service';
@@ -21,12 +22,13 @@ import { TotpService } from './totp.service';
     PasswordService,
     TotpService,
     InvitationService,
+    BootstrapService,
     StaffAuthService,
     OidcService,
     MemberAuthService,
     // Guard global: semua rute wajib bersesi kecuali @Public() (deny-by-default).
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [SessionService, InvitationService, PasswordService],
+  exports: [SessionService, InvitationService, PasswordService, BootstrapService],
 })
 export class AuthModule {}

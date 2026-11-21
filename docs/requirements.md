@@ -45,7 +45,7 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 |---|---|---|
 | AUT-1 | Login member Google | Hanya email Google terverifikasi; login kedua akun Google sama masuk ke akun sama; tidak ada endpoint password member; email milik akun Google lain ditolak dan masuk antrean tinjauan; state/nonce/PKCE dan cookie pengikat ditegakkan (3C, teruji dengan IdP palsu; Google sungguhan menunggu OAuth client pemilik) |
 | AUT-2 | Login staff + MFA | Hanya via undangan; tanpa MFA ditolak; 5 gagal berturut-turut mengunci sementara; tidak ada registrasi staff |
-| AUT-3 | Bootstrap admin | Hanya saat belum ada staff; token sekali pakai kedaluwarsa 24 jam; tanpa kredensial default; teraudit; jalur mati setelah selesai |
+| AUT-3 | Bootstrap admin | Hanya saat belum ada staff; tautan sekali pakai kedaluwarsa 24 jam dan hanya dicetak ke terminal interaktif; tanpa kredensial default; peran awal berumur 7 hari; teraudit; jalur mati otomatis saat Direktur pertama aktif (3E, teruji termasuk CLI) |
 | RBA-1 | Permission granular | Endpoint menolak (403) tanpa permission; pembuat dan pemeriksa tidak boleh orang sama; tes matriks otomatis |
 | ORG-1 | Isolasi perusahaan | Pengguna scope A tidak dapat membaca data B lewat API, ID langsung, ekspor |
 | ORG-2 | Perusahaan baru | Tambah perusahaan lewat master data tanpa deploy ulang |

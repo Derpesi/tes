@@ -11,7 +11,8 @@
     "test:integration": "jest --config jest.config.js --runInBand --testPathPatterns 'test/.*\\.spec\\.ts$'",
     "export:openapi": "ts-node --transpile-only scripts/export-openapi.ts",
     "db:migrate": "node scripts/migrate.js up",
-    "db:rollback": "node scripts/migrate.js down"
+    "db:rollback": "node scripts/migrate.js down",
+    "bootstrap": "ts-node --transpile-only scripts/bootstrap.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.11",

@@ -36,6 +36,7 @@ Prasyarat: Node ≥22.12, pnpm 10, PostgreSQL 16. User database dev perlu hak `C
 - `pnpm build` — build semua aplikasi
 - `pnpm db:migrate` / `pnpm db:rollback` — migrasi SQL di `db/migrations/` (butuh `DATABASE_URL`)
 - `pnpm test:isolation` — tes isolasi perusahaan (RLS, PostgreSQL asli); `pnpm test:rbac` — tes matriks RBAC (tanpa DB)
+- `pnpm bootstrap -- --email <email>` — bootstrap administrator awal (hanya di terminal interaktif server; lihat `docs/bootstrap-admin.md`)
 - `pnpm test:scripts` — tes skrip repo (pemeriksa lisensi)
 - `pnpm check:licenses` — cek kebijakan lisensi dependency (`.github/license-policy.json`)
 - `pnpm export:openapi` — perbarui `docs/openapi/openapi.json` (CI gagal bila kontrak berubah tanpa commit ini)

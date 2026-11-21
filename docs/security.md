@@ -46,11 +46,7 @@ Lihat bagian *Implementasi (Fase 3D)* di `rbac.md`. Ringkas: guard global deny-b
 Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
 
 ## Bootstrap admin
-1. CLI `bootstrap` dijalankan operator di server (bukan endpoint publik), hanya saat belum ada staff.
-2. Email admin diisi saat eksekusi (tanpa default); token sekali pakai (256-bit, disimpan hash, kedaluwarsa 24 jam).
-3. Penerima menetapkan password sendiri dan wajib mendaftarkan TOTP sebelum akses.
-4. Peran awal IT Administrator berumur terbatas (mis. 7 hari), bukan Super Admin permanen; wajib mengundang Direktur.
-5. Setelah selesai jalur bootstrap mati, token dicabut, semua langkah diaudit. Prosedur break-glass terdokumentasi, nonaktif default, penggunaannya memicu alarm.
+Lihat runbook operator di `bootstrap-admin.md`. Ringkas: CLI dijalankan operator di server (bukan endpoint), menolak non-TTY, email diberikan saat eksekusi (tanpa default), tautan sekali pakai (256-bit, hash, 24 jam) dicetak sekali ke terminal dan tidak masuk email/log/audit; peran IT Administrator bootstrap berumur 7 hari sejak aktivasi; bootstrap ditutup otomatis saat Direktur pertama aktif; `--regenerate` hanya selama belum ada Direktur aktif; dua eksekusi bersamaan dicegah (kunci advisory + baris status terkunci); semuanya diaudit (`auth.bootstrap.*`). Break-glass: manual, nonaktif secara default, tanpa alarm otomatis (pekerjaan lanjutan).
 
 ## Risiko utama dan mitigasi
 | Risiko | Mitigasi |
