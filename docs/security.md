@@ -29,6 +29,16 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 - **Pesan error:** pesan bawaan framework/library tidak diteruskan; hanya pesan beralamat kode aplikasi (Indonesia) atau pesan standar.
 - **Keterbatasan yang diketahui:** (1) pembatas laju di memori, bukan lintas instance; (2) tidak ada OTP email; (3) waktu respons `lupa kata sandi` tidak sepenuhnya seragam; (4) `TRUST_PROXY` harus benar atau IP klien keliru; (5) pemulihan MFA lewat admin dengan persetujuan ganda menyusul di 3D.
 
+## Login member via Google OIDC (Fase 3C)
+- **Alur:** Authorization Code + **PKCE S256**; `state` dan `nonce` acak per transaksi; transaksi sekali pakai, kedaluwarsa 10 menit, dikonsumsi atomik; callback wajib datang dari browser yang memulai (cookie pengikat `__Host-oidc`, disimpan sebagai hash) sehingga login-CSRF dan penyuntikan kode ditolak tanpa menghanguskan transaksi sah.
+- **Validasi token:** `iss`, `aud`, `exp`, `nonce`, PKCE oleh `openid-client`; **ditambah** verifikasi tanda tangan RS256, `iss`, dan `aud` dengan JWKS penerbit (`jose`). Uji kami menemukan bahwa `openid-client` sendiri tidak memverifikasi tanda tangan id_token dari token endpoint (mengandalkan TLS, sah menurut OIDC Core); pemeriksaan tambahan menutup celah itu bila TLS/penerbit dikompromikan. `email_verified` harus tepat `true` (boolean).
+- **Akun:** kunci identitas = `sub` Google (bukan email). Email yang sudah dimiliki akun Google lain **ditolak** dan masuk `member_account_conflicts` (identitas di-HMAC) untuk ditinjau HRD; tidak ada penautan otomatis (mencegah pengambilalihan akun lewat email yang didaur ulang).
+- **Data minimum:** tidak meminta `offline_access`, tidak menyimpan access/refresh token Google; hanya `sub`, email, dan nama tampilan.
+- **Redirect:** `returnTo` hanya jalur relatif satu-origin (tolak `//`, `\`, skema, karakter kontrol); semua galat berupa redirect ke `/masuk?galat=<kode>` tanpa detail internal; respons start/callback memakai `Cache-Control: no-store` dan `Referrer-Policy: no-referrer`.
+- **Log:** serializer log membuang query string sehingga `code`/`state` tidak tercatat (diuji dengan menangkap keluaran log).
+- **Pemisahan realm:** sesi member tidak dapat memakai endpoint staff dan sebaliknya (`REALM_TIDAK_SESUAI`); sesi member idle 24 jam, mutlak 30 hari.
+- **Keterbatasan:** login Google sungguhan belum teruji (hanya IdP palsu lokal); Safari + `__Host-` pada `http://localhost` belum diuji; penentuan "satu orang satu akun" berdasarkan NIK menyusul di Fase 5.
+
 ## Role database aplikasi
 Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
 

@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
+import { serialisasiReq } from './common/log';
 import { ConfigModule } from './config/config.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DatabaseModule } from './database/database.module';
@@ -17,7 +18,7 @@ import { HealthController } from './health/health.controller';
         // Jangan mencatat header sensitif atau body (potensi PII).
         redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
         serializers: {
-          req: (r) => ({ id: r.id, method: r.method, url: r.url }),
+          req: serialisasiReq,
           res: (r) => ({ statusCode: r.statusCode }),
         },
       },

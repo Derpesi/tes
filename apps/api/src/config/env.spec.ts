@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { muatEnv } from './env';
+import { ISSUER_GOOGLE, muatEnv, redirectUriGoogle } from './env';
 
 const sah = (): NodeJS.ProcessEnv =>
   ({
@@ -49,5 +49,23 @@ describe('muatEnv', () => {
     } catch (e) {
       expect((e as Error).message).not.toContain(kunciSalah);
     }
+  });
+  it('string kosong dari .env dianggap tidak diisi (opsional)', () => {
+    const e = muatEnv({ ...sah(), GOOGLE_CLIENT_ID: '', GOOGLE_CLIENT_SECRET: '', SMTP_HOST: '', TRUST_PROXY: '', GOOGLE_ISSUER: '', API_PUBLIC_PATH: '' });
+    expect(e.GOOGLE_CLIENT_ID).toBeUndefined();
+    expect(e.SMTP_HOST).toBeUndefined();
+    expect(e.TRUST_PROXY).toBe(0);
+    expect(e.GOOGLE_ISSUER).toBe(ISSUER_GOOGLE);
+    expect(e.API_PUBLIC_PATH).toBe('/api');
+  });
+  it('GOOGLE_ISSUER tidak boleh diubah di produksi, boleh di tes/pengembangan', () => {
+    expect(() => muatEnv({ ...sah(), NODE_ENV: 'production', GOOGLE_ISSUER: 'http://127.0.0.1:9999' })).toThrow(/produksi/);
+    expect(muatEnv({ ...sah(), NODE_ENV: 'test', GOOGLE_ISSUER: 'http://127.0.0.1:9999' }).GOOGLE_ISSUER).toBe('http://127.0.0.1:9999');
+    expect(muatEnv({ ...sah(), NODE_ENV: 'production' }).GOOGLE_ISSUER).toBe(ISSUER_GOOGLE);
+  });
+  it('API_PUBLIC_PATH harus berupa jalur dan membentuk redirect URI persis', () => {
+    expect(() => muatEnv({ ...sah(), API_PUBLIC_PATH: 'api' })).toThrow(/API_PUBLIC_PATH/);
+    expect(() => muatEnv({ ...sah(), API_PUBLIC_PATH: '/api/' })).toThrow(/API_PUBLIC_PATH/);
+    expect(redirectUriGoogle(muatEnv(sah()))).toBe('https://hris.contoh.invalid/api/auth/member/google/callback');
   });
 });

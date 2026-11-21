@@ -275,6 +275,59 @@
           "Autentikasi Staff"
         ]
       }
+    },
+    "/auth/member/google/start": {
+      "get": {
+        "operationId": "MemberAuthController_mulai",
+        "parameters": [
+          {
+            "name": "returnTo",
+            "required": false,
+            "in": "query",
+            "description": "Jalur relatif tujuan setelah masuk (mis. /lowongan)",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Mengalihkan ke Google"
+          },
+          "503": {
+            "description": "Masuk dengan Google belum dikonfigurasi"
+          }
+        },
+        "tags": [
+          "Autentikasi Member"
+        ]
+      }
+    },
+    "/auth/member/google/callback": {
+      "get": {
+        "operationId": "MemberAuthController_callback",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Mengalihkan ke aplikasi (sukses) atau ke halaman masuk dengan kode galat"
+          }
+        },
+        "tags": [
+          "Autentikasi Member"
+        ]
+      }
+    },
+    "/auth/member/me": {
+      "get": {
+        "operationId": "MemberAuthController_saya",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Informasi sesi member (hanya realm member)"
+          }
+        },
+        "tags": [
+          "Autentikasi Member"
+        ]
+      }
     }
   },
   "info": {

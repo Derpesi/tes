@@ -18,6 +18,9 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-11 | Brand DAMARINDO GROUP; navy, putih, gold; warna final dan logo resmi menyusul; tanpa logo pengganti |
 | D-12 | Member belum ditempatkan melihat dan melamar lowongan semua perusahaan Group; lowongan wajib punya perusahaan pengelola; karyawan aktif diblokir di frontend dan backend |
 | D-13 | Member: Google OIDC saja. Staff: password HRIS + MFA wajib. Tanpa portal/akun rekanan. Payroll tahap awal hanya rekap |
+| D-14 | Redirect URI Google = `<APP_BASE_URL>/api/auth/member/google/callback` (prefiks `/api` untuk same-origin lewat reverse proxy/rewrite; dapat diubah lewat `API_PUBLIC_PATH`) |
+| D-15 | Email Google yang sudah dimiliki member lain dengan akun Google berbeda **ditolak dan masuk antrean tinjauan HRD**; tidak ada penautan otomatis berdasarkan email |
+| D-16 | Email yang sama sebagai staff dan member adalah dua akun terpisah tanpa penautan |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -35,12 +38,13 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-11 | Penyedia email belum dipilih; dev memakai Mailpit lokal | Pemilik menentukan |
 | A-12 | Isolasi perusahaan via `set_config('app.company_ids')` per transaksi + `enable_tenant_rls` (ADR-0003, diusulkan) | Harness 2D, lalu modul pertama dan uji beban |
 | A-13 | ~~`audit_logs` dikecualikan sementara dari RLS~~ **DITUTUP di Fase 3A**: `audit_logs` memakai kebijakan RLS khusus (baca per scope atau global bila `app.audit_global`; tulis selalu boleh); pengecualian registri kosong | Tes `audit-rls` dan registri |
-| A-14 | Batas sesi staff: idle 30 menit, mutlak 8 jam; sesi tertunda (menunggu MFA/pendaftaran) 10 menit | Divalidasi pemilik |
+| A-14 | Batas sesi staff: idle 30 menit, mutlak 8 jam; **member: idle 24 jam, mutlak 30 hari**; sesi tertunda (menunggu MFA/pendaftaran) 10 menit | Divalidasi pemilik |
 | A-15 | Kunci akun: 5 gagal berturut-turut (kata sandi atau MFA) mengunci 15 menit, juga untuk email tak terdaftar; undangan berlaku 7 hari, tautan reset 30 menit (maks 3 permintaan/jam/akun) | Divalidasi pemilik |
 | A-16 | argon2id (`@node-rs/argon2`) m=19 MiB, t=2, p=1 (minimum OWASP) | Disetel ulang setelah uji beban |
 | A-17 | TOTP via `otplib` 13 (toleransi ±30 detik, proteksi pakai-ulang); **tanpa OTP email**; 10 kode pemulihan sekali pakai | Pemilik |
 | A-18 | Pembatas laju per IP di memori (instance tunggal): 10 permintaan/menit untuk endpoint auth, 120/menit umum. Di balik proxy wajib set `TRUST_PROXY` | Redis dievaluasi bila perlu (A-06) |
 | A-19 | Node minimal 22.12 (otplib memakai dependency ESM yang dimuat lewat `require`) | CI memakai `.nvmrc` |
+| A-20 | Login Google: `prompt=select_account` (perangkat bersama), scope `openid email profile`, tanpa refresh token; tanda tangan id_token diverifikasi ulang dengan JWKS (di atas TLS) | Uji dengan klien Google sungguhan oleh pemilik |
 
 ## Masih Terbuka
-Penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.
+Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

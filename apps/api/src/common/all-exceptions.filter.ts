@@ -20,20 +20,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const res = host.switchToHttp().getResponse<Response>();
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    if (status >= 500) this.logger.error(exception instanceof Error ? exception.message : 'error tak dikenal');
 
     // Pesan bawaan framework/library berbahasa Inggris tidak boleh bocor ke pengguna. Pesan khusus hanya
     // dipakai bila exception membawa `kode` (dibuat oleh aplikasi ini, berbahasa Indonesia).
     let pesan = PESAN_STANDAR[status] ?? PESAN_STANDAR[500];
     let kode = `HTTP_${status}`;
-    if (exception instanceof HttpException && status < 500) {
+    let khusus = false; // exception buatan aplikasi (membawa `kode`) dan pesannya sudah dikurasi
+    if (exception instanceof HttpException) {
       const r = exception.getResponse();
       if (typeof r === 'object' && r !== null && typeof (r as { kode?: unknown }).kode === 'string') {
         const o = r as { kode: string; message?: string | string[] };
         kode = o.kode;
+        khusus = true;
         if (o.message) pesan = Array.isArray(o.message) ? o.message.join('; ') : o.message;
       }
     }
+    // Galat tak terduga dicatat (pesan saja); galat terkurasi (mis. 503 terkonfigurasi) tidak membanjiri log sebagai ERROR.
+    if (status >= 500 && !khusus) this.logger.error(exception instanceof Error ? exception.message : 'error tak dikenal');
     res.status(status).json({ statusCode: status, kode, pesan });
   }
 }

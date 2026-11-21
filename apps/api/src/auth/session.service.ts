@@ -35,7 +35,7 @@ export class SessionService {
 
   async buat(p: { userId: string; realm: Realm; state: StateSesi; userAgent?: string }): Promise<SesiBaru> {
     const token = tokenAcak();
-    const maxAgeMs = p.state === 'PENUH' ? TTL.staffAbsoluteMs : TTL.tertundaMs;
+    const maxAgeMs = p.state !== 'PENUH' ? TTL.tertundaMs : p.realm === 'member' ? TTL.memberAbsoluteMs : TTL.staffAbsoluteMs;
     const r = await this.pool.query(
       `INSERT INTO sessions (user_id, realm, token_hash, state, expires_at, user_agent)
        VALUES ($1, $2, $3, $4, now() + ($5 * interval '1 millisecond'), $6) RETURNING id, expires_at`,
@@ -50,8 +50,11 @@ export class SessionService {
       `SELECT s.id, s.user_id, s.realm, s.state, s.expires_at, u.email
          FROM sessions s JOIN users u ON u.id = s.user_id
         WHERE s.token_hash = $1 AND s.revoked_at IS NULL AND s.expires_at > now() AND u.status <> 'NONAKTIF'
-          AND s.last_seen_at > now() - (CASE WHEN s.state = 'PENUH' THEN $2::bigint ELSE $3::bigint END) * interval '1 millisecond'`,
-      [sha256(token), TTL.staffIdleMs, TTL.tertundaMs],
+          AND s.last_seen_at > now() - (CASE
+                WHEN s.state <> 'PENUH' THEN $3::bigint
+                WHEN s.realm = 'member' THEN $4::bigint
+                ELSE $2::bigint END) * interval '1 millisecond'`,
+      [sha256(token), TTL.staffIdleMs, TTL.tertundaMs, TTL.memberIdleMs],
     );
     if (!r.rowCount) return null;
     const x = r.rows[0];
