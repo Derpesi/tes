@@ -47,6 +47,10 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | AUT-2 | Login staff + MFA | Hanya via undangan; tanpa MFA ditolak; 5 gagal berturut-turut mengunci sementara; tidak ada registrasi staff |
 | AUT-3 | Bootstrap admin | Hanya saat belum ada staff; tautan sekali pakai kedaluwarsa 24 jam dan hanya dicetak ke terminal interaktif; tanpa kredensial default; peran awal berumur 7 hari; teraudit; jalur mati otomatis saat Direktur pertama aktif (3E, teruji termasuk CLI) |
 | RBA-1 | Permission granular | Endpoint menolak (403) tanpa permission; pembuat dan pemeriksa tidak boleh orang sama; tes matriks otomatis |
+| ORG-2 | Perusahaan baru | Ditambah lewat API/UI tanpa ubah kode; tidak berlaku sebelum Direktur menyetujui; IT tidak dapat menyetujui sendiri (4B) |
+| REK-1 | Rekanan = master data | Tanpa tabel/rute/peran login atau portal rekanan (teruji); satu rekanan banyak lokasi berkoordinat dan radius valid (4C) |
+| KON-1 | Kontrak layanan | State machine ditegakkan; aktivasi Direktur ≠ pembuat; nomor unik per perusahaan; isi terkunci setelah aktif (4D) |
+| DOK-1 | Dokumen legalitas/lampiran | Unggahan palsu ditolak (magic bytes, ukuran, ekstensi); unduhan terkontrol izin + scope + audit tanpa URL publik (4B/4D) |
 | ORG-1 | Isolasi perusahaan | Pengguna scope A tidak dapat membaca data B lewat API, ID langsung, ekspor |
 | ORG-2 | Perusahaan baru | Tambah perusahaan lewat master data tanpa deploy ulang |
 | REK-1 | Rekanan hanya data | Tidak ada tabel, rute, atau role login rekanan (diuji otomatis) |

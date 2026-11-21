@@ -11,7 +11,7 @@ export class ApiError extends Error {
 }
 
 export interface OpsiApi {
-  method?: 'GET' | 'POST' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
   /** Token CSRF (wajib untuk method tulis pada rute bersesi). */
   csrf?: string;

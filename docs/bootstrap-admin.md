@@ -33,3 +33,6 @@ Dipakai **sekali** saat sistem baru, oleh **operator dengan akses server dan dat
 ## Keterbatasan
 - Keamanan tautan bergantung pada kanal yang dipakai operator untuk menyampaikannya.
 - Tidak ada pembatasan alamat IP atau perangkat untuk administrator awal; kontrolnya adalah MFA wajib, umur peran 7 hari, dan penutupan otomatis.
+
+## Seed perusahaan awal (Fase 4)
+Setelah migrasi, operator menjalankan `pnpm seed:perusahaan` (butuh `DATABASE_URL`). Skrip idempoten: membuat PT. Damarindo Mandiri (DMR), PT. OSI (OSI), dan PT. Pancormas Perkasa (PCP) bila belum ada (kode singkat adalah usulan; data hukum diisi lewat aplikasi). Perusahaan tambahan dibuat IT Administrator lewat aplikasi dan disetujui Direktur.

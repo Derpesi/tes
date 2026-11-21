@@ -30,7 +30,7 @@ export function Sukses({ pesan }: { pesan: string | null }) {
   ) : null;
 }
 
-export function Kolom(p: { id: string; label: string; type?: string; value: string; onChange: (v: string) => void; autoComplete?: string; inputMode?: 'numeric' | 'text' | 'email'; bantuan?: string; required?: boolean; maxLength?: number }) {
+export function Kolom(p: { id: string; label: string; type?: string; value: string; onChange: (v: string) => void; autoComplete?: string; inputMode?: 'numeric' | 'decimal' | 'text' | 'email'; bantuan?: string; required?: boolean; maxLength?: number }) {
   return (
     <div className="kolom">
       <label htmlFor={p.id}>{p.label}</label>
@@ -42,4 +42,24 @@ export function Kolom(p: { id: string; label: string; type?: string; value: stri
       ) : null}
     </div>
   );
+}
+
+export function Pilihan(p: { id: string; label: string; value: string; onChange: (v: string) => void; opsi: { nilai: string; teks: string }[]; required?: boolean }) {
+  return (
+    <div className="kolom">
+      <label htmlFor={p.id}>{p.label}</label>
+      <select id={p.id} name={p.id} value={p.value} onChange={(e) => p.onChange(e.target.value)} required={p.required ?? true}>
+        <option value="">Pilih…</option>
+        {p.opsi.map((o) => (
+          <option key={o.nilai} value={o.nilai}>
+            {o.teks}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+export function Lencana({ status }: { status: string }) {
+  return <span className={`lencana lencana-${status.toLowerCase()}`}>{status.replace(/_/g, ' ')}</span>;
 }

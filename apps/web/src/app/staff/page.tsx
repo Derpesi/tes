@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Galat, Halaman } from '../../components/ui';
@@ -47,7 +48,24 @@ export default function BerandaStaff() {
             <p>Peran: {info.roles && info.roles.length ? info.roles.join(', ') : 'belum ada peran'}</p>
             <p className="bantuan">Izin aktif: {info.permissions?.length ?? 0}. Akses perusahaan: {info.allCompanies ? 'seluruh perusahaan' : `${info.companyIds?.length ?? 0} perusahaan`}.</p>
           </div>
-          <p className="bantuan">Modul kepegawaian akan tersedia pada tahap berikutnya.</p>
+          <nav className="menu" aria-label="Menu utama">
+            {info.permissions?.includes('company.view') ? (
+              <Link className="tombol-sekunder" href="/staff/perusahaan">
+                Perusahaan
+              </Link>
+            ) : null}
+            {info.permissions?.includes('partner.view') ? (
+              <Link className="tombol-sekunder" href="/staff/rekanan">
+                Rekanan
+              </Link>
+            ) : null}
+            {info.permissions?.includes('user_role.view') ? (
+              <Link className="tombol-sekunder" href="/staff/persetujuan">
+                Persetujuan
+              </Link>
+            ) : null}
+          </nav>
+          <p className="bantuan">Modul kepegawaian lainnya akan tersedia pada tahap berikutnya.</p>
           <button className="tombol-sekunder" type="button" onClick={keluar}>
             Keluar
           </button>

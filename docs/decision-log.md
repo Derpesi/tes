@@ -26,6 +26,11 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-19 | Reset MFA = akun kembali ke undangan (kata sandi, MFA, kode pemulihan dihapus; sesi dicabut) |
 | D-20 | Tidak ada yang dapat mengubah peran/scope/status akunnya sendiri. Matriks dikoreksi: modul *Pengguna & role* diberi `V` untuk Direktur dan IT |
 | D-21 | Bootstrap memakai undangan staff biasa (token 256-bit ber-hash, TTL 24 jam) yang tautannya **dicetak sekali ke terminal interaktif** (CLI menolak non-TTY); tabel `bootstrap_tokens` dihapus. Peran IT Administrator awal berumur 7 hari sejak aktivasi; bootstrap ditutup otomatis saat Direktur pertama aktif |
+| D-22 | Perusahaan baru dibuat IT dalam keadaan nonaktif dan berlaku setelah persetujuan aktivasi Direktur (ADR-0005) |
+| D-23 | Rekanan dimiliki satu perusahaan grup; `companies` tanpa RLS dengan visibilitas di layanan; anak mewarisi `company_id` dari induk |
+| D-24 | Dokumen: `ObjectStorage` + driver lokal sekarang, driver S3 menyusul setelah hosting dipilih; unggahan divalidasi magic bytes; unduhan lewat API terkontrol + audit |
+| D-25 | Kontrak layanan diaktifkan Direktur (satu penyetuju, bukan pembuat); isi terkunci setelah aktif |
+| D-26 | Adendum/versi kontrak pasca-aktif ditunda ke Fase 6 |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -53,6 +58,9 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-21 | Permintaan persetujuan kedaluwarsa dalam 72 jam | Divalidasi pemilik |
 | A-22 | Baris audit global dapat dibaca Direktur dan IT Administrator saja | Divalidasi pemilik |
 | A-23 | CSP web memakai `'unsafe-inline'` untuk skrip/gaya (Next.js tanpa nonce); `'unsafe-eval'` hanya di pengembangan | Pengetatan dengan nonce (pekerjaan lanjutan) |
+| A-24 | Bentuk pengaturan payroll/dokumen perusahaan: `payrollSettings {periodType, cutOffDay 1–28}`, `documentSettings {contractNumberPrefix}`; hanya titik awal, menunggu kebijakan pemilik | Pemilik |
+| A-25 | Kode singkat perusahaan awal (DMR/OSI/PCP) adalah usulan; dapat diubah IT | Pemilik |
+| A-26 | Radius geofence bawaan 100 m (batas 20–1000 m); koordinat `numeric(9,6)` | Divalidasi saat Fase 7 |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

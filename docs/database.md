@@ -61,6 +61,16 @@ erDiagram
 ## Sudah dibuat (Fase 3A)
 `companies` (minimal), `persons` (minimal), `users`, `google_identities`, `staff_credentials`, `staff_mfa_factors`, `mfa_recovery_codes`, `sessions`, `login_attempts`, `staff_invitations`, `password_reset_tokens`, `system_state`, `bootstrap_tokens`, `notification_outbox`, `roles`, `permissions`, `role_permissions`, `user_roles`, `user_company_scopes`, `approval_requests`. Identitas dan kredensial dibatasi per realm lewat FK komposit `(user_id, realm)`; email disimpan huruf kecil; token hanya disimpan sebagai hash. Tabel otorisasi memakai nama kolom `scope_company_id` (bukan `company_id`) karena bukan data tenant. Seed peran/permission dibangkitkan dari `docs/rbac.md` (`scripts/gen-rbac-seed.mjs`).
 
+## Sudah dibuat (Fase 4A)
+`companies` diperluas (kode singkat unik, data hukum, pengaturan jsonb), `company_documents`, `partners`, `partner_contacts`, `partner_locations`, `partner_contracts`, `partner_contract_documents`, `manpower_requirements`; `approval_requests` mendukung subjek perusahaan. Semua tabel anak ber-`company_id NOT NULL` + RLS; FK komposit `(partner_id, company_id)` mencegah rujukan lintas perusahaan.
+```
+companies 1─* partners 1─* partner_locations 1─* manpower_requirements
+              │   └─* partner_contacts
+              └─* partner_contracts 1─* partner_contract_documents
+companies 1─* company_documents
+```
+Constraint: nama rekanan/lokasi aktif unik; `(company_id, contract_number)` unik; periode kontrak valid; koordinat lengkap-atau-kosong; radius 20–1000; penyetuju kontrak ≠ pembuat; kontrak AKTIF wajib punya penyetuju.
+
 ## Dirancang tapi belum dibuat (menunggu fase payroll)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
 

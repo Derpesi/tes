@@ -24,7 +24,8 @@ h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
 .kolom { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.875rem; }
 .kolom label { font-weight: 600; }
 .kolom input { min-height: 44px; padding: 0.5rem 0.75rem; font-size: 1rem; border: 1px solid #8a96a8; border-radius: 8px; color: var(--warna-navy); background: #fff; }
-.kolom input:focus-visible { outline: 3px solid var(--warna-gold); outline-offset: 1px; }
+.kolom select { min-height: 44px; padding: 0.5rem 0.75rem; font-size: 1rem; border: 1px solid #8a96a8; border-radius: 8px; color: var(--warna-navy); background: #fff; }
+.kolom input:focus-visible, .kolom select:focus-visible { outline: 3px solid var(--warna-gold); outline-offset: 1px; }
 .bantuan { font-size: 0.875rem; color: #44546a; }
 .tombol, .tombol-sekunder { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; width: 100%; padding: 0.625rem 1rem; font-size: 1rem; font-weight: 700; border-radius: 8px; border: 2px solid var(--warna-navy); cursor: pointer; text-decoration: none; margin-bottom: 0.75rem; }
 .tombol { background: var(--warna-navy); color: var(--warna-putih); }
@@ -40,3 +41,17 @@ h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
 .cek { display: flex; gap: 0.5rem; align-items: flex-start; margin: 0.75rem 0; }
 .cek input { width: 24px; height: 24px; margin-top: 0.125rem; }
 .tautan { display: inline-block; min-height: 44px; padding: 0.75rem 0; color: var(--warna-navy); font-weight: 600; }
+
+/* ---- master data ---- */
+.menu { display: grid; gap: 0.5rem; margin-bottom: 1rem; }
+.butir { border: 1px solid #d5dbe5; border-radius: 10px; padding: 0.75rem; margin-bottom: 0.625rem; background: #fff; overflow-wrap: anywhere; }
+.butir h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.butir p { margin: 0.125rem 0; }
+.lencana { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; border: 1px solid currentColor; }
+.lencana-aktif, .lencana-disetujui { color: #0f3d21; background: #e8f5ec; }
+.lencana-draft, .lencana-menunggu, .lencana-menunggu_persetujuan { color: #5a4300; background: #fff4d1; }
+.lencana-nonaktif, .lencana-berakhir, .lencana-dibatalkan, .lencana-ditolak { color: #5f120d; background: #fdecea; }
+.aksi { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.bagian { margin-top: 1.5rem; }
+details.lipat { margin-bottom: 1rem; }
+details.lipat > summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }

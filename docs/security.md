@@ -42,6 +42,9 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 ## RBAC, scope, dan persetujuan ganda (Fase 3D)
 Lihat bagian *Implementasi (Fase 3D)* di `rbac.md`. Ringkas: guard global deny-by-default (diuji dengan enumerasi rute), izin dihitung dari database per permintaan, pemisahan realm, persetujuan ganda dengan pemisahan tugas di aplikasi dan database, tidak ada perubahan akses diri sendiri, audit log dibatasi RLS, kursor keyset divalidasi ketat dan berpresisi mikrodetik, token undangan tidak pernah dikembalikan lewat API. **Keterbatasan:** belum ada pencegahan menghapus Direktur terakhir; kualifikator sel matriks belum ditegakkan; penegakan scope pada modul bisnis menyusul bersama modulnya.
 
+## Master data dan dokumen (Fase 4)
+Lihat ADR-0005. Ringkas: `company_id` anak diturunkan dari induk yang terlihat lewat RLS (menebak ID = 404); perusahaan di luar scope tidak dibocorkan; unggahan divalidasi magic bytes (PDF/PNG/JPEG, ≤ 10 MB, ekstensi harus cocok), disimpan di penyimpanan privat dengan kunci acak, diunduh hanya lewat API (izin + scope + audit, `attachment`, `nosniff`, `no-store`); audit perubahan hanya memuat nama bidang, bukan nilai. **Keterbatasan:** belum ada pemindai virus; driver S3 belum ada; kode kesalahan penyimpanan tidak memuat jalur; dokumen dihapus lunak (objek dipertahankan).
+
 ## Web (Fase 3F)
 - **Same-origin:** browser hanya berbicara ke web; `/api/*` diteruskan ke API (rewrite Next.js; tujuan lewat `API_URL`, bawaan `http://localhost:3001`). Tidak ada CORS lintas origin.
 - **Header:** CSP (`default-src 'self'`, `frame-ancestors 'none'`, `form-action 'self'`; `'unsafe-inline'` masih diperlukan oleh Next.js), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` membatasi kamera/mikrofon/lokasi; `X-Powered-By` dimatikan.

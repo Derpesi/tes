@@ -8,5 +8,6 @@ Catat setiap keputusan penting sebagai ADR bernama `NNNN-judul.md` dengan bagian
 | 0002 | Usulan Pilihan Teknis Turunan | Diusulkan (sebagian dipakai) |
 | 0003 | Mekanisme Isolasi Perusahaan (RLS) | Disetujui |
 | 0004 | Autentikasi, Sesi, dan Otorisasi | Disetujui |
+| 0005 | Master Data Multi-Perusahaan dan Penyimpanan Dokumen | Disetujui |
 
 Ringkasan arsitektur: `../architecture.md`. Daftar keputusan dan asumsi: `../decision-log.md`.

@@ -13,7 +13,9 @@ const aku = dirname(fileURLToPath(import.meta.url));
 const akar = join(aku, '..', '..');
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
-const { generateSync } = require(join(akar, 'apps/api/node_modules/otplib'));
+const { generateSync, generateSecret } = require(join(akar, 'apps/api/node_modules/otplib'));
+const { hash: hashArgon, Algorithm } = require(join(akar, 'apps/api/node_modules/@node-rs/argon2'));
+const { enkripsi } = require(join(akar, 'apps/api/dist/common/crypto/crypto.js'));
 const { Pool } = require(join(akar, 'tests/node_modules/pg'));
 
 const DB = process.env.TEST_DATABASE_URL;
@@ -21,6 +23,7 @@ if (!DB) throw new Error('TEST_DATABASE_URL wajib diisi');
 const SKEMA = `e2e_${randomBytes(4).toString('hex')}`;
 const WEB = 'http://localhost:3000';
 const PASSWORD = 'kuda lari malam hari di sawah';
+const KUNCI_ENK = randomBytes(32).toString('base64');
 const EMAIL = `e2e-${randomBytes(3).toString('hex')}@contoh.invalid`;
 const OUT = process.env.E2E_OUT ?? join(akar, 'tests/e2e/out');
 mkdirSync(OUT, { recursive: true });
@@ -46,7 +49,7 @@ async function utama() {
   const envApi = {
     ...process.env, NODE_ENV: 'production', PORT: '3001', APP_BASE_URL: WEB,
     DATABASE_URL: `${DB}${DB.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c search_path=${SKEMA}`)}`,
-    AUTH_HMAC_KEY: randomBytes(32).toString('base64'), APP_ENCRYPTION_KEY: randomBytes(32).toString('base64'), TRUST_PROXY: '0',
+    AUTH_HMAC_KEY: randomBytes(32).toString('base64'), APP_ENCRYPTION_KEY: KUNCI_ENK, TRUST_PROXY: '0', STORAGE_DIR: join(OUT, 'penyimpanan'),
   };
   delete envApi.GOOGLE_CLIENT_ID; delete envApi.GOOGLE_CLIENT_SECRET;
   proses.push(spawn('node', [join(akar, 'apps/api/dist/main.js')], { env: envApi, stdio: 'ignore' }));
@@ -58,9 +61,9 @@ async function utama() {
   const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 1, locale: 'id-ID' });
   const page = await ctx.newPage();
   const galatKonsol = [];
-  // Respons 401 yang memang diharapkan (belum masuk, kata sandi/kode salah) dicatat Chromium sebagai galat jaringan.
+  // Respons 401/400 yang memang diharapkan (belum masuk, kata sandi/kode salah, validasi formulir) dicatat Chromium sebagai galat jaringan.
   // Hanya pola itu yang dikecualikan; pelanggaran CSP dan galat lain tetap menggagalkan tes.
-  const diharapkan = /Failed to load resource: the server responded with a status of 401/;
+  const diharapkan = /Failed to load resource: the server responded with a status of (401|400)/; // 400: validasi formulir yang sengaja dipicu tes
   page.on('console', (m) => { if (m.type() === 'error' && !diharapkan.test(m.text())) galatKonsol.push(m.text()); });
   page.on('pageerror', (e) => galatKonsol.push(String(e)));
 
@@ -167,6 +170,110 @@ async function utama() {
   await periksa('lupa-password');
   await page.goto(`${WEB}/staff/reset`);
   assert.match(await page.textContent('[role=alert].galat'), /tidak valid/);
+
+
+  // 8. Master data (Fase 4): IT membuat perusahaan -> Direktur menyetujui -> Marketing menambah rekanan/lokasi/kontak/kontrak -> Direktur mengaktifkan kontrak.
+  const hashPassword = await hashArgon(PASSWORD, { algorithm: Algorithm.Argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 });
+  const buatStaff = async (kode, roles, allCompanies = false) => {
+    const email = `e2e-${kode}-${randomBytes(3).toString('hex')}@contoh.invalid`;
+    const rahasia = generateSecret();
+    const pp = await pool.query(`INSERT INTO persons (display_name) VALUES ('SINTETIS E2E') RETURNING id`);
+    const uu = await pool.query(`INSERT INTO users (person_id, realm, email, status, all_companies) VALUES ($1, 'staff', $2, 'AKTIF', $3) RETURNING id`, [pp.rows[0].id, email, allCompanies]);
+    const uid = uu.rows[0].id;
+    await pool.query(`INSERT INTO staff_credentials (user_id, password_hash) VALUES ($1, $2)`, [uid, hashPassword]);
+    await pool.query(`INSERT INTO staff_mfa_factors (user_id, secret_enc, status, confirmed_at) VALUES ($1, $2, 'AKTIF', now())`, [uid, enkripsi(rahasia, Buffer.from(KUNCI_ENK, 'base64'), `mfa:${uid}`)]);
+    for (const r of roles) await pool.query(`INSERT INTO user_roles (user_id, role_code, grant_source) VALUES ($1, $2, 'MANUAL')`, [uid, r]);
+    return { email, rahasia, uid, langkah: 0 };
+  };
+  const masukUI = async (st) => {
+    await page.goto(`${WEB}/staff/masuk`);
+    await page.fill('#email', st.email); await page.fill('#password', PASSWORD); await page.click('button[type=submit]');
+    await page.waitForSelector('#kode');
+    await page.fill('#kode', generateSync({ secret: st.rahasia, epoch: Math.floor(Date.now() / 1000) + 30 * st.langkah++ })); await page.click('button[type=submit]');
+    await page.waitForURL('**/staff'); await page.waitForSelector('.kartu');
+  };
+  const keluarUI = async () => { await page.goto(`${WEB}/staff`); await page.waitForSelector('button.tombol-sekunder'); await page.click('button.tombol-sekunder'); await page.waitForURL('**/staff/masuk'); };
+  const itAdm = await buatStaff('it', ['IT_ADMIN']);
+  const direktur = await buatStaff('dir', ['DIREKTUR'], true);
+  const marketing = await buatStaff('mkt', ['MARKETING']);
+  const KODE = `E${randomBytes(2).toString('hex').toUpperCase()}`;
+
+  // 8a. IT membuat perusahaan baru (tanpa ubah kode)
+  await masukUI(itAdm);
+  assert.ok(await page.isVisible('a:has-text("Perusahaan")'), 'IT melihat menu Perusahaan');
+  await page.click('a:has-text("Perusahaan")'); await page.waitForURL('**/staff/perusahaan');
+  await page.click('summary:has-text("Tambah perusahaan")');
+  await page.fill('#nama', 'PT SINTETIS E2E'); await page.fill('#kode', 'x'); await page.click('button[type=submit]');
+  assert.match(await page.textContent('[role=alert].galat'), /Kode singkat/); // validasi Indonesia dari API
+  await page.fill('#kode', KODE); await page.click('button[type=submit]');
+  assert.match(await page.textContent('[role=status].sukses'), /menunggu persetujuan/i);
+  assert.match(await page.textContent('.butir'), /MENUNGGU PERSETUJUAN/);
+  await periksa('perusahaan-it'); await foto('08-perusahaan-it');
+  await keluarUI();
+
+  // 8b. Direktur menyetujui aktivasi
+  await masukUI(direktur);
+  await page.goto(`${WEB}/staff/persetujuan`);
+  await page.waitForSelector('.butir');
+  assert.match(await page.textContent('.butir'), /Aktivasi perusahaan baru/);
+  await periksa('persetujuan'); await foto('09-persetujuan');
+  await page.click('button:has-text("Setujui")');
+  assert.match(await page.textContent('[role=status].sukses'), /disetujui/i);
+  await page.goto(`${WEB}/staff/perusahaan`);
+  await page.waitForSelector('.butir');
+  assert.match(await page.textContent('body'), new RegExp(`Kode ${KODE} AKTIF`));
+  await keluarUI();
+  const comp = await pool.query(`SELECT id FROM companies WHERE short_code = $1`, [KODE]);
+  assert.equal(comp.rowCount, 1);
+  await pool.query(`INSERT INTO user_company_scopes (user_id, scope_company_id) VALUES ($1, $2)`, [marketing.uid, comp.rows[0].id]);
+
+  // 8c. Marketing: rekanan, lokasi, kontak, kontrak
+  await masukUI(marketing);
+  assert.ok(!(await page.isVisible('a:has-text("Persetujuan")')), 'Marketing tidak melihat menu Persetujuan');
+  await page.click('a:has-text("Rekanan")'); await page.waitForURL('**/staff/rekanan');
+  await page.click('summary:has-text("Tambah rekanan")');
+  await page.fill('#nama', 'REKANAN SINTETIS E2E'); await page.fill('#kota', 'Bandung'); await page.click('button[type=submit]');
+  assert.match(await page.textContent('[role=status].sukses'), /Rekanan ditambahkan/);
+  await periksa('rekanan'); await foto('10-rekanan');
+  await page.click('a:has-text("Lihat detail REKANAN SINTETIS E2E")'); await page.waitForURL(/\/staff\/rekanan\/[0-9a-f-]{36}/);
+  await page.waitForSelector('#h-lokasi');
+  await page.click('summary:has-text("Tambah lokasi")');
+  await page.fill('#lok-nama', 'Gedung Utama'); await page.fill('#lok-lat', '91'); await page.fill('#lok-lng', '106,8272'); await page.click('button:has-text("Simpan lokasi")');
+  assert.match(await page.textContent('[role=alert].galat'), /Lintang/);
+  await page.fill('#lok-lat', '-6,175392'); await page.click('button:has-text("Simpan lokasi")');
+  assert.match(await page.textContent('[role=status].sukses'), /Lokasi ditambahkan/);
+  assert.match(await page.textContent('#h-lokasi + .butir'), /-6\.175392, 106\.8272 · radius 100 m/);
+  await page.click('summary:has-text("Tambah kontak")');
+  await page.fill('#kontak-nama', 'PIC Sintetis'); await page.click('button:has-text("Simpan kontak")');
+  assert.match(await page.textContent('[role=status].sukses'), /Kontak ditambahkan/);
+  await page.click('summary:has-text("Tambah kontrak")');
+  await page.fill('#ktr-nomor', 'KTR/E2E/001'); await page.fill('#ktr-jenis', 'Keamanan'); await page.fill('#ktr-mulai', '2026-02-01'); await page.fill('#ktr-akhir', '2026-01-01'); await page.click('button:has-text("Simpan kontrak")');
+  assert.match(await page.textContent('[role=alert].galat'), /sebelum/);
+  await page.fill('#ktr-akhir', '2026-12-31'); await page.click('button:has-text("Simpan kontrak")');
+  assert.match(await page.textContent('[role=status].sukses'), /DRAFT/);
+  assert.match(await page.textContent('#h-kontrak + .butir'), /KTR\/E2E\/001 DRAFT/);
+  assert.match(await page.textContent('#h-kontrak + .butir'), /1 Februari 2026 – 31 Desember 2026/);
+  assert.ok(!(await page.isVisible('button:has-text("Aktifkan kontrak")')), 'Marketing tidak dapat mengaktifkan kontrak');
+  await periksa('detail-rekanan'); await foto('11-detail-rekanan');
+  const detailUrl = page.url();
+  await keluarUI();
+
+  // 8d. Direktur mengaktifkan kontrak (bukan pembuat)
+  await masukUI(direktur);
+  await page.goto(detailUrl);
+  await page.waitForSelector('#h-kontrak + .butir');
+  await page.click('button:has-text("Aktifkan kontrak KTR/E2E/001")');
+  assert.match(await page.textContent('[role=status].sukses'), /diaktifkan/);
+  assert.match(await page.textContent('#h-kontrak + .butir'), /KTR\/E2E\/001 AKTIF/);
+  await periksa('kontrak-aktif'); await foto('12-kontrak-aktif');
+  const cl = await pool.connect(); // RLS berlaku juga bagi pemeriksa: baca dalam transaksi bersekop perusahaan
+  await cl.query('BEGIN'); await cl.query(`SELECT set_config('app.company_ids', $1, true)`, [comp.rows[0].id]);
+  const k = await cl.query(`SELECT status, approved_by, created_by FROM partner_contracts WHERE contract_number = 'KTR/E2E/001'`);
+  await cl.query('ROLLBACK'); cl.release();
+  assert.equal(k.rows[0].status, 'AKTIF');
+  assert.equal(k.rows[0].approved_by, direktur.uid);
+  assert.equal(k.rows[0].created_by, marketing.uid);
+  await keluarUI();
 
   assert.deepEqual(galatKonsol, [], `galat konsol/CSP: ${galatKonsol.join(' | ')}`);
   await browser.close();
