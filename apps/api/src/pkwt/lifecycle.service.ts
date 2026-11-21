@@ -55,8 +55,7 @@ export class ContractLifecycleService implements OnModuleInit, OnModuleDestroy {
     const orang = await this.sdb.tx({ companyIds: ids }, async (c) => {
       const r = await c.query(
         `SELECT person_id FROM employment_contracts WHERE (status = 'DITANDATANGANI' AND start_date <= $1::date) OR (status = 'AKTIF' AND end_date - $1::date <= 30)
-         UNION SELECT person_id FROM placements WHERE (status = 'MENUNGGU_KONTRAK' AND start_date <= $1::date) OR (status IN ('AKTIF', 'DITANGGUHKAN') AND end_date < $1::date)
-         UNION SELECT person_id FROM member_profiles WHERE status IN ('KARYAWAN_AKTIF', 'KONTRAK_AKAN_BERAKHIR')`,
+         UNION SELECT person_id FROM placements WHERE (status = 'MENUNGGU_KONTRAK' AND start_date <= $1::date) OR (status IN ('AKTIF', 'DITANGGUHKAN') AND end_date < $1::date)`,
         [hari],
       );
       return r.rows.map((x) => x.person_id as string);

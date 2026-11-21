@@ -386,16 +386,156 @@ async function utama() {
   await periksa('lamaran-detail'); await foto('20-lamaran-detail');
   await keluarUI();
 
-  // 9g. Karyawan aktif: menu disembunyikan DAN backend menolak (403)
-  await pool.query(`UPDATE member_profiles SET status = 'KARYAWAN_AKTIF' WHERE person_id = $1`, [pm.rows[0].id]);
+  // 10. Fase 6: PKWT (template -> kontrak -> PDF -> scan -> verifikasi) dan penempatan; status member berubah OTOMATIS (tanpa mengatur DB).
+  const buatStaffScope = async (kode, roles, semua = false) => { const x = await buatStaff(kode, roles, semua); if (!semua) await pool.query(`INSERT INTO user_company_scopes (user_id, scope_company_id) VALUES ($1, $2)`, [x.uid, comp.rows[0].id]); return x; };
+  const hariWib = (selisih = 0) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date(Date.now() + selisih * 86400000));
+  const NOMOR_PREFIKS = 'PKWT/';
+  const IDEM = 'Satpam E2E';
+
+  // Login UI (kata sandi + TOTP) sudah diuji di bagian awal; bagian Fase 6 memakai sesi staf sintetis lewat DB agar tidak terkena pembatas laju autentikasi (10/menit/IP).
+  const masukSesi = async (st) => {
+    const tok = randomBytes(32).toString('base64url');
+    await pool.query(`INSERT INTO sessions (user_id, realm, token_hash, state, expires_at) VALUES ($1, 'staff', $2, 'PENUH', now() + interval '2 hours')`, [st.uid, createHash('sha256').update(tok).digest()]);
+    await ctx.clearCookies();
+    const r = await cdp.send('Network.setCookie', { name: '__Host-sid', value: tok, url: WEB, path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
+    assert.ok(r.success, 'cookie sesi staf gagal diset');
+    await page.goto(`${WEB}/staff`); await page.waitForSelector('.kartu');
+  };
+
+  // 10a. HRD membuat template; Direktur mencatat verifikasi hukum (tanpa teks hukum bawaan sistem)
+  const hrdTpl = await buatStaffScope('hrd-tpl', ['HRD']);
+  await masukSesi(hrdTpl);
+  await page.goto(`${WEB}/staff/template-pkwt`); await page.waitForSelector('summary:has-text("Tambah template")');
+  assert.match(await page.textContent('body'), /Sistem tidak menyediakan teks hukum/);
+  await page.click('summary:has-text("Tambah template")');
+  await page.fill('#nama-tpl', 'Template E2E'); await page.fill('#isi-tpl', 'Gaji {{gaji}}'); await page.click('button:has-text("Simpan template")');
+  assert.match(await page.textContent('[role=alert].galat'), /Variabel tidak dikenal: gaji/);
+  await page.fill('#isi-tpl', 'CONTOH UJI — BUKAN DOKUMEN HUKUM. Nama: {{nama}}; Nomor: {{nomor}}; Jabatan: {{jabatan}}');
+  await page.click('button:has-text("Simpan template")');
+  assert.match(await page.textContent('[role=status].sukses'), /perlu diverifikasi/);
+  await periksa('template-pkwt'); await foto('22-template-pkwt');
+  await ctx.clearCookies();
+  const dirTpl = await buatStaffScope('dir-tpl', ['DIREKTUR'], true);
+  await masukSesi(dirTpl);
+  await page.goto(`${WEB}/staff/template-pkwt`); await page.waitForSelector('.butir');
+  await page.fill('input[id^="cat-"]', 'Diverifikasi ahli hukum (uji E2E)'); await page.click('button:has-text("Catat verifikasi Template E2E v1")');
+  assert.match(await page.textContent('[role=status].sukses'), /sudah diverifikasi/);
+  await ctx.clearCookies();
+
+  // 10b. Adm membuat kontrak dari lamaran yang diterima; HRD mengajukan; HRD lain memeriksa; Direktur menyetujui
+  const mulaiKontrak = hariWib(0);
+  const akhirKontrak = hariWib(60);
+  const adm = await buatStaffScope('adm', ['STAFF_ADMINISTRASI']);
+  await masukSesi(adm);
+  await page.goto(`${WEB}/staff/pkwt`); await page.waitForSelector('summary:has-text("Buat kontrak dari lamaran")');
+  await page.click('summary:has-text("Buat kontrak dari lamaran")');
+  await page.waitForFunction(() => document.querySelectorAll('#lamaran option').length > 1);
+  await page.selectOption('#lamaran', { index: 1 }); await page.selectOption('#template', { index: 1 });
+  await page.fill('#jabatan', IDEM); await page.fill('#mulai', mulaiKontrak); await page.fill('#akhir', hariWib(-1)); await page.click('button:has-text("Simpan kontrak")');
+  assert.match(await page.textContent('[role=alert].galat'), /sebelum/);
+  await page.fill('#akhir', akhirKontrak); await page.click('button:has-text("Simpan kontrak")');
+  assert.match(await page.textContent('[role=status].sukses'), /draf/);
+  await periksa('pkwt-daftar'); await foto('23-pkwt-daftar');
+  await ctx.clearCookies();
+  const hrdA1 = await buatStaffScope('hrd-a1', ['HRD']);
+  await masukSesi(hrdA1);
+  await page.goto(`${WEB}/staff/pkwt`); await page.waitForSelector('.butir');
+  await page.click(`a:has-text("Buka kontrak ${NOMOR_PREFIKS}")`); await page.waitForSelector('button:has-text("Ajukan untuk diperiksa")');
+  const urlKontrak = page.url();
+  await page.click('button:has-text("Ajukan untuk diperiksa")');
+  assert.match(await page.textContent('[role=status].sukses'), /diajukan/);
+  await ctx.clearCookies();
+  const hrdR = await buatStaffScope('hrd-r', ['HRD']);
+  await masukSesi(hrdR);
+  await page.goto(urlKontrak); await page.waitForSelector('button:has-text("Periksa dan teruskan")');
+  await page.fill('#alasan-kembali', 'Mohon cek jabatan'); await page.click('button:has-text("Kembalikan ke draf")');
+  assert.match(await page.textContent('[role=status].sukses'), /dikembalikan/);
+  await ctx.clearCookies();
+  await masukSesi(hrdA1); // pembuat/pengaju memperbaiki dan mengajukan ulang
+  await page.goto(urlKontrak); await page.waitForSelector('button:has-text("Ajukan untuk diperiksa")');
+  await page.click('button:has-text("Ajukan untuk diperiksa")');
+  assert.match(await page.textContent('[role=status].sukses'), /diajukan/);
+  await ctx.clearCookies();
+  const hrdR2 = await buatStaffScope('hrd-r2', ['HRD']);
+  await masukSesi(hrdR2);
+  await page.goto(urlKontrak); await page.waitForSelector('button:has-text("Periksa dan teruskan")');
+  await page.click('button:has-text("Periksa dan teruskan")');
+  assert.match(await page.textContent('[role=status].sukses'), /menunggu persetujuan/);
+  await ctx.clearCookies();
+  const dirK = await buatStaffScope('dir-k', ['DIREKTUR'], true);
+  await masukSesi(dirK);
+  await page.goto(urlKontrak); await page.waitForSelector('button:has-text("Setujui kontrak")');
+  assert.match(await page.textContent('.kartu'), /bukan tanda tangan sah/);
+  await periksa('pkwt-detail-persetujuan'); await foto('24-pkwt-persetujuan');
+  await page.click('button:has-text("Setujui kontrak")');
+  assert.match(await page.textContent('[role=status].sukses'), /ditandatangani basah/);
+  await ctx.clearCookies();
+
+  // 10c. HRD mencetak PDF (diunduh via API), mengunggah scan; HRD lain memverifikasi -> kontrak sah dan aktif (tanggal mulai = hari ini)
+  const hrdU = await buatStaffScope('hrd-u', ['HRD']);
+  await masukSesi(hrdU);
+  await page.goto(urlKontrak); await page.waitForSelector('a:has-text("Unduh PDF kontrak")');
+  const pdf = await page.request.get(`${WEB}/api${new URL(urlKontrak).pathname.replace('/staff', '')}/pdf`);
+  assert.equal(pdf.status(), 200);
+  assert.match(pdf.headers()['content-type'], /application\/pdf/);
+  const isiPdf = await pdf.body();
+  assert.equal(isiPdf.subarray(0, 5).toString(), '%PDF-');
+  await page.waitForSelector('h3:has-text("Unggah scan bertanda tangan")');
+  await page.setInputFiles('#berkas', { name: 'kontrak-ttd.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\nSCAN-TTD-E2E\n%%EOF\n') });
+  await page.click('button:has-text("Unggah scan")');
+  assert.match(await page.textContent('[role=status].sukses'), /menunggu verifikasi/i);
+  await periksa('pkwt-detail-scan'); await foto('25-pkwt-scan');
+  await ctx.clearCookies();
+  const hrdV = await buatStaffScope('hrd-v', ['HRD']);
+  await masukSesi(hrdV);
+  await page.goto(urlKontrak); await page.waitForSelector('button:has-text("Verifikasi scan kontrak-ttd.pdf")');
+  await page.click('button:has-text("Verifikasi scan kontrak-ttd.pdf")');
+  assert.match(await page.textContent('[role=status].sukses'), /Kontrak sah/);
+  await page.waitForSelector('.kartu :text("Aktif")'); // tanggal mulai hari ini: siklus hidup langsung mengaktifkan
+  await periksa('pkwt-detail-aktif'); await foto('26-pkwt-aktif');
+  await ctx.clearCookies();
+
+  // 10d. HRD merencanakan penempatan; Mgr Ops menyetujui -> penempatan AKTIF dan member menjadi karyawan OTOMATIS
+  const hrdP = await buatStaffScope('hrd-p', ['HRD']);
+  await masukSesi(hrdP);
+  await page.goto(`${WEB}/staff/penempatan`); await page.waitForSelector('summary:has-text("Rencanakan penempatan")');
+  await page.click('summary:has-text("Rencanakan penempatan")');
+  await page.waitForFunction(() => document.querySelectorAll('#kontrak option').length > 1 && document.querySelectorAll('#rekanan option').length > 1);
+  await page.selectOption('#kontrak', { index: 1 }); await page.selectOption('#rekanan', { label: 'REKANAN SINTETIS E2E' });
+  await page.waitForFunction(() => document.querySelectorAll('#lokasi option').length > 1);
+  await page.selectOption('#lokasi', { label: 'Gedung Utama' }); await page.fill('#mulai', mulaiKontrak);
+  await page.click('button:has-text("Simpan penempatan")');
+  assert.match(await page.textContent('[role=status].sukses'), /menunggu persetujuan/);
+  await periksa('penempatan-hrd'); await foto('27-penempatan');
+  await ctx.clearCookies();
+  const ops = await buatStaffScope('ops', ['MANAGER_OPERASIONAL']);
+  await masukSesi(ops);
+  await page.goto(`${WEB}/staff/penempatan`); await page.waitForSelector('button:has-text("Setujui penempatan")');
+  await page.click('button:has-text("Setujui penempatan")');
+  assert.match(await page.textContent('[role=status].sukses'), /disetujui/);
+  await page.waitForSelector('.butir .lencana-aktif'); // aktif otomatis (kontrak aktif dan tanggal mulai tiba)
+  await page.goto(`${WEB}/staff/karyawan`); await page.waitForSelector('.angka');
+  assert.match(await page.textContent('.butir:has-text("SINTETIS Pelamar E2E")'), /Satpam E2E/);
+  assert.ok((await page.textContent('.angka')).match(/\d+Aktif/), 'ringkasan karyawan aktif tampil');
+  await periksa('karyawan-aktif'); await foto('28-karyawan-aktif');
+  await ctx.clearCookies();
+
+  // 10e. Member: status KARYAWAN_AKTIF diturunkan OTOMATIS -> menu Lowongan hilang, dashboard menampilkan kontrak, backend menolak lamaran (403)
   await masukMember();
   await page.goto(`${WEB}/saya`); await page.waitForSelector('.kartu');
+  assert.match(await page.textContent('body'), /Karyawan aktif/);
+  assert.match(await page.textContent('[aria-label="Kontrak kerja"]'), /Satpam E2E/);
+  assert.match(await page.textContent('[aria-label="Kontrak kerja"]'), /Gedung Utama/);
   assert.ok(!(await page.isVisible('a:has-text("Lowongan")')), 'karyawan aktif tidak melihat menu Lowongan');
   assert.match(await page.textContent('.kartu'), /Karyawan aktif tidak dapat melamar/);
-  await periksa('member-karyawan-aktif'); await foto('21-member-karyawan-aktif');
+  await periksa('member-karyawan-aktif'); await foto('29-member-karyawan-aktif');
   await page.goto(`${WEB}/saya/lowongan`); await page.waitForSelector('.butir'); // halaman dapat dibuka langsung, tetapi backend yang menegakkan
   await page.click('button:has-text("Lamar Satpam E2E")');
   assert.match(await page.textContent('[role=alert].galat'), /Karyawan aktif tidak dapat melamar/);
+  const st = await pool.query(`SELECT status FROM member_profiles WHERE person_id = $1`, [pm.rows[0].id]);
+  assert.equal(st.rows[0].status, 'KARYAWAN_AKTIF');
+  const otomatis = await pool.query(`SELECT count(*)::int AS n FROM member_status_histories WHERE person_id = $1 AND to_status = 'KARYAWAN_AKTIF' AND actor_user_id IS NULL AND reason LIKE 'Otomatis:%'`, [pm.rows[0].id]);
+  assert.equal(otomatis.rows[0].n, 1, 'perubahan status karyawan dicatat sebagai otomatis (tanpa aktor)');
 
   assert.deepEqual(galatKonsol, [], `galat konsol/CSP: ${galatKonsol.join(' | ')}`);
   await browser.close();
@@ -404,7 +544,7 @@ async function utama() {
 }
 
 let kode = 0;
-try { await utama(); } catch (e) { console.error('E2E GAGAL:', e.message); kode = 1; }
+try { await utama(); } catch (e) { console.error('E2E GAGAL:', e.message); if (process.env.E2E_DEBUG) console.error(e.stack); kode = 1; }
 berhenti();
 const admin = new Pool({ connectionString: DB, max: 1 });
 await admin.query(`DROP SCHEMA IF EXISTS ${SKEMA} CASCADE`).catch(() => undefined);

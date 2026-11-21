@@ -80,6 +80,15 @@ companies 1─* job_vacancies 1─* job_applications *─1 persons ; job_applica
 ```
 Constraint: biodata wajib lengkap saat status ≥ MENUNGGU_VERIFIKASI; status terverifikasi wajib punya pemeriksa; satu KTP/foto diri aktif; satu lamaran aktif per (lowongan, orang).
 
+## Sudah dibuat (Fase 6)
+`contract_templates`, `employment_contracts`, `contract_versions` (hanya-tambah), `contract_documents` (scan), `contract_number_counters`, `contract_status_histories`, `placements` (+ `placement_status_histories`). Semua ber-`company_id` + RLS; FK komposit mencegah rujukan lintas perusahaan; kebijakan RLS membaca-milik untuk member (kontrak, penempatan, lokasi penempatannya). Ekstensi `btree_gist` untuk exclusion constraint penempatan.
+```
+job_applications 1─* employment_contracts *─1 contract_templates
+employment_contracts 1─* contract_versions / contract_documents / contract_status_histories
+employment_contracts 1─* placements *─1 partner_locations ; employment_contracts ─ extends ─ employment_contracts
+```
+Pelindung database: pembuat/pemeriksa/penyetuju berbeda; template terverifikasi sebelum PERSETUJUAN; scan terverifikasi sebelum DITANDATANGANI; template terverifikasi terkunci; penempatan AKTIF hanya bila kontrak AKTIF; penempatan non-final tidak tumpang tindih; riwayat hanya-tambah (aktor kosong hanya untuk "Otomatis: ...").
+
 ## Dirancang tapi belum dibuat (menunggu fase payroll)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
 

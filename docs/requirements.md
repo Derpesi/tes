@@ -55,6 +55,10 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | MEM-2 | Verifikasi HRD | HRD mengembalikan (alasan wajib) atau menyetujui; riwayat status lengkap; NIK tersamar kecuali reveal teraudit (5C) |
 | LOW-1 | Lowongan lintas perusahaan | Staff mengelola lowongan dalam scope; member melihat lowongan DIBUKA semua perusahaan tanpa catatan internal (5D) |
 | SEL-1 | Seleksi lamaran | State machine DIAJUKAN→…→MENUNGGU_PKWT; keputusan diaudit; transisi ilegal 409 (5D) |
+| PKW-3 | Template PKWT | Tanpa teks hukum bawaan; verifikasi dicatat Direktur (pemverifikasi ≠ pembuat); terkunci dan berversi; variabel daftar putih (6A) |
+| PKW-4 | Alur kontrak | Pembuat/pemeriksa/penyetuju berbeda (aplikasi + DB); nomor otomatis; PDF sesuai permintaan; scan terenkripsi diverifikasi HRD (6B) |
+| PEN-2 | Status otomatis | Kontrak + penempatan aktif → KARYAWAN_AKTIF; akan berakhir/berakhir otomatis; lamaran 403 oleh alur nyata; kembali pencari kerja hanya lewat verifikasi HRD (6C) |
+| DSH-1 | Dashboard | Member melihat kontrak/penempatan miliknya; staf melihat karyawan aktif dalam scope; notifikasi kontrak akan berakhir sekali (6D) |
 | ORG-1 | Isolasi perusahaan | Pengguna scope A tidak dapat membaca data B lewat API, ID langsung, ekspor |
 | ORG-2 | Perusahaan baru | Tambah perusahaan lewat master data tanpa deploy ulang |
 | REK-1 | Rekanan hanya data | Tidak ada tabel, rute, atau role login rekanan (diuji otomatis) |

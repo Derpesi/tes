@@ -74,6 +74,26 @@ export default function BerandaStaff() {
                 </Link>
               </>
             ) : null}
+            {info.permissions?.includes('pkwt.view') ? (
+              <>
+                <Link className="tombol-sekunder" href="/staff/pkwt">
+                  Kontrak PKWT
+                </Link>
+                <Link className="tombol-sekunder" href="/staff/template-pkwt">
+                  Template PKWT
+                </Link>
+              </>
+            ) : null}
+            {info.permissions?.includes('placement.view') ? (
+              <>
+                <Link className="tombol-sekunder" href="/staff/penempatan">
+                  Penempatan
+                </Link>
+                <Link className="tombol-sekunder" href="/staff/karyawan">
+                  Karyawan aktif
+                </Link>
+              </>
+            ) : null}
             {info.permissions?.includes('user_role.view') ? (
               <Link className="tombol-sekunder" href="/staff/persetujuan">
                 Persetujuan

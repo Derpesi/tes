@@ -66,6 +66,8 @@ Setiap perubahan = versi baru di `contract_versions` (tidak menimpa). Masa kerja
 
 > **Status implementasi (Fase 5):** alur member dan lamaran di atas sudah diimplementasikan sampai lamaran `MENUNGGU_PKWT` dan member `BELUM_DITEMPATKAN`. PKWT, penempatan, dan status `KARYAWAN_AKTIF` dan seterusnya (otomatis) dikerjakan di Fase 6; `CanApply` sudah menegakkan blokir karyawan aktif di backend.
 
+> **Status implementasi (Fase 6):** PKWT (diagram di atas), penempatan, dan status member otomatis (KARYAWAN_AKTIF, KONTRAK_AKAN_BERAKHIR, KONTRAK_BERAKHIR) sudah diimplementasikan (ADR-0007). Perpanjangan diwujudkan sebagai kontrak lanjutan bertaut yang melewati alur penuh. Template hukum resmi belum ada; sistem tidak membawa teks hukum.
+
 ## Penempatan
 ```mermaid
 stateDiagram-v2

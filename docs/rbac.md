@@ -1,6 +1,6 @@
 # RBAC dan Hak Akses Staff Internal
 
-Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. (Koreksi Fase 4A: IT `C` pada Perusahaan, Manager Operasional `D` pada Rekanan & lokasi, dan modul baru *Dokumen legalitas perusahaan*. Koreksi Fase 3D: modul *Pengguna & role* diberi `V` untuk Direktur dan IT; tanpa `V` tidak ada yang dapat melihat daftar pengguna/persetujuan.) Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal.
+Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. (Koreksi Fase 4A: IT `C` pada Perusahaan, Manager Operasional `D` pada Rekanan & lokasi, dan modul baru *Dokumen legalitas perusahaan*. Koreksi Fase 3D: modul *Pengguna & role* diberi `V` untuk Direktur dan IT; tanpa `V` tidak ada yang dapat melihat daftar pengguna/persetujuan.) Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal. (Fase 6: terminasi kontrak lebih awal memakai `pkwt.approve`; verifikasi template memakai `pkwt.approve`; reaktivasi member memakai `member.review`; kualifikator sel seperti "U(shift)" belum ditegakkan.)
 
 | Modul | Direktur | Mgr Ops | IT | HRD | Marketing | Adm | Pay-Abs Rekanan | Keuangan | Pay Internal |
 |---|---|---|---|---|---|---|---|---|---|

@@ -336,16 +336,17 @@ jalan('penempatan, siklus hidup kontrak, dan status member otomatis (PostgreSQL 
       expect((await riwayatMember(k1.pel.person)).map((x) => x.to_status)).not.toContain('KONTRAK_BERAKHIR');
     });
 
-    it('jalankan(): memproses semua orang yang jatuh tempo (worker) dan mengembalikan ringkasan; aman diulang', async () => {
+    it('jalankan(): memproses orang yang jatuh tempo (worker) dan mengembalikan ringkasan; aman diulang', async () => {
       const t = await aktor();
-      const k = await kontrakSiap(t);
-      await penempatanSiap(t, k);
+      const besok = new Date(Date.now() + 86400000 + 7 * 3600000).toISOString().slice(0, 10); // jam realistis: hanya pekerjaan yang benar-benar jatuh tempo
+      const k = await kontrakSiap(t, { start: besok, end: hari(besok, 100) });
+      await penempatanSiap(t, k, { startDate: besok, endDate: hari(besok, 100) });
       const { ContractLifecycleService } = await import('../src/pkwt/lifecycle.service');
       const svc = app.get(ContractLifecycleService);
-      const r = await svc.jalankan(pada(MULAI));
+      const r = await svc.jalankan(pada(besok));
       expect(r.kontrakAktif).toBeGreaterThanOrEqual(1);
       expect(await statusMemberDb(k.pel.person)).toBe('KARYAWAN_AKTIF');
-      const ulang = await svc.jalankan(pada(MULAI));
+      const ulang = await svc.jalankan(pada(besok));
       expect(ulang.kontrakAktif).toBe(0);
       expect(ulang.statusMemberDiubah).toBe(0);
     });

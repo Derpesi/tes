@@ -63,3 +63,17 @@ export function Pilihan(p: { id: string; label: string; value: string; onChange:
 export function Lencana({ status }: { status: string }) {
   return <span className={`lencana lencana-${status.toLowerCase()}`}>{status.replace(/_/g, ' ')}</span>;
 }
+
+export function AreaTeks(p: { id: string; label: string; value: string; onChange: (v: string) => void; maxLength?: number; bantuan?: string; baris?: number }) {
+  return (
+    <div className="kolom">
+      <label htmlFor={p.id}>{p.label}</label>
+      <textarea id={p.id} name={p.id} value={p.value} onChange={(e) => p.onChange(e.target.value)} maxLength={p.maxLength} rows={p.baris ?? 6} required aria-describedby={p.bantuan ? `${p.id}-bantuan` : undefined} />
+      {p.bantuan ? (
+        <span id={`${p.id}-bantuan`} className="bantuan">
+          {p.bantuan}
+        </span>
+      ) : null}
+    </div>
+  );
+}

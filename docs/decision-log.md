@@ -38,6 +38,13 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-31 | CanApply di backend (403) sebagai satu-satunya sumber aturan; karyawan aktif/kontrak akan berakhir ditolak, dievaluasi dalam transaksi yang sama dengan status profil |
 | D-32 | Verifikasi HRD: kembalikan (alasan wajib, terlihat member) atau setujui (TERVERIFIKASI lalu BELUM_DITEMPATKAN); ubah saat menunggu verifikasi mengembalikan status |
 | D-33 | Akhir Fase 5 = lamaran `MENUNGGU_PKWT`; PKWT, penempatan, dan perubahan status karyawan di Fase 6 |
+| D-34 | Template PKWT disediakan pengguna tanpa teks hukum bawaan; verifikasi hukum dicatat Direktur (di luar sistem); template terverifikasi terkunci dan berversi (ADR-0007) |
+| D-35 | Kontrak: pembuat, pemeriksa, penyetuju berbeda; template terverifikasi sebelum persetujuan; scan terverifikasi sebelum sah; "setuju" bukan tanda tangan sah |
+| D-36 | Perpanjangan = kontrak lanjutan bertaut yang melewati alur penuh, tidak menimpa kontrak berjalan |
+| D-37 | Penempatan tumpang tindih ditolak database (exclusion constraint btree_gist); persetujuan Mgr Ops, penyetuju ≠ pembuat |
+| D-38 | Status member turunan hanya ditulis `MemberStatusService`; kembali BELUM_DITEMPATKAN hanya lewat verifikasi HRD; perubahan otomatis bertanda "Otomatis:" tanpa aktor |
+| D-39 | Siklus hidup kontrak idempoten dengan jam disuntikkan; worker interval + pemicu kejadian; notifikasi kontrak akan berakhir sekali per kontrak |
+| D-40 | Dependency pdf-lib untuk PDF PKWT; pako (MIT AND Zlib) dicatat sebagai pengecualian lisensi yang diajukan ke pemilik |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -72,6 +79,9 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-28 | Pendidikan terakhir: SD, SMP, SMA/SMK, D1-D3, D4/S1, S2, S3 | Pemilik |
 | A-29 | Retensi dokumen identitas member belum ditetapkan (hapus lunak, objek dipertahankan) | Tinjau terhadap UU PDP |
 | A-30 | Lowongan yang ditutup/kedaluwarsa tidak terlihat member kecuali oleh pelamarnya; lamaran yang ditolak tetap menghalangi lamaran ulang ke lowongan yang sama | Pemilik |
+| A-31 | Jendela "kontrak akan berakhir" = 30 hari; nomor kontrak `<prefiks>/<kode>/<tahun>/<urut 4 digit>` | Pemilik |
+| A-32 | Variabel template: nama, nik, nomor, jabatan, tanggal_mulai, tanggal_akhir, perusahaan, tanggal_cetak | Pemilik/ahli hukum |
+| A-33 | Kontrak aktif tanpa penempatan aktif belum menjadikan karyawan; kontrak aktif ditangguhkan penempatannya tetap berstatus karyawan | Pemilik |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

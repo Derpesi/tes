@@ -24,8 +24,9 @@ h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
 .kolom { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.875rem; }
 .kolom label { font-weight: 600; }
 .kolom input { min-height: 44px; padding: 0.5rem 0.75rem; font-size: 1rem; border: 1px solid #8a96a8; border-radius: 8px; color: var(--warna-navy); background: #fff; }
+.kolom textarea { padding: 0.5rem 0.75rem; font-size: 1rem; border: 1px solid #8a96a8; border-radius: 8px; color: var(--warna-navy); background: #fff; font-family: inherit; resize: vertical; min-height: 96px; }
 .kolom select { min-height: 44px; padding: 0.5rem 0.75rem; font-size: 1rem; border: 1px solid #8a96a8; border-radius: 8px; color: var(--warna-navy); background: #fff; }
-.kolom input:focus-visible, .kolom select:focus-visible { outline: 3px solid var(--warna-gold); outline-offset: 1px; }
+.kolom input:focus-visible, .kolom select:focus-visible, .kolom textarea:focus-visible { outline: 3px solid var(--warna-gold); outline-offset: 1px; }
 .bantuan { font-size: 0.875rem; color: #44546a; }
 .tombol, .tombol-sekunder { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; width: 100%; padding: 0.625rem 1rem; font-size: 1rem; font-weight: 700; border-radius: 8px; border: 2px solid var(--warna-navy); cursor: pointer; text-decoration: none; margin-bottom: 0.75rem; }
 .tombol { background: var(--warna-navy); color: var(--warna-putih); }
@@ -55,3 +56,6 @@ h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
 .bagian { margin-top: 1.5rem; }
 details.lipat { margin-bottom: 1rem; }
 details.lipat > summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+.angka { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
+.angka .butir { margin: 0; text-align: center; }
+.angka strong { display: block; font-size: 1.5rem; }
