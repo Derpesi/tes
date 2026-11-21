@@ -12,7 +12,7 @@ export const BATAS_EKSPOR_BARIS = 10000;
 const jam = (d: Date | null) => (d ? new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false }).format(d).replace('.', ':') : null);
 type Baris = Record<string, unknown>;
 
-interface Saring { from: string; to: string; locationId?: string; personId?: string }
+export interface Saring { from: string; to: string; locationId?: string; personId?: string }
 
 /**
  * Rekap absensi per orang-hari (tanggal-shift) dari REKAMAN EFEKTIF: putusan tinjauan menggantikan status asli, koreksi bernomor yang disetujui menggantikan
@@ -28,7 +28,8 @@ export class RecapService {
     private readonly audit: AuditService,
   ) {}
 
-  private async ambil(c: PoolClient, f: Saring, batas: number, kursor: { t: string; id: string } | null): Promise<Baris[]> {
+  /** Baris rekap per orang-hari (mentah). Dipakai juga oleh snapshot payroll (Fase 8) agar satu sumber kebenaran. */
+  async ambil(c: PoolClient, f: Saring, batas: number, kursor: { t: string; id: string } | null): Promise<Baris[]> {
     const r = await c.query(
       `WITH rek AS (
          SELECT e.id, e.person_id, e.shift_date, e.location_id, e.kind, e.occurred_at, e.effective_status

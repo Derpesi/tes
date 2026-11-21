@@ -3203,6 +3203,101 @@
         ]
       }
     },
+    "/payroll/periods": {
+      "get": {
+        "operationId": "PayrollController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      },
+      "post": {
+        "operationId": "PayrollController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Membuka periode dan rekap versi 1 (DRAFT); tumpang tindih ditolak (409)"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/periods/{id}": {
+      "get": {
+        "operationId": "PayrollController_detailPeriode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}": {
+      "get": {
+        "operationId": "PayrollController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rekap lengkap: baris, komponen (nominal sebagai teks desimal), subtotal per jenis. Tidak ada total gaji/neto"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/pull": {
+      "post": {
+        "operationId": "PayrollController_tarik",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot absensi (DRAFT, jenis PARTNER, idempoten); komponen dipertahankan"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
