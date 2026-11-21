@@ -22,7 +22,6 @@ process.env.APP_ENCRYPTION_KEY = randomBytes(32).toString('base64');
 process.env.TRUST_PROXY = '1';
 
 const PASSWORD = 'kuda lari malam hari di sawah';
-const ROLES = ['DIREKTUR', 'MANAGER_OPERASIONAL', 'IT_ADMIN', 'HRD', 'MARKETING', 'STAFF_ADMINISTRASI', 'STAFF_PAYROLL_ABSENSI_REKANAN', 'STAFF_KEUANGAN', 'STAFF_PAYROLL_INTERNAL'];
 
 interface Sesi {
   cookie: string;
@@ -42,7 +41,6 @@ jalan('Kontrak layanan rekanan (PostgreSQL asli)', () => {
   let perusahaanA: string;
   let perusahaanB: string;
   const terkirim: PesanEmail[] = [];
-  const sesiPeran = new Map<string, Staff>();
   let nomorIp = 1;
 
   beforeAll(async () => {
@@ -76,7 +74,6 @@ jalan('Kontrak layanan rekanan (PostgreSQL asli)', () => {
     const b = await pool.query(`INSERT INTO companies (name) VALUES ($1) RETURNING id`, [`PT SINTETIS B ${randomBytes(3).toString('hex')}`]);
     perusahaanA = a.rows[0].id;
     perusahaanB = b.rows[0].id;
-    for (const r of ROLES) sesiPeran.set(r, await buatStaffMasuk([r]));
   });
   afterAll(async () => {
     await pool?.end();

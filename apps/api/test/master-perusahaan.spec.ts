@@ -42,7 +42,6 @@ jalan('Master perusahaan dan dokumen legalitas (PostgreSQL asli)', () => {
   let perusahaanA: string;
   let perusahaanB: string;
   const terkirim: PesanEmail[] = [];
-  const sesiPeran = new Map<string, Staff>();
   let nomorIp = 1;
 
   beforeAll(async () => {
@@ -76,7 +75,6 @@ jalan('Master perusahaan dan dokumen legalitas (PostgreSQL asli)', () => {
     const b = await pool.query(`INSERT INTO companies (name) VALUES ($1) RETURNING id`, [`PT SINTETIS B ${randomBytes(3).toString('hex')}`]);
     perusahaanA = a.rows[0].id;
     perusahaanB = b.rows[0].id;
-    for (const r of ROLES) sesiPeran.set(r, await buatStaffMasuk([r]));
   });
   afterAll(async () => {
     await pool?.end();
