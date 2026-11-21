@@ -67,10 +67,10 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | PKW-1 | Alur PKWT | Transisi di luar diagram ditolak; tiap perubahan membuat versi baru; template belum terverifikasi tidak bisa dipakai aktif |
 | PKW-2 | Dokumen PKWT | Scan terunggah dengan checksum, versi, petugas, waktu; HRD dapat memverifikasi atau menolak dengan alasan |
 | PEN-1 | Penempatan | Dua penempatan aktif tumpang tindih ditolak database |
-| ABS-1 | Titik dan QR | PDF QR dapat diunduh; titik nonaktif ditolak |
-| ABS-2 | Scan absensi | Luar radius ditolak; duplikat ditolak; tanpa selfie kamera ditolak; waktu dari server; shift lintas tengah malam benar |
-| ABS-3 | Koreksi | Rekaman asli tak berubah; koreksi butuh persetujuan; teraudit |
-| ABS-4 | Retensi selfie | Selfie melewati masa retensi terhapus oleh pekerjaan harian; legal hold dikecualikan; penghapusan teraudit |
-| PAY-1 | Rekap absensi | Rekap per periode sesuai data absensi; setelah disetujui tak bisa diubah tanpa koreksi resmi |
-| EXP-1 | Ekspor | xlsx, CSV, PDF terbentuk; sel berawalan `=+-@` dinetralkan; ekspor teraudit |
+| ABS-1 | Titik dan QR | PDF QR dapat diunduh; titik nonaktif ditolak (7B) |
+| ABS-2 | Scan absensi | Luar radius ditolak; duplikat ditolak; tanpa selfie kamera ditolak; waktu dari server; shift lintas tengah malam benar (7C) |
+| ABS-3 | Koreksi | Rekaman asli tak berubah; koreksi butuh persetujuan; teraudit (7D) |
+| ABS-4 | Retensi selfie | Selfie melewati masa retensi terhapus oleh pekerjaan harian; legal hold dikecualikan; penghapusan teraudit (7D) |
+| PAY-1 | Rekap absensi | Rekap per periode sesuai data absensi; setelah disetujui tak bisa diubah tanpa koreksi resmi (rekap absensi 7D; persetujuan rekap Fase 8) |
+| EXP-1 | Ekspor | xlsx, CSV, PDF terbentuk; sel berawalan `=+-@` dinetralkan; ekspor teraudit (CSV absensi 7D; xlsx/PDF Fase 8) |
 | AUD-1 | Audit | Aksi sensitif tercatat; tabel tidak bisa UPDATE/DELETE |

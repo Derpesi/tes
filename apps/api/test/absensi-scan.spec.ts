@@ -196,6 +196,9 @@ jalan('Absensi member: scan QR + GPS + selfie (PostgreSQL asli)', () => {
       const masuk = await absen(m).expect(201);
       expect(masuk.body).toMatchObject({ status: 'VALID', flags: ['TERLAMBAT'] });
       expect(masuk.body.message).toMatch(/terlambat/);
+      // member membaca penanda rekamannya sendiri pada riwayat dan ringkasan hari ini (kebijakan RLS baca-milik)
+      expect((await http('get', '/member/attendance', m).expect(200)).body.items[0].flags).toEqual(['TERLAMBAT']);
+      expect((await http('get', '/member/attendance/today', m).expect(200)).body.records[0].flags).toEqual(['TERLAMBAT']);
       waktu = wib('2026-03-11 14:00');
       const pulang = await absen(m, { kind: 'PULANG' }).expect(201);
       expect(pulang.body).toMatchObject({ status: 'VALID', flags: ['PULANG_CEPAT'] });

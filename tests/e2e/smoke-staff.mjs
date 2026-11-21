@@ -57,8 +57,8 @@ async function utama() {
   await tunggu('http://localhost:3001/health', 'API');
   await tunggu(`${WEB}/`, 'Web');
 
-  const browser = await chromium.launch();
-  const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 1, locale: 'id-ID' });
+  const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] }); // kamera dan izin palsu untuk uji absensi
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 1, locale: 'id-ID', permissions: ['geolocation', 'camera'], geolocation: { latitude: -6.9, longitude: 107.6, accuracy: 20 } });
   const page = await ctx.newPage();
   const galatKonsol = [];
   // Respons 401/400 yang memang diharapkan (belum masuk, kata sandi/kode salah, validasi formulir) dicatat Chromium sebagai galat jaringan.
@@ -536,6 +536,149 @@ async function utama() {
   assert.equal(st.rows[0].status, 'KARYAWAN_AKTIF');
   const otomatis = await pool.query(`SELECT count(*)::int AS n FROM member_status_histories WHERE person_id = $1 AND to_status = 'KARYAWAN_AKTIF' AND actor_user_id IS NULL AND reason LIKE 'Otomatis:%'`, [pm.rows[0].id]);
   assert.equal(otomatis.rows[0].n, 1, 'perubahan status karyawan dicatat sebagai otomatis (tanpa aktor)');
+
+  // 11. Fase 7: absensi QR + GPS + selfie. Pengaturan titik/shift/jadwal lewat UI staf; absen lewat UI member dengan geolokasi dan kamera palsu.
+  const tenantQ = async (fn) => {
+    const c = await pool.connect();
+    try { await c.query('BEGIN'); await c.query(`SELECT set_config('app.company_ids', $1, true)`, [comp.rows[0].id]); const r = await fn(c); await c.query('COMMIT'); return r; }
+    catch (e) { await c.query('ROLLBACK').catch(() => undefined); throw e; } finally { c.release(); }
+  };
+  await tenantQ((c) => c.query(`UPDATE partner_locations SET latitude = -6.9, longitude = 107.6, geofence_radius_m = 100 WHERE name = 'Gedung Utama'`));
+  const hariIni7 = hariWib(0);
+
+  // 11a. Mgr Ops membuat titik absensi; Adm mengunduh poster QR (izin export); izin kamera/lokasi hanya dibuka di /absen
+  const ops7 = await buatStaffScope('ops7', ['MANAGER_OPERASIONAL']);
+  await masukSesi(ops7);
+  await page.goto(`${WEB}/staff/titik-absensi`); await page.waitForSelector('summary:has-text("Buat titik absensi")');
+  await page.click('summary:has-text("Buat titik absensi")');
+  await page.waitForFunction(() => document.querySelectorAll('#rekanan option').length > 1);
+  await page.selectOption('#rekanan', { label: 'REKANAN SINTETIS E2E' });
+  await page.waitForFunction(() => document.querySelectorAll('#lokasi option').length > 1);
+  await page.selectOption('#lokasi', { label: 'Gedung Utama' });
+  await page.click('button:has-text("Buat titik")');
+  assert.match(await page.textContent('[role=status].sukses'), /Titik absensi dibuat/);
+  await page.waitForSelector('.butir:has-text("Gedung Utama")');
+  assert.ok(!(await page.isVisible('a:has-text("Unduh poster QR")')), 'Mgr Ops tidak memegang izin ekspor QR');
+  await periksa('titik-absensi'); await foto('30-titik-absensi');
+  const titik = (await tenantQ((c) => c.query(`SELECT id, public_code FROM attendance_points WHERE status = 'AKTIF' ORDER BY created_at DESC LIMIT 1`))).rows[0];
+  await ctx.clearCookies();
+  const adm7 = await buatStaffScope('adm7', ['STAFF_ADMINISTRASI']);
+  await masukSesi(adm7);
+  await page.goto(`${WEB}/staff/titik-absensi`); await page.waitForSelector('a:has-text("Unduh poster QR")');
+  const qr = await page.request.get(`${WEB}${await page.getAttribute('a:has-text("Unduh poster QR")', 'href')}`);
+  assert.equal(qr.status(), 200);
+  assert.equal((await qr.body()).subarray(0, 5).toString(), '%PDF-');
+  const cekHeader = async (jalur) => (await page.request.get(`${WEB}${jalur}`)).headers()['permissions-policy'];
+  assert.equal(await cekHeader('/absen'), 'camera=(self), microphone=(), geolocation=(self)');
+  assert.equal(await cekHeader('/'), 'camera=(), microphone=(), geolocation=()');
+  assert.equal(await cekHeader('/staff'), 'camera=(), microphone=(), geolocation=()');
+  await ctx.clearCookies();
+
+  // 11b. Mgr Ops membuat shift fleksibel (mencakup seluruh hari) dan jadwal untuk penempatan member
+  await masukSesi(ops7);
+  await page.goto(`${WEB}/staff/jadwal`); await page.waitForSelector('summary:has-text("Tambah shift")');
+  await page.click('summary:has-text("Tambah shift")');
+  await page.fill('#s-nama', 'Fleksibel E2E'); await page.selectOption('#s-jenis', 'FLEXIBLE'); await page.fill('#s-mulai', '00:00'); await page.fill('#s-selesai', '23:59');
+  await page.click('button:has-text("Simpan shift")');
+  assert.match(await page.textContent('[role=status].sukses'), /Shift ditambahkan/);
+  await page.click('summary:has-text("Tambah jadwal")');
+  await page.waitForFunction(() => document.querySelectorAll('#j-p option').length > 1 && [...document.querySelectorAll('#j-s option')].some((o) => o.textContent === 'Fleksibel E2E'));
+  await page.selectOption('#j-p', { index: 1 }); await page.selectOption('#j-s', { label: 'Fleksibel E2E' });
+  for (const d of [6, 7]) await page.check(`#hari-${d}`);
+  await page.fill('#j-mulai', hariIni7);
+  await page.click('button:has-text("Simpan jadwal")');
+  assert.match(await page.textContent('[role=status].sukses'), /Jadwal ditambahkan/);
+  await periksa('jadwal'); await foto('31-jadwal');
+  await ctx.clearCookies();
+
+  // 11c. Member tanpa sesi diarahkan masuk dengan returnTo; lalu absen masuk (VALID), pulang di luar radius (DITOLAK), pulang dari perangkat baru (PERLU_VERIFIKASI)
+  await page.goto(`${WEB}/absen?t=${titik.public_code}`);
+  await page.waitForURL('**/masuk?returnTo=*');
+  assert.equal(new URL(page.url()).searchParams.get('returnTo'), `/absen?t=${titik.public_code}`);
+  assert.match(await page.getAttribute('a.tombol', 'href'), /\/api\/auth\/member\/google\/start\?returnTo=%2Fabsen%3Ft%3D/);
+  await masukMember();
+  await page.goto(`${WEB}/absen`); // tanpa kode titik
+  assert.match(await page.textContent('body'), /Pindai QR di lokasi kerja/);
+  await page.goto(`${WEB}/absen?t=${titik.public_code}`); await page.waitForSelector('button:has-text("Ambil lokasi saya")');
+  await periksa('absen'); await foto('32-absen');
+  const absenUI = async (jenis) => {
+    await page.click(`label:has(#jenis-${jenis})`);
+    await page.click('button:has-text("lokasi")');
+    await page.waitForSelector('text=Lokasi terambil');
+    await page.click('button:has-text("Buka kamera")'); await page.waitForSelector('video.kamera');
+    await page.waitForFunction(() => { const v = document.querySelector('video.kamera'); return v && v.videoWidth > 0; });
+    await page.click('button:has-text("Ambil foto")'); await page.waitForSelector('img.kamera');
+    await page.click('button:has-text("Kirim absen")'); await page.waitForSelector('[role=status].kartu');
+    return page.textContent('[role=status].kartu');
+  };
+  const masuk = await absenUI('MASUK');
+  assert.match(masuk, /Valid/); assert.match(masuk, /Absen masuk tercatat pukul \d\d:\d\d WIB/);
+  await foto('33-absen-valid');
+  await ctx.setGeolocation({ latitude: -6.91, longitude: 107.6, accuracy: 20 }); // ~1,1 km dari titik
+  await page.goto(`${WEB}/absen?t=${titik.public_code}`); await page.waitForSelector('button:has-text("Ambil lokasi saya")');
+  const jauh = await absenUI('PULANG');
+  assert.match(jauh, /Ditolak/); assert.match(jauh, /di luar radius/);
+  await ctx.setGeolocation({ latitude: -6.9, longitude: 107.6, accuracy: 20 });
+  await page.goto(`${WEB}/absen?t=${titik.public_code}`); await page.waitForSelector('button:has-text("Ambil lokasi saya")');
+  await page.evaluate(() => window.localStorage.setItem('hris_perangkat', 'perangkat-e2e-kedua-0123456789abcdef'));
+  const baru = await absenUI('PULANG');
+  assert.match(baru, /Perlu verifikasi/); assert.match(baru, /perangkat baru/i);
+  await foto('34-absen-perlu-verifikasi');
+  await page.goto(`${WEB}/saya/absensi`); await page.waitForSelector('.butir');
+  assert.equal(await page.locator('.butir').count(), 3);
+  const riwayat = await page.textContent('main');
+  for (const t of ['Valid', 'Ditolak', 'Perlu verifikasi', 'Perangkat baru']) assert.ok(riwayat.includes(t), `riwayat memuat "${t}": ${riwayat.slice(0, 600)}`);
+  await periksa('riwayat-absensi'); await foto('35-riwayat-absensi');
+  await page.goto(`${WEB}/saya`); await page.waitForSelector('a:has-text("Riwayat absensi")');
+  await ctx.clearCookies();
+
+  // 11d. PayAbs memeriksa dan melihat selfie (diaudit); Mgr Ops memutuskan dan menyetujui perangkat; peran lain tidak dapat melihat selfie
+  const payabs7 = await buatStaffScope('payabs7', ['STAFF_PAYROLL_ABSENSI_REKANAN']);
+  await masukSesi(payabs7);
+  await page.goto(`${WEB}/staff/tinjauan-absensi`); await page.waitForSelector('.butir');
+  assert.match(await page.textContent('.butir'), /Perangkat baru/);
+  assert.match(await page.textContent('.butir'), /Menunggu pemeriksaan/);
+  await page.click('button:has-text("Buka rincian")'); await page.waitForSelector('#alasan-periksa');
+  await page.fill('#alasan-periksa', 'Wajah dan lokasi sesuai'); await page.click('button:has-text("Catat pemeriksaan")');
+  assert.match(await page.textContent('[role=status].sukses'), /Pemeriksaan dicatat/);
+  await page.click('button:has-text("Tampilkan selfie")');
+  await page.waitForFunction(() => { const i = document.querySelector('img.foto-tinjau'); return i && i.complete && i.naturalWidth > 0; });
+  assert.ok(!(await page.isVisible('#putusan')), 'PayAbs tidak dapat memutuskan');
+  await periksa('tinjauan-absensi'); await foto('36-tinjauan-absensi');
+  const rekPerlu = (await tenantQ((c) => c.query(`SELECT id FROM attendance_records WHERE status = 'PERLU_VERIFIKASI' ORDER BY created_at DESC LIMIT 1`))).rows[0].id;
+  const dilihat = await tenantQ((c) => c.query(`SELECT actor_id FROM audit_logs WHERE action = 'attendance.selfie.viewed' AND object_id = $1`, [rekPerlu]));
+  assert.ok(dilihat.rows.some((r) => r.actor_id === payabs7.uid), 'akses selfie tercatat di audit');
+  await ctx.clearCookies();
+  await masukSesi(ops7);
+  await page.goto(`${WEB}/staff/tinjauan-absensi`); await page.waitForSelector('.butir');
+  await page.click('button:has-text("Buka rincian")'); await page.waitForSelector('#putusan');
+  assert.ok(await page.isVisible('button:has-text("Tampilkan selfie")'), 'Mgr Ops memegang selfie.view per matriks, sehingga tombol tampil');
+  await page.selectOption('#putusan', 'DISETUJUI'); await page.selectOption('#perangkat', 'SETUJUI'); await page.fill('#alasan-putus', 'Perangkat milik pekerja');
+  await page.click('button:has-text("Simpan putusan")');
+  assert.match(await page.textContent('[role=status].sukses'), /Putusan dicatat/);
+  const dev = await tenantQ((c) => c.query(`SELECT status FROM device_registrations ORDER BY first_seen_at DESC LIMIT 1`));
+  assert.equal(dev.rows[0].status, 'DISETUJUI');
+  await ctx.clearCookies();
+  await masukSesi(adm7);
+  assert.equal((await page.request.get(`${WEB}/api/attendance/records/${rekPerlu}/selfie`)).status(), 403, 'Adm tidak boleh melihat selfie');
+  assert.equal((await page.request.get(`${WEB}/api/attendance/review`)).status(), 403);
+  await ctx.clearCookies();
+
+  // 11e. Rekap absensi dan ekspor CSV (Mgr Ops)
+  await masukSesi(ops7);
+  await page.goto(`${WEB}/staff/rekap-absensi`); await page.waitForSelector('#dari');
+  await page.fill('#dari', hariIni7); await page.fill('#sampai', hariIni7); await page.click('button:has-text("Tampilkan rekap")');
+  await page.waitForSelector('.butir:has-text("SINTETIS Pelamar E2E")');
+  assert.match(await page.textContent('.butir:has-text("SINTETIS Pelamar E2E")'), /Hadir/);
+  await periksa('rekap-absensi'); await foto('37-rekap-absensi');
+  const csv = await page.request.get(`${WEB}/api/attendance/recap/export.csv?from=${hariIni7}&to=${hariIni7}`);
+  assert.equal(csv.status(), 200);
+  assert.match(csv.headers()['content-type'], /text\/csv/);
+  const teksCsv = (await csv.body()).toString('utf8');
+  assert.equal(teksCsv.charCodeAt(0), 0xfeff);
+  assert.match(teksCsv, /Tanggal Shift,Nama,Lokasi/); assert.match(teksCsv, /SINTETIS Pelamar E2E/);
+  await page.goto(`${WEB}/staff/koreksi-absensi`); await page.waitForSelector('text=Koreksi absensi');
+  await periksa('koreksi-absensi');
 
   assert.deepEqual(galatKonsol, [], `galat konsol/CSP: ${galatKonsol.join(' | ')}`);
   await browser.close();

@@ -94,6 +94,31 @@ export default function BerandaStaff() {
                 </Link>
               </>
             ) : null}
+            {['attendance_point.view', 'attendance_point.create', 'attendance_point.update', 'attendance_point.export'].some((i) => info.permissions?.includes(i)) ? (
+              <Link className="tombol-sekunder" href="/staff/titik-absensi">
+                Titik absensi (QR)
+              </Link>
+            ) : null}
+            {info.permissions?.includes('placement.view') ? (
+              <Link className="tombol-sekunder" href="/staff/jadwal">
+                Shift dan jadwal
+              </Link>
+            ) : null}
+            {['attendance_anomaly.view', 'attendance_anomaly.review', 'attendance_anomaly.approve'].some((i) => info.permissions?.includes(i)) ? (
+              <Link className="tombol-sekunder" href="/staff/tinjauan-absensi">
+                Tinjauan absensi
+              </Link>
+            ) : null}
+            {['attendance_adjustment.view', 'attendance_adjustment.create', 'attendance_adjustment.update', 'attendance_adjustment.approve'].some((i) => info.permissions?.includes(i)) ? (
+              <Link className="tombol-sekunder" href="/staff/koreksi-absensi">
+                Koreksi absensi
+              </Link>
+            ) : null}
+            {info.permissions?.includes('attendance_recap.view') ? (
+              <Link className="tombol-sekunder" href="/staff/rekap-absensi">
+                Rekap absensi
+              </Link>
+            ) : null}
             {info.permissions?.includes('user_role.view') ? (
               <Link className="tombol-sekunder" href="/staff/persetujuan">
                 Persetujuan

@@ -12,6 +12,8 @@ import { ScheduleService } from './schedule.service';
 import { DaftarJadwalQuery, DaftarLiburQuery, DaftarShiftQuery, DaftarTitikQuery, IdParam, JadwalBuat, LiburBuat, ShiftBuat, ShiftUbah, TitikBuat } from './schemas';
 
 const id = (nama: string) => Param(nama, new ZodPipe(IdParam));
+/** Daftar titik terbuka bagi pemegang izin lihat maupun izin aksi (buat/ubah/ekspor), karena pelaksana harus dapat menemukan titiknya. */
+const LIHAT_TITIK = ['attendance_point.view', 'attendance_point.create', 'attendance_point.update', 'attendance_point.export'] as const;
 
 /** Titik absensi (QR), shift, jadwal kerja, dan hari libur. Rekanan = master data internal; tidak ada akun rekanan. */
 @ApiTags('Absensi: pengaturan')
@@ -23,13 +25,13 @@ export class AttendanceSetupController {
     @Inject(ENV) private readonly env: Env,
   ) {}
 
-  @RequirePermission('attendance_point.view')
+  @RequirePermission(...LIHAT_TITIK)
   @Get('points')
   daftarTitik(@AksesStaff() a: Akses, @Query(new ZodPipe(DaftarTitikQuery)) q: z.infer<typeof DaftarTitikQuery>) {
     return this.titik.daftar(a, q);
   }
 
-  @RequirePermission('attendance_point.view')
+  @RequirePermission(...LIHAT_TITIK)
   @Get('points/:id')
   detailTitik(@AksesStaff() a: Akses, @id('id') i: string) {
     return this.titik.detail(a, i);

@@ -107,7 +107,8 @@ jalan('Absensi: titik/QR, shift, jadwal, dan libur (PostgreSQL asli)', () => {
       const titik = (await buat(s.mo, lok).expect(201)).body;
       expect(titik).toMatchObject({ locationId: lok, status: 'AKTIF', hasCoordinates: true, geofenceRadiusM: 100 });
       for (const n of ['mo', 'dir', 'it', 'payabs']) await http('get', `/attendance/points/${titik.id}`, s[n]).expect(200);
-      for (const n of ['adm', 'hrd', 'mkt']) await http('get', `/attendance/points/${titik.id}`, s[n]).expect(403);
+      await http('get', `/attendance/points/${titik.id}`, s.adm).expect(200); // Adm memegang buat/ubah/ekspor: daftar terbuka agar dapat mengunduh QR
+      for (const n of ['hrd', 'mkt']) await http('get', `/attendance/points/${titik.id}`, s[n]).expect(403);
       for (const n of ['hrd', 'mkt', 'dir', 'it', 'payabs']) await http('post', `/attendance/points/${titik.id}/rotate-code`, s[n]).expect(403);
       for (const n of ['hrd', 'mkt', 'dir', 'it', 'payabs', 'adm']) await http('post', `/attendance/points/${titik.id}/deactivate`, s[n]).expect(403);
       for (const n of ['mo', 'dir', 'it', 'payabs', 'hrd', 'mkt']) await http('get', `/attendance/points/${titik.id}/qr.pdf`, s[n]).expect(403); // hanya Adm yang memegang export

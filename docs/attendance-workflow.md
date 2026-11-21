@@ -32,3 +32,10 @@ Tanpa jaringan, aplikasi menampilkan pesan gagal beserta prosedur koreksi absens
 
 ## Koreksi
 `attendance_adjustments` terpisah, alasan wajib, diajukan Staff Payroll Absensi, disetujui Manager Operasional. Rekaman asli tidak diubah; semuanya diaudit.
+
+> **Status implementasi (Fase 7):** seluruh alur di atas diimplementasikan (ADR-0008). Rute member: `POST /member/attendance` (multipart), `GET /member/attendance`, `GET /member/attendance/today`; halaman `/absen?t=<kode>` dan `/saya/absensi`. Rute staf: `/attendance/points` (+QR PDF), `/shifts`, `/schedules`, `/holidays`, `/review`, `/records/:id/selfie`, `/adjustments`, `/recap` dan `/recap/export.csv`. Perbedaan dari rancangan awal yang perlu diketahui: selfie dialirkan lewat API berizin dan diaudit (belum URL bertanda tangan, menunggu driver S3); selfie > 300 KB dicatat sebagai `DITOLAK` (bukan galat); rekap belum menurunkan hari tanpa absen dari jadwal (Fase 8).
+
+## Operasi
+- Purge selfie berjalan harian di proses API (`SelfieService.purge`); retensi per perusahaan di `documentSettings.selfieRetentionDays` (7–3650, bawaan 90). Gagal hapus objek dicatat di log tanpa kunci objek; periksa dan ulangi.
+- Mengganti kode QR: `POST /attendance/points/:id/rotate-code`, lalu cetak ulang poster (kode lama langsung tidak berlaku).
+- Absen yang gagal karena tidak ada koneksi tidak dapat disusulkan oleh pekerja; petugas absensi mengajukan koreksi bernomor (disetujui Mgr Ops).

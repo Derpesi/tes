@@ -62,3 +62,6 @@ Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/veri
 - **Audit log:** pembacaan dibatasi RLS. Baris perusahaan hanya untuk pemegang scope perusahaan itu; baris global (company_id kosong: peristiwa auth/sistem) hanya untuk Direktur dan IT Administrator. IT tidak melihat PII (detail audit tidak memuat PII).
 - Kualifikator sel (mis. "rekanan", "internal", "draft") **belum ditegakkan**; diterapkan di modul terkait (Fase 5 dan seterusnya).
 
+
+## Catatan penegakan Fase 7
+`RequirePermission(izin, ...alternatif)` berarti pemegang **salah satu** izin diizinkan; dipakai hanya untuk daftar baca yang harus terbuka bagi pelaksana tindakan (antrean tinjauan: `attendance_anomaly.view|review|approve`; koreksi: `attendance_adjustment.view|create|update|approve`; titik absensi: `attendance_point.view|create|update|export`). Izin aksi tetap tunggal dan tidak berubah. Kualifikator sel (mis. PayAbs "U(shift)", penampil selfie "rekanan/internal") belum ditegakkan di kode.

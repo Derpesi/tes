@@ -89,6 +89,11 @@ export default function Saya() {
             <Link className="tombol-sekunder" href="/saya/lamaran">
               Lamaran saya
             </Link>
+            {profil.status === 'KARYAWAN_AKTIF' || profil.status === 'KONTRAK_AKAN_BERAKHIR' ? (
+              <Link className="tombol-sekunder" href="/saya/absensi">
+                Riwayat absensi
+              </Link>
+            ) : null}
           </nav>
           <button className="tombol-sekunder" type="button" onClick={keluar}>
             Keluar

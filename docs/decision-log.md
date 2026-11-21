@@ -45,6 +45,16 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-38 | Status member turunan hanya ditulis `MemberStatusService`; kembali BELUM_DITEMPATKAN hanya lewat verifikasi HRD; perubahan otomatis bertanda "Otomatis:" tanpa aktor |
 | D-39 | Siklus hidup kontrak idempoten dengan jam disuntikkan; worker interval + pemicu kejadian; notifikasi kontrak akan berakhir sekali per kontrak |
 | D-40 | Dependency pdf-lib untuk PDF PKWT; pako (MIT AND Zlib) dicatat sebagai pengecualian lisensi yang diajukan ke pemilik |
+| D-41 | Absensi online-only: QR statis = pengenal titik (bukan rahasia), kode dapat diganti, satu titik aktif per lokasi; PDF QR dibangkitkan sesuai permintaan dan diaudit (ADR-0008) |
+| D-42 | Tanggal-shift = tanggal mulai shift; penentuan shift fungsi murni berjam-disuntikkan; waktu rekaman selalu waktu server |
+| D-43 | Setiap percobaan absen yang dinilai disimpan (termasuk DITOLAK); unik per (orang, titik, jenis, tanggal-shift) untuk non-DITOLAK; idempotensi per kunci; hasil VALID / PERLU_VERIFIKASI / DITOLAK |
+| D-44 | Perangkat pertama disetujui otomatis, tambahan perlu verifikasi; id perangkat disimpan sebagai HMAC |
+| D-45 | Selfie hanya dari kamera, JPEG ≤ 300 KB, terenkripsi; tanpa face recognition; akses hanya `selfie.view` dan diaudit sebelum byte dikirim |
+| D-46 | Retensi selfie per perusahaan (`selfieRetentionDays`, bawaan 90) dengan purge harian dan legal hold; baris rekaman tetap |
+| D-47 | Tinjauan absensi dua langkah (periksa PayAbs/PayInt, putus Mgr Ops, orang berbeda di aplikasi dan database); rekaman asli tidak diubah; tampilan efektif memakai putusan |
+| D-48 | Koreksi absensi bernomor `KOR/<tahun>/<urut>`; penyetuju ≠ pembuat; hanya koreksi disetujui dipakai rekap |
+| D-49 | Rekap absensi per orang-hari dan ekspor CSV (≤ 10.000 baris) dengan perlindungan formula injection dan audit; xlsx/PDF di Fase 8 |
+| D-50 | `RequirePermission` mendukung izin alternatif ("salah satu") hanya untuk daftar baca; Permissions-Policy membuka kamera/lokasi hanya di `/absen` |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -82,6 +92,13 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-31 | Jendela "kontrak akan berakhir" = 30 hari; nomor kontrak `<prefiks>/<kode>/<tahun>/<urut 4 digit>` | Pemilik |
 | A-32 | Variabel template: nama, nik, nomor, jabatan, tanggal_mulai, tanggal_akhir, perusahaan, tanggal_cetak | Pemilik/ahli hukum |
 | A-33 | Kontrak aktif tanpa penempatan aktif belum menjadikan karyawan; kontrak aktif ditangguhkan penempatannya tetap berstatus karyawan | Pemilik |
+| A-34 | Ambang anomali: lompatan > 150 km/jam, koordinat identik ≥ 5×, akurasi > 100 m, selisih jam klien > 5 menit, > 3 akun per perangkat; skor per penanda | Kalibrasi dengan data nyata/uji beban (Fase 10) |
+| A-35 | Toleransi bawaan shift: terlambat 15 menit, awal 30 menit (batas 0–240); override per lokasi | Pemilik |
+| A-36 | Selfie JPEG 640 px, ≤ 300 KB (klien menargetkan ≤ 280 KB); lebih besar ditolak sebagai DITOLAK, > 400 KB ditolak 413 | Ukur kapasitas di staging (A-08) |
+| A-37 | Rentang rekap/ekspor ≤ 93 hari; ekspor ≤ 10.000 baris sinkron (belum antrean latar) | Pindah ke antrean bila beban menuntut |
+| A-38 | Legal hold diterapkan Mgr Ops (`attendance_anomaly.approve`); matriks belum memiliki izin khusus | Pemilik |
+| A-39 | Daftar baca (titik, tinjauan, koreksi) terbuka bagi pemegang izin aksi terkait selain izin lihat | Pemilik meninjau matriks |
+| A-40 | Partisi bulanan `attendance_records` ditunda; indeks (orang, tanggal), (titik, waktu), (perusahaan, tanggal) disiapkan | Uji beban k6 (Fase 10) |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

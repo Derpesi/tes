@@ -89,6 +89,16 @@ employment_contracts 1─* placements *─1 partner_locations ; employment_contr
 ```
 Pelindung database: pembuat/pemeriksa/penyetuju berbeda; template terverifikasi sebelum PERSETUJUAN; scan terverifikasi sebelum DITANDATANGANI; template terverifikasi terkunci; penempatan AKTIF hanya bila kontrak AKTIF; penempatan non-final tidak tumpang tindih; riwayat hanya-tambah (aktor kosong hanya untuk "Otomatis: ...").
 
+## Sudah dibuat (Fase 7)
+`attendance_points`, `shift_patterns`, `work_schedules`, `holidays`, `device_registrations`, `attendance_records`, `attendance_selfies`, `attendance_flags`, `attendance_reviews` (hanya-tambah), `attendance_adjustments`, view `attendance_effective` (`security_invoker`), kolom toleransi di `partner_locations`, fungsi `retensi_selfie_hari`. Semua ber-`company_id` + RLS (migrasi 017–019).
+```
+partner_locations 1─* attendance_points ; placements 1─* work_schedules *─1 shift_patterns
+persons 1─* device_registrations ; attendance_records *─1 {placement, point, location, shift, device}
+attendance_records 1─1 attendance_selfies ; 1─* attendance_flags ; 1─* attendance_reviews (PERIKSA, PUTUSAN)
+persons 1─* attendance_adjustments
+```
+Pelindung database: satu titik aktif per lokasi; kode QR unik; `crosses_midnight` konsisten dengan jam; unik (orang, titik, jenis, tanggal-shift) non-DITOLAK; kunci idempotensi unik per orang; alasan tolak sesuai status; putusan tinjauan wajib didahului pemeriksaan oleh orang berbeda (trigger); penyetuju koreksi ≠ pembuat (CHECK); selfie ≤ 300 KB, satu per rekaman; tinjauan hanya-tambah. Kebijakan baca-milik member dan dua kebijakan SELECT sempit (`titik_baca_kode`, `perangkat_baca_hash`) bergantung variabel transaksi yang hanya disetel kode server.
+
 ## Dirancang tapi belum dibuat (menunggu fase payroll)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
 
@@ -101,7 +111,7 @@ Pelindung database: pembuat/pemeriksa/penyetuju berbeda; template terverifikasi 
 - Satu `google_sub` terhubung ke satu pengguna.
 
 ## Kapasitas dan indeks
-- `attendance_records` dipartisi per bulan; ±7,3 juta baris/tahun pada 10.000 pekerja dan 2 kejadian/hari.
+- `attendance_records`: ±7,3 juta baris/tahun pada 10.000 pekerja dan 2 kejadian/hari. **Partisi bulanan ditunda ke Fase 10** (uji beban); saat ini tabel biasa dengan indeks yang disiapkan.
 - Indeks: `(employee_id, shift_date)`, `(attendance_point_id, occurred_at)`, `(company_id, shift_date)`.
 - Keyset pagination untuk daftar besar; pekerjaan latar untuk ekspor.
 - Selfie ≈4 GB/hari pada 10.000 pekerja (asumsi A-08).

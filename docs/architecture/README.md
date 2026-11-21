@@ -11,5 +11,6 @@ Catat setiap keputusan penting sebagai ADR bernama `NNNN-judul.md` dengan bagian
 | 0005 | Master Data Multi-Perusahaan dan Penyimpanan Dokumen | Disetujui |
 | 0006 | Member, Perlindungan PII, Lowongan, dan Lamaran | Disetujui |
 | 0007 | PKWT, Penempatan, dan Status Karyawan Otomatis | Disetujui |
+| 0008 | Absensi QR + GPS + Selfie (Online-Only) | Disetujui |
 
 Ringkasan arsitektur: `../architecture.md`. Daftar keputusan dan asumsi: `../decision-log.md`.

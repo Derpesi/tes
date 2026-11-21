@@ -59,3 +59,22 @@ details.lipat > summary { min-height: 44px; display: flex; align-items: center; 
 .angka { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
 .angka .butir { margin: 0; text-align: center; }
 .angka strong { display: block; font-size: 1.5rem; }
+
+/* ---- absensi ---- */
+.lencana-valid, .lencana-hadir { color: #0f3d21; background: #e8f5ec; }
+.lencana-perlu_verifikasi, .lencana-menunggu_verifikasi, .lencana-menunggu_periksa, .lencana-menunggu_putusan, .lencana-diajukan { color: #5a4300; background: #fff4d1; }
+.lencana-tidak_hadir { color: #5f120d; background: #fdecea; }
+.lencana-izin, .lencana-sakit, .lencana-selesai { color: #0b1f3a; background: #eaf0fa; }
+.langkah { counter-increment: langkah; }
+.langkah h3::before { content: counter(langkah) '. '; }
+.kamera { display: block; width: 100%; max-width: 20rem; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; background: #0b1f3a; margin: 0.5rem auto; }
+.pilihan-jenis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem; }
+.pilihan-jenis label { display: flex; align-items: center; justify-content: center; min-height: 44px; border: 2px solid var(--warna-navy); border-radius: 8px; font-weight: 700; cursor: pointer; padding: 0.5rem; }
+.pilihan-jenis input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.pilihan-jenis input:checked + span { text-decoration: underline; }
+.pilihan-jenis label:has(input:checked) { background: var(--warna-navy); color: var(--warna-putih); }
+.pilihan-jenis label:has(input:focus-visible) { outline: 3px solid var(--warna-gold); outline-offset: 2px; }
+.hari-kerja { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.875rem; }
+.hari-kerja label { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 44px; padding: 0 0.5rem; border: 1px solid #8a96a8; border-radius: 8px; }
+.hari-kerja input { width: 20px; height: 20px; }
+.foto-tinjau { display: block; max-width: 100%; width: 14rem; border-radius: 8px; border: 1px solid #d5dbe5; margin: 0.5rem 0; }

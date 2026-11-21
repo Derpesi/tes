@@ -266,6 +266,19 @@ ada('Absensi: invarian skema, pelindung database, dan isolasi RLS', () => {
       });
     });
 
+    it('member hanya membaca penanda rekamannya sendiri (kebijakan absensi_flag_baca_milik)', async () => {
+      await dalamScope(pool, [A], async (c) => void (await c.query(`INSERT INTO attendance_flags (company_id, record_id, code) VALUES ($1, $2, 'MILIK_A') ON CONFLICT DO NOTHING`, [A, d.A.rekaman])), { commit: true });
+      await dalamScope(pool, [B], async (c) => void (await c.query(`INSERT INTO attendance_flags (company_id, record_id, code) VALUES ($1, $2, 'MILIK_B') ON CONFLICT DO NOTHING`, [B, d.B.rekaman])), { commit: true });
+      const baca = (person: string) =>
+        dalamScope(pool, [], async (c) => {
+          await c.query(`SELECT set_config('app.member_person_id', $1, true)`, [person]);
+          return (await c.query(`SELECT code FROM attendance_flags WHERE code LIKE 'MILIK\\_%'`)).rows.map((r) => r.code as string);
+        });
+      expect(await baca(d.A.person)).toEqual(['MILIK_A']);
+      expect(await baca(d.B.person)).toEqual(['MILIK_B']);
+      expect(await baca(randomUUID())).toEqual([]);
+    });
+
     it('tampilan attendance_effective mengikuti RLS (scope A tidak melihat rekaman B)', async () => {
       const ids = await dalamScope(pool, [A], async (c) => (await c.query(`SELECT company_id FROM attendance_effective`)).rows.map((r) => r.company_id as string));
       expect(ids.length).toBeGreaterThan(0);
