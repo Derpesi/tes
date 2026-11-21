@@ -1930,6 +1930,393 @@
         ]
       }
     },
+    "/pkwt": {
+      "get": {
+        "operationId": "PkwtController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      },
+      "post": {
+        "operationId": "PkwtController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Membuat kontrak DRAFT dari lamaran MENUNGGU_PKWT; nomor otomatis; versi 1"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}": {
+      "get": {
+        "operationId": "PkwtController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      },
+      "patch": {
+        "operationId": "PkwtController_ubah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hanya DRAFT; setiap perubahan membuat versi baru"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/submit": {
+      "post": {
+        "operationId": "PkwtController_ajukan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/review": {
+      "post": {
+        "operationId": "PkwtController_periksa",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "REVIEW -> PERSETUJUAN (pemeriksa bukan pembuat; template wajib terverifikasi)"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/review/reject": {
+      "post": {
+        "operationId": "PkwtController_tolakReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/approve": {
+      "post": {
+        "operationId": "PkwtController_setujui",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PERSETUJUAN -> PENANDATANGANAN (penyetuju bukan pembuat/pemeriksa). BUKAN tanda tangan sah"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/approve/reject": {
+      "post": {
+        "operationId": "PkwtController_tolakPersetujuan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/cancel": {
+      "post": {
+        "operationId": "PkwtController_batalkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/pdf": {
+      "get": {
+        "operationId": "PkwtController_pdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF dibangkitkan sesuai permintaan (tidak disimpan); setiap pencetakan diaudit"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/documents": {
+      "get": {
+        "operationId": "PkwtController_daftarDokumen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      },
+      "post": {
+        "operationId": "PkwtController_unggah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "berkas"
+                ],
+                "properties": {
+                  "berkas": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/documents/{docId}/download": {
+      "get": {
+        "operationId": "PkwtController_unduh",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scan didekripsi dan dialirkan lewat API; setiap unduhan diaudit"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/documents/{docId}/verify": {
+      "post": {
+        "operationId": "PkwtController_verifikasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verifikasi scan (pemverifikasi bukan pengunggah): MENUNGGU_VERIFIKASI_DOKUMEN -> DITANDATANGANI"
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
+    "/pkwt/{id}/documents/{docId}/reject": {
+      "post": {
+        "operationId": "PkwtController_tolakDokumen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak PKWT"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
