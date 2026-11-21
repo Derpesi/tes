@@ -3603,6 +3603,98 @@
         ]
       }
     },
+    "/payroll/recaps/{id}/export.csv": {
+      "get": {
+        "operationId": "PayrollController_csv",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ekspor CSV (BOM UTF-8; sel berawalan = + - @ dinetralkan); dicatat di payroll_exports dan audit"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/export.xlsx": {
+      "get": {
+        "operationId": "PayrollController_xlsx",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ekspor xlsx (lembar Rekap, Komponen, Info); dicatat di payroll_exports dan audit"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/export.pdf": {
+      "get": {
+        "operationId": "PayrollController_pdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ekspor PDF (bukan slip gaji); dicatat di payroll_exports dan audit"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/exports": {
+      "get": {
+        "operationId": "PayrollController_riwayatEkspor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Riwayat ekspor rekap (siapa, format, jumlah baris, SHA-256, waktu)"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",

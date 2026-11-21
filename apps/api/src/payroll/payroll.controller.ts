@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { z } from 'zod';
 import { ZodPipe } from '../common/zod.pipe';
 import type { Akses } from '../rbac/akses.service';
 import { AksesStaff, RequirePermission } from '../rbac/rbac.decorators';
 import { SEMUA_IZIN_PAYROLL } from './akses';
 import { AlurService } from './alur.service';
+import { ExportService, FormatEkspor } from './export.service';
 import { PayrollService } from './payroll.service';
 import { AlasanBody, DaftarPeriodeQuery, GarisManualBuat, GarisUbah, IdParam, KomponenBody, KomponenUbah, KoreksiRekapBody, PeriodeBuat } from './schemas';
 
@@ -23,6 +25,7 @@ export class PayrollController {
   constructor(
     private readonly svc: PayrollService,
     private readonly alur: AlurService,
+    private readonly ekspor: ExportService,
   ) {}
 
   @RequirePermission(IZIN_PERTAMA, ...IZIN_LAIN)
@@ -140,5 +143,40 @@ export class PayrollController {
   @ApiOkResponse({ description: 'Koreksi resmi: versi baru bernomor (KRP/<tahun>/<urut>) sebagai salinan DRAFT; versi lama tetap utuh' })
   koreksi(@AksesStaff() a: Akses, @id('id') i: string, @Body(new ZodPipe(KoreksiRekapBody)) b: z.infer<typeof KoreksiRekapBody>) {
     return this.alur.koreksi(a, i, b.reason);
+  }
+
+  // ----- ekspor (hanya rekap DISETUJUI/DIFINALISASI; diaudit) -----
+  private async kirim(a: Akses, i: string, format: FormatEkspor, res: Response) {
+    const h = await this.ekspor.ekspor(a, i, format);
+    res.set({ 'Content-Type': h.mime, 'Content-Length': String(h.data.length), 'Content-Disposition': `attachment; filename="${h.namaBerkas}"`, 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'private, no-store' });
+    res.end(h.data);
+  }
+
+  @RequirePermission('payroll_recap_partner.export', 'payroll_recap_internal.export')
+  @Get('recaps/:id/export.csv')
+  @ApiOkResponse({ description: 'Ekspor CSV (BOM UTF-8; sel berawalan = + - @ dinetralkan); dicatat di payroll_exports dan audit' })
+  async csv(@AksesStaff() a: Akses, @id('id') i: string, @Res() res: Response) {
+    return this.kirim(a, i, 'CSV', res);
+  }
+
+  @RequirePermission('payroll_recap_partner.export', 'payroll_recap_internal.export')
+  @Get('recaps/:id/export.xlsx')
+  @ApiOkResponse({ description: 'Ekspor xlsx (lembar Rekap, Komponen, Info); dicatat di payroll_exports dan audit' })
+  async xlsx(@AksesStaff() a: Akses, @id('id') i: string, @Res() res: Response) {
+    return this.kirim(a, i, 'XLSX', res);
+  }
+
+  @RequirePermission('payroll_recap_partner.export', 'payroll_recap_internal.export')
+  @Get('recaps/:id/export.pdf')
+  @ApiOkResponse({ description: 'Ekspor PDF (bukan slip gaji); dicatat di payroll_exports dan audit' })
+  async pdf(@AksesStaff() a: Akses, @id('id') i: string, @Res() res: Response) {
+    return this.kirim(a, i, 'PDF', res);
+  }
+
+  @RequirePermission(IZIN_PERTAMA, ...IZIN_LAIN)
+  @Get('recaps/:id/exports')
+  @ApiOkResponse({ description: 'Riwayat ekspor rekap (siapa, format, jumlah baris, SHA-256, waktu)' })
+  riwayatEkspor(@AksesStaff() a: Akses, @id('id') i: string) {
+    return this.ekspor.riwayat(a, i);
   }
 }
