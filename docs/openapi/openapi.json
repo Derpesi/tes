@@ -871,6 +871,360 @@
           "Master Perusahaan"
         ]
       }
+    },
+    "/partners": {
+      "get": {
+        "operationId": "PartnersController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Rekanan dalam scope pengguna; keyset pagination"
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "post": {
+        "operationId": "PartnersController_buat",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}": {
+      "get": {
+        "operationId": "PartnersController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "patch": {
+        "operationId": "PartnersController_ubah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}/deactivate": {
+      "post": {
+        "operationId": "PartnersController_nonaktifkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}/contacts": {
+      "get": {
+        "operationId": "PartnersController_daftarKontak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "post": {
+        "operationId": "PartnersController_buatKontak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}/contacts/{kontakId}": {
+      "patch": {
+        "operationId": "PartnersController_ubahKontak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kontakId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}/contacts/{kontakId}/deactivate": {
+      "post": {
+        "operationId": "PartnersController_nonaktifkanKontak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kontakId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/partners/{id}/locations": {
+      "get": {
+        "operationId": "PartnersController_daftarLokasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "post": {
+        "operationId": "PartnersController_buatLokasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/locations/{lokasiId}": {
+      "get": {
+        "operationId": "PartnersController_detailLokasi",
+        "parameters": [
+          {
+            "name": "lokasiId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "patch": {
+        "operationId": "PartnersController_ubahLokasi",
+        "parameters": [
+          {
+            "name": "lokasiId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/locations/{lokasiId}/deactivate": {
+      "post": {
+        "operationId": "PartnersController_nonaktifkanLokasi",
+        "parameters": [
+          {
+            "name": "lokasiId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
+    },
+    "/locations/{lokasiId}/manpower": {
+      "get": {
+        "operationId": "PartnersController_daftarKebutuhan",
+        "parameters": [
+          {
+            "name": "lokasiId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      },
+      "post": {
+        "operationId": "PartnersController_buatKebutuhan",
+        "parameters": [
+          {
+            "name": "lokasiId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rekanan dan Lokasi"
+        ]
+      }
     }
   },
   "info": {
