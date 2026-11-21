@@ -2592,6 +2592,271 @@
         ]
       }
     },
+    "/attendance/points": {
+      "get": {
+        "operationId": "AttendanceSetupController_daftarTitik",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceSetupController_buatTitik",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/points/{id}": {
+      "get": {
+        "operationId": "AttendanceSetupController_detailTitik",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/points/{id}/deactivate": {
+      "post": {
+        "operationId": "AttendanceSetupController_nonaktifkanTitik",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/points/{id}/rotate-code": {
+      "post": {
+        "operationId": "AttendanceSetupController_gantiKode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mengganti kode publik QR; kode lama langsung tidak berlaku"
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/points/{id}/qr.pdf": {
+      "get": {
+        "operationId": "AttendanceSetupController_qrPdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Poster QR (PDF) dibangkitkan sesuai permintaan; pencetakan diaudit"
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/shifts": {
+      "get": {
+        "operationId": "AttendanceSetupController_daftarShift",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceSetupController_buatShift",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/shifts/{id}": {
+      "patch": {
+        "operationId": "AttendanceSetupController_ubahShift",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/schedules": {
+      "get": {
+        "operationId": "AttendanceSetupController_daftarJadwal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceSetupController_buatJadwal",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/schedules/{id}": {
+      "delete": {
+        "operationId": "AttendanceSetupController_hapusJadwal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/holidays": {
+      "get": {
+        "operationId": "AttendanceSetupController_daftarLibur",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceSetupController_buatLibur",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
+    "/attendance/holidays/{id}": {
+      "delete": {
+        "operationId": "AttendanceSetupController_hapusLibur",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: pengaturan"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
