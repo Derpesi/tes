@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
+import { MasterModule } from './master/master.module';
 import { AuthModule } from './auth/auth.module';
 import { opsiPinoHttp } from './common/log';
 import { StorageModule } from './common/storage/storage.module';
@@ -24,6 +25,7 @@ import { HealthController } from './health/health.controller';
     NotificationsModule,
     AuthModule,
     AdminModule,
+    MasterModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

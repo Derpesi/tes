@@ -11,5 +11,6 @@ import { StaffAdminService } from './staff-admin.service';
   imports: [AuthModule, AuditModule, RbacModule],
   controllers: [AdminController],
   providers: [StaffAdminService, ApprovalService, AuditViewerService],
+  exports: [ApprovalService],
 })
 export class AdminModule {}

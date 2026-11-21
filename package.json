@@ -22,7 +22,8 @@
     "test:isolation": "pnpm --filter @hris/tests test:integration",
     "test:rbac": "pnpm --filter @hris/tests test",
     "bootstrap": "pnpm --filter @hris/api bootstrap",
-    "test:e2e": "node tests/e2e/smoke-staff.mjs"
+    "test:e2e": "node tests/e2e/smoke-staff.mjs",
+    "seed:perusahaan": "pnpm --filter @hris/api seed:perusahaan"
   },
   "pnpm": {
     "overrides": {

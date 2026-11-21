@@ -642,6 +642,235 @@
           "Administrasi Staff"
         ]
       }
+    },
+    "/companies": {
+      "get": {
+        "operationId": "MasterController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perusahaan dalam scope pengguna (dan perusahaan pending buatannya); keyset pagination"
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      },
+      "post": {
+        "operationId": "MasterController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perusahaan dibuat NONAKTIF; aktif setelah Direktur menyetujui permintaan aktivasi"
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
+    },
+    "/companies/{id}": {
+      "get": {
+        "operationId": "MasterController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      },
+      "patch": {
+        "operationId": "MasterController_ubah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
+    },
+    "/companies/{id}/deactivate": {
+      "post": {
+        "operationId": "MasterController_nonaktifkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
+    },
+    "/companies/{id}/documents": {
+      "get": {
+        "operationId": "MasterController_daftarDokumen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      },
+      "post": {
+        "operationId": "MasterController_unggah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "berkas",
+                  "kind",
+                  "title"
+                ],
+                "properties": {
+                  "berkas": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "validUntil": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
+    },
+    "/companies/{id}/documents/{docId}/download": {
+      "get": {
+        "operationId": "MasterController_unduh",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berkas dialirkan lewat API (tanpa URL publik); setiap unduhan diaudit"
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
+    },
+    "/companies/{id}/documents/{docId}": {
+      "delete": {
+        "operationId": "MasterController_hapusDokumen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Master Perusahaan"
+        ]
+      }
     }
   },
   "info": {
