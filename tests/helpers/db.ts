@@ -36,6 +36,10 @@ export interface OpsiScope {
   commit?: boolean;
   /** true = izinkan membaca baris audit global (company_id NULL). */
   auditGlobal?: boolean;
+  /** Member membaca lowongan DIBUKA lintas perusahaan. */
+  memberRead?: boolean;
+  /** Person member pemilik sesi (membatasi lamaran ke miliknya). */
+  memberPersonId?: string;
 }
 
 /**
@@ -54,6 +58,8 @@ export async function dalamScope<T>(
     await c.query(`SET LOCAL ROLE ${ROLE_UJI}`);
     await c.query(`SELECT set_config('app.company_ids', $1, true)`, [companyIds.join(',')]);
     await c.query(`SELECT set_config('app.audit_global', $1, true)`, [opsi.auditGlobal ? 'on' : 'off']);
+    await c.query(`SELECT set_config('app.member_read', $1, true)`, [opsi.memberRead ? 'on' : 'off']);
+    await c.query(`SELECT set_config('app.member_person_id', $1, true)`, [opsi.memberPersonId ?? '']);
     const hasil = await fn(c);
     await c.query(opsi.commit ? 'COMMIT' : 'ROLLBACK');
     return hasil;

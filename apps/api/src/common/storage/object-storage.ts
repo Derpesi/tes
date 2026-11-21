@@ -28,3 +28,10 @@ export function buatKunciObjek(companyId: string): string {
   if (!POLA_KUNCI.test(kunci)) throw new Error('companyId tidak valid untuk kunci objek');
   return kunci;
 }
+
+/** Kunci objek berkas member: `<personId>/<uuid-acak>` (berkas member tidak ber-company_id). */
+export function buatKunciObjekMember(personId: string): string {
+  const kunci = `${personId}/${randomUUID()}`;
+  if (!POLA_KUNCI.test(kunci)) throw new Error('personId tidak valid untuk kunci objek');
+  return kunci;
+}
