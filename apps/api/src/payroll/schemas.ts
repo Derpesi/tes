@@ -26,3 +26,35 @@ export const PeriodeBuat = z
 
 export type AlasanBody = z.infer<typeof AlasanBody>;
 export const AlasanBody = z.object({ reason: alasan('Alasan') });
+
+// ----- komponen dan masukan (nominal selalu TEKS desimal; angka JS/float ditolak) -----
+const UANG_PESAN = 'Nominal harus berupa angka desimal, maksimal 12 digit dan 2 angka di belakang koma (contoh 1500000.50)';
+const nominal = z.string({ error: UANG_PESAN }).regex(/^\d{1,12}(\.\d{1,2})?$/, UANG_PESAN);
+const jam = (nama: string) => z.string({ error: `${nama} harus berupa teks desimal` }).regex(/^\d{1,4}(\.\d{1,2})?$/, `${nama}: gunakan angka desimal, maksimal 4 digit dan 2 angka di belakang koma`);
+const hari = (nama: string) => z.number({ error: `${nama} harus berupa angka` }).int(`${nama} harus bilangan bulat`).min(0, `${nama} minimal 0`).max(93, `${nama} maksimal 93`);
+const hitung = (nama: string) => z.number({ error: `${nama} harus berupa angka` }).int(`${nama} harus bilangan bulat`).min(0, `${nama} minimal 0`).max(100000, `${nama} terlalu besar`);
+
+export const KomponenBody = z.object({
+  kind: z.enum(['TUNJANGAN', 'POTONGAN', 'INSENTIF'], { error: 'Jenis komponen harus TUNJANGAN, POTONGAN, atau INSENTIF' }),
+  name: z.string({ error: 'Nama komponen wajib diisi' }).trim().min(1, 'Nama komponen wajib diisi').max(80, 'Nama komponen terlalu panjang (maksimal 80 karakter)'),
+  amount: nominal,
+});
+export const KomponenUbah = KomponenBody.partial().strict().refine((v) => Object.keys(v).length > 0, 'Tidak ada perubahan');
+
+export const GarisUbah = z
+  .object({
+    daysLeave: hari('Hari cuti'),
+    overtimeHours: jam('Jam lembur'),
+    note: z.string().trim().max(300, 'Catatan terlalu panjang (maksimal 300 karakter)').nullable(),
+    // Hanya baris MANUAL (rekap internal):
+    daysPresent: hari('Hari hadir'), daysAbsent: hari('Hari tidak hadir'), daysPermit: hari('Hari izin'), daysSick: hari('Hari sakit'),
+    lateCount: hitung('Jumlah terlambat'), earlyLeaveCount: hitung('Jumlah pulang cepat'), hoursWorked: jam('Jam kerja'),
+  })
+  .partial()
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, 'Tidak ada perubahan');
+export const GarisManualBuat = z.object({
+  personId: uuid('ID orang'),
+  workerName: z.string({ error: 'Nama wajib diisi' }).trim().min(1, 'Nama wajib diisi').max(150, 'Nama terlalu panjang (maksimal 150 karakter)'),
+});
+export const KoreksiRekapBody = z.object({ reason: alasan('Alasan koreksi') });

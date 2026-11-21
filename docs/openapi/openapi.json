@@ -3298,6 +3298,311 @@
         ]
       }
     },
+    "/payroll/recaps/{id}/lines": {
+      "post": {
+        "operationId": "PayrollController_tambahGaris",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menambah baris manual (rekap internal saja)"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/lines/{lineId}": {
+      "put": {
+        "operationId": "PayrollController_ubahGaris",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mengubah masukan manual (cuti, jam lembur, catatan); angka absensi hanya pada baris manual"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      },
+      "delete": {
+        "operationId": "PayrollController_hapusGaris",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/lines/{lineId}/components": {
+      "post": {
+        "operationId": "PayrollController_tambahKomponen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menambah komponen masukan (nominal teks desimal); bukan perhitungan gaji"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/lines/{lineId}/components/{componentId}": {
+      "put": {
+        "operationId": "PayrollController_ubahKomponen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      },
+      "delete": {
+        "operationId": "PayrollController_hapusKomponen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/verify": {
+      "post": {
+        "operationId": "PayrollController_verifikasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DRAFT -> DIVERIFIKASI; ditolak bila ada rekaman absensi menunggu verifikasi atau pemeriksa = pembuat/penyunting"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/return": {
+      "post": {
+        "operationId": "PayrollController_kembalikan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/approve": {
+      "post": {
+        "operationId": "PayrollController_setujui",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DIVERIFIKASI -> DISETUJUI (hash isi disimpan); penyetuju bukan pembuat/pemeriksa"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/finalize": {
+      "post": {
+        "operationId": "PayrollController_finalisasi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DISETUJUI -> DIFINALISASI; finalisator berbeda dari pembuat, pemeriksa, penyetuju; integritas isi diperiksa"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
+    "/payroll/recaps/{id}/correct": {
+      "post": {
+        "operationId": "PayrollController_koreksi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Koreksi resmi: versi baru bernomor (KRP/<tahun>/<urut>) sebagai salinan DRAFT; versi lama tetap utuh"
+          }
+        },
+        "tags": [
+          "Payroll: rekap"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",

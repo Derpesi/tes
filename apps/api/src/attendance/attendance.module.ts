@@ -17,6 +17,6 @@ import { SelfieService } from './selfie.service';
   imports: [AuditModule, MemberModule],
   controllers: [AttendanceSetupController, AttendanceOpsController, MemberAttendanceController],
   providers: [PointsService, ScheduleService, MemberAttendanceService, ReviewService, SelfieService, AdjustmentsService, RecapService, { provide: JAM_ABSENSI, useValue: () => new Date() }],
-  exports: [PointsService, ScheduleService, SelfieService, RecapService],
+  exports: [PointsService, ScheduleService, SelfieService, RecapService, JAM_ABSENSI],
 })
 export class AttendanceModule {}
