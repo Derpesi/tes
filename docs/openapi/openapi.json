@@ -1493,6 +1493,161 @@
           "Kontrak Layanan Rekanan"
         ]
       }
+    },
+    "/member/profile": {
+      "get": {
+        "operationId": "MemberController_lihat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profil milik sendiri; NIK ditampilkan tersamar"
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      },
+      "put": {
+        "operationId": "MemberController_simpan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Menyimpan biodata (draf bertahap); perubahan saat menunggu verifikasi mengembalikan status ke PROFIL_BELUM_LENGKAP"
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
+    },
+    "/member/profile/submit": {
+      "post": {
+        "operationId": "MemberController_ajukan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Mengajukan verifikasi HRD setelah biodata dan KTP lengkap"
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
+    },
+    "/member/profile/history": {
+      "get": {
+        "operationId": "MemberController_riwayat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
+    },
+    "/member/documents": {
+      "get": {
+        "operationId": "MemberController_daftarDokumen",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      },
+      "post": {
+        "operationId": "MemberController_unggah",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "berkas",
+                  "kind"
+                ],
+                "properties": {
+                  "berkas": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "KTP",
+                      "FOTO_DIRI",
+                      "IJAZAH",
+                      "LAINNYA"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
+    },
+    "/member/documents/{docId}/download": {
+      "get": {
+        "operationId": "MemberController_unduh",
+        "parameters": [
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berkas milik sendiri dialirkan lewat API setelah didekripsi (tanpa URL publik)"
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
+    },
+    "/member/documents/{docId}": {
+      "delete": {
+        "operationId": "MemberController_hapus",
+        "parameters": [
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Member (self-service)"
+        ]
+      }
     }
   },
   "info": {
