@@ -55,11 +55,16 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     invitations = app.get(InvitationService);
     worker = app.get(OutboxWorker);
     pool = new Pool({ connectionString: URL, max: 3 });
+    await pool.query(`UPDATE notification_outbox SET status = 'GAGAL', payload_enc = NULL WHERE status = 'MENUNGGU'`); // sisa run sebelumnya
   });
   afterAll(async () => {
     await pool?.end();
     await app?.close();
   });
+  /** Mengosongkan outbox sepenuhnya (prosesBatch hanya mengambil sejumlah terbatas per panggilan). */
+  const kirimEmail = async () => {
+    for (let i = 0; i < 50 && (await worker.prosesBatch(100)) > 0; i++);
+  };
   beforeEach(() => {
     terkirim.length = 0;
     kanalGagal = false;
@@ -96,7 +101,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
   async function buatStaffAktif(): Promise<Staff> {
     const email = emailBaru();
     const u = await invitations.undang({ email, namaTampilan: 'SINTETIS Staff', diundangOleh: null });
-    await worker.prosesBatch();
+    await kirimEmail();
     const mail = terkirim.find((m) => m.to === email)!;
     const acc = await http('post', '/auth/staff/invitation/accept').send({ token: tokenDariEmail(mail), password: PASSWORD }).expect(200);
     const c1 = cookieDari(acc);
@@ -138,7 +143,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('cookie sesi memakai awalan __Host-, HttpOnly, Secure, Path=/, SameSite=Lax, tanpa Domain', async () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const acc = await http('post', '/auth/staff/invitation/accept').send({ token: tokenDariEmail(terkirim[0]), password: PASSWORD }).expect(200);
       const h = (acc.headers['set-cookie'] as unknown as string[]).find((x) => x.startsWith('__Host-sid='))!;
       expect(h).toMatch(/HttpOnly/i);
@@ -151,7 +156,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('kata sandi lemah ditolak dengan pesan Indonesia dan undangan tidak terpakai', async () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const token = tokenDariEmail(terkirim[0]);
       const r = await http('post', '/auth/staff/invitation/accept').send({ token, password: 'pendek' }).expect(400);
       expect(r.body.kode).toBe('PASSWORD_LEMAH');
@@ -162,7 +167,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('undangan hanya sekali pakai; kedaluwarsa dan token acak ditolak', async () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const token = tokenDariEmail(terkirim[0]);
       await http('post', '/auth/staff/invitation/accept').send({ token, password: PASSWORD }).expect(200);
       const lagi = await http('post', '/auth/staff/invitation/accept').send({ token, password: PASSWORD }).expect(400);
@@ -170,7 +175,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
 
       const email2 = emailBaru();
       await invitations.undang({ email: email2, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const token2 = tokenDariEmail(terkirim[terkirim.length - 1]);
       await pool.query(`UPDATE staff_invitations SET expires_at = now() - interval '1 minute' WHERE token_hash = $1`, [sha(token2)]);
       await http('post', '/auth/staff/invitation/accept').send({ token: token2, password: PASSWORD }).expect(400);
@@ -183,7 +188,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const [lama, baru] = terkirim.filter((m) => m.to === email).map(tokenDariEmail);
       await http('post', '/auth/staff/invitation/accept').send({ token: lama, password: PASSWORD }).expect(400);
       await http('post', '/auth/staff/invitation/accept').send({ token: baru, password: PASSWORD }).expect(200);
@@ -196,7 +201,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('sesi pendaftaran MFA tidak dapat mengakses endpoint sesi penuh maupun verifikasi MFA', async () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const acc = await http('post', '/auth/staff/invitation/accept').send({ token: tokenDariEmail(terkirim[0]), password: PASSWORD }).expect(200);
       const c = cookieDari(acc);
       const me = await http('get', '/auth/me', { cookie: c }).expect(403);
@@ -209,7 +214,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('kode pendaftaran MFA salah ditolak dan akun belum aktif', async () => {
       const email = emailBaru();
       const { userId } = await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const acc = await http('post', '/auth/staff/invitation/accept').send({ token: tokenDariEmail(terkirim[0]), password: PASSWORD }).expect(200);
       const c = cookieDari(acc);
       await http('post', '/auth/staff/mfa/enroll/start', { cookie: c, csrf: acc.body.csrfToken }).expect(200);
@@ -359,14 +364,14 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
       const a = await http('post', '/auth/staff/password/forgot').send({ email: s.email }).expect(202);
       const b = await http('post', '/auth/staff/password/forgot').send({ email: emailBaru() }).expect(202);
       expect(a.body).toEqual(b.body);
-      await worker.prosesBatch();
+      await kirimEmail();
       expect(terkirim.filter((m) => m.subject.includes('Atur ulang'))).toHaveLength(1);
     });
 
     it('reset: sesi lama dicabut, kata sandi lama mati, token sekali pakai, MFA tetap wajib', async () => {
       const s = await buatStaffAktif();
       await http('post', '/auth/staff/password/forgot').send({ email: s.email }).expect(202);
-      await worker.prosesBatch();
+      await kirimEmail();
       const token = tokenDariEmail(terkirim.find((m) => m.subject.includes('Atur ulang'))!);
       const lemah = await http('post', '/auth/staff/password/reset').send({ token, password: 'pendek' }).expect(400);
       expect(lemah.body.kode).toBe('PASSWORD_LEMAH');
@@ -382,7 +387,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
     it('token reset kedaluwarsa ditolak dan permintaan dibatasi 3 per jam per akun', async () => {
       const s = await buatStaffAktif();
       for (let i = 0; i < 4; i++) await http('post', '/auth/staff/password/forgot').send({ email: s.email }).expect(202);
-      await worker.prosesBatch(20);
+      await kirimEmail();
       const surat = terkirim.filter((m) => m.subject.includes('Atur ulang'));
       expect(surat).toHaveLength(3);
       const token = tokenDariEmail(surat[2]);
@@ -426,7 +431,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
       const sebelum = await pool.query(`SELECT payload_enc, status FROM notification_outbox WHERE recipient = $1`, [email]);
       expect(sebelum.rows[0].status).toBe('MENUNGGU');
       expect((sebelum.rows[0].payload_enc as Buffer).includes(Buffer.from('/undangan?token='))).toBe(false);
-      await worker.prosesBatch();
+      await kirimEmail();
       const sesudah = await pool.query(`SELECT payload_enc, status FROM notification_outbox WHERE recipient = $1`, [email]);
       expect(sesudah.rows[0]).toMatchObject({ status: 'TERKIRIM', payload_enc: null });
     });
@@ -435,7 +440,7 @@ jalan('autentikasi staff (PostgreSQL asli)', () => {
       const email = emailBaru();
       await invitations.undang({ email, namaTampilan: 'SINTETIS', diundangOleh: null });
       kanalGagal = true;
-      await worker.prosesBatch();
+      await worker.prosesBatch(100);
       const r = await pool.query(`SELECT status, attempts, last_error, next_attempt_at > now() AS ditunda FROM notification_outbox WHERE recipient = $1`, [email]);
       expect(r.rows[0]).toMatchObject({ status: 'MENUNGGU', attempts: 1, last_error: 'Error', ditunda: true });
       expect(terkirim).toHaveLength(0);

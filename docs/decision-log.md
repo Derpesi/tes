@@ -21,6 +21,10 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-14 | Redirect URI Google = `<APP_BASE_URL>/api/auth/member/google/callback` (prefiks `/api` untuk same-origin lewat reverse proxy/rewrite; dapat diubah lewat `API_PUBLIC_PATH`) |
 | D-15 | Email Google yang sudah dimiliki member lain dengan akun Google berbeda **ditolak dan masuk antrean tinjauan HRD**; tidak ada penautan otomatis berdasarkan email |
 | D-16 | Email yang sama sebagai staff dan member adalah dua akun terpisah tanpa penautan |
+| D-17 | Peran berhak tinggi (Direktur, IT Administrator), akses seluruh perusahaan, dan reset MFA memerlukan **persetujuan ganda** (pemohon ≠ penyetuju). Pengecualian terbatas: admin bootstrap menunjuk Direktur pertama langsung (teraudit) |
+| D-18 | Sembilan peran dan permission bersifat **tetap** (seed dari `docs/rbac.md`); belum ada UI untuk mengedit peran/permission |
+| D-19 | Reset MFA = akun kembali ke undangan (kata sandi, MFA, kode pemulihan dihapus; sesi dicabut) |
+| D-20 | Tidak ada yang dapat mengubah peran/scope/status akunnya sendiri. Matriks dikoreksi: modul *Pengguna & role* diberi `V` untuk Direktur dan IT |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -45,6 +49,8 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-18 | Pembatas laju per IP di memori (instance tunggal): 10 permintaan/menit untuk endpoint auth, 120/menit umum. Di balik proxy wajib set `TRUST_PROXY` | Redis dievaluasi bila perlu (A-06) |
 | A-19 | Node minimal 22.12 (otplib memakai dependency ESM yang dimuat lewat `require`) | CI memakai `.nvmrc` |
 | A-20 | Login Google: `prompt=select_account` (perangkat bersama), scope `openid email profile`, tanpa refresh token; tanda tangan id_token diverifikasi ulang dengan JWKS (di atas TLS) | Uji dengan klien Google sungguhan oleh pemilik |
+| A-21 | Permintaan persetujuan kedaluwarsa dalam 72 jam | Divalidasi pemilik |
+| A-22 | Baris audit global dapat dibaca Direktur dan IT Administrator saja | Divalidasi pemilik |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

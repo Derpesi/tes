@@ -7,6 +7,7 @@ import { ZodPipe } from '../common/zod.pipe';
 import { COOKIE_SESI } from './auth.constants';
 import type { RequestDenganSesi } from './auth.guard';
 import { Public, Sesi } from './decorators';
+import { AksesService } from '../rbac/akses.service';
 import { SessionService, SesiAktif, SesiBaru } from './session.service';
 import { Konteks, StaffAuthService } from './staff-auth.service';
 
@@ -32,6 +33,7 @@ export class StaffAuthController {
   constructor(
     private readonly auth: StaffAuthService,
     private readonly sesi: SessionService,
+    private readonly akses: AksesService,
   ) {}
 
   private setCookie(res: Response, s: SesiBaru) {
@@ -136,7 +138,14 @@ export class StaffAuthController {
   @Sesi({ realm: 'staff' })
   @Get('me')
   @ApiOkResponse({ description: 'Hanya dapat diakses sesi penuh (setelah verifikasi dua langkah)' })
-  saya(@Req() req: RequestDenganSesi) {
-    return this.info(req.sesi!);
+  async saya(@Req() req: RequestDenganSesi) {
+    const a = await this.akses.muat(req.sesi!.userId);
+    return {
+      ...this.info(req.sesi!),
+      roles: a.roles.sort(),
+      permissions: [...a.permissions].sort(),
+      companyIds: a.companyIds,
+      allCompanies: a.semuaPerusahaan,
+    };
   }
 }

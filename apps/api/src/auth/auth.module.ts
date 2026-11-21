@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuditModule } from '../audit/audit.module';
+import { RbacModule } from '../rbac/rbac.module';
 import { AuthGuard } from './auth.guard';
 import { InvitationService } from './invitation.service';
 import { MemberAuthController } from './member-auth.controller';
@@ -13,7 +14,7 @@ import { StaffAuthService } from './staff-auth.service';
 import { TotpService } from './totp.service';
 
 @Module({
-  imports: [AuditModule],
+  imports: [AuditModule, RbacModule],
   controllers: [StaffAuthController, MemberAuthController],
   providers: [
     SessionService,

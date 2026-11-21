@@ -4,11 +4,13 @@ import type { Request } from 'express';
 import { samaAman } from '../common/crypto/crypto';
 import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
+import { Akses, AksesService } from '../rbac/akses.service';
+import { IZIN } from '../rbac/rbac.decorators';
 import { COOKIE_SESI } from './auth.constants';
 import { OPSI_SESI, OpsiSesi, PUBLIK } from './decorators';
 import { SesiAktif, SessionService } from './session.service';
 
-export type RequestDenganSesi = Request & { sesi?: SesiAktif };
+export type RequestDenganSesi = Request & { sesi?: SesiAktif; akses?: Akses };
 
 const METHOD_AMAN = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -22,6 +24,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly sesi: SessionService,
+    private readonly akses: AksesService,
     @Inject(ENV) env: Env,
   ) {
     this.origin = new URL(env.APP_BASE_URL).origin;
@@ -43,7 +46,10 @@ export class AuthGuard implements CanActivate {
     }
     if (!sesi) throw new UnauthorizedException({ kode: 'BELUM_MASUK', message: 'Anda belum masuk atau sesi telah berakhir' });
 
-    const opsi = this.reflector.getAllAndOverride<OpsiSesi | undefined>(OPSI_SESI, target) ?? { states: ['PENUH'] };
+    const opsiMeta = this.reflector.getAllAndOverride<OpsiSesi | undefined>(OPSI_SESI, target);
+    // Deny-by-default: rute harus menyatakan @Public(), @Sesi(), atau @RequirePermission() secara eksplisit.
+    if (!opsiMeta) throw new ForbiddenException({ kode: 'RUTE_TANPA_IZIN', message: 'Anda tidak memiliki izin untuk tindakan ini' });
+    const opsi = opsiMeta;
     if (opsi.realm && sesi.realm !== opsi.realm) {
       throw new ForbiddenException({ kode: 'REALM_TIDAK_SESUAI', message: 'Anda tidak memiliki izin untuk tindakan ini' });
     }
@@ -60,6 +66,12 @@ export class AuthGuard implements CanActivate {
       }
     }
     req.sesi = sesi;
+    const izin = this.reflector.getAllAndOverride<string | undefined>(IZIN, target);
+    if (izin) {
+      const a = await this.akses.muat(sesi.userId);
+      if (!a.permissions.has(izin)) throw new ForbiddenException({ kode: 'IZIN_DITOLAK', message: 'Anda tidak memiliki izin untuk tindakan ini' });
+      req.akses = a;
+    }
     return true;
   }
 

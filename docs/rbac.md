@@ -1,6 +1,6 @@
 # RBAC dan Hak Akses Staff Internal
 
-Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal.
+Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. (Koreksi Fase 3D: modul *Pengguna & role* diberi `V` untuk Direktur dan IT; tanpa `V` tidak ada yang dapat melihat daftar pengguna/persetujuan.) Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal.
 
 | Modul | Direktur | Mgr Ops | IT | HRD | Marketing | Adm | Pay-Abs Rekanan | Keuangan | Pay Internal |
 |---|---|---|---|---|---|---|---|---|---|
@@ -20,7 +20,7 @@ Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/veri
 | Rekap payroll rekanan | V | V | – | – | – | – | C,U | K,E | – |
 | Rekap payroll internal | V,A | – | – | – | – | – | – | K | C,U,E |
 | Persetujuan rekap | A,F | – | – | – | – | – | – | A,F | – |
-| Pengguna & role | A | – | C,U,D | – | – | – | – | – | – |
+| Pengguna & role | V,A | – | V,C,U,D | – | – | – | – | – | – |
 | Retensi/konfigurasi | A | – | U | – | – | – | – | – | – |
 | Audit log | V | V* | V(teknis, tanpa PII) | – | – | – | – | V(transaksi) | – |
 | Laporan konsolidasi | V,E | V* | – | V* | V* | – | – | V*,E | – |
@@ -38,3 +38,26 @@ Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/veri
 - Selfie tidak terlihat oleh IT, Marketing, Admin, atau Direktur secara default.
 - Aksi sensitif (persetujuan rekap, ubah rekening, pemberian peran, akses selfie) masuk audit trail.
 - Tidak ada Super Admin permanen; akun bootstrap berumur terbatas.
+
+## Implementasi (Fase 3D)
+**Penamaan permission:** `<modul>.<aksi>` dibangkitkan dari matriks (`docs/rbac-pemetaan.json`): V=`view`, C=`create`, U=`update`, D=`deactivate`, K=`review`, A=`approve`, E=`export`, F=`finalize`, S=`view_summary`. Seed ada di migrasi `…rbac-seed` dan `…user-role-view`; tes harness membandingkan database dengan berkas ini.
+
+**Penegakan:** guard global. Rute wajib menyatakan `@Public()`, `@Sesi()`, atau `@RequirePermission('modul.aksi')`; rute tanpa pernyataan ditolak (403 `RUTE_TANPA_IZIN`) dan terdeteksi tes enumerasi rute. Izin dihitung dari database **pada setiap permintaan** (pencabutan, kedaluwarsa peran, dan penonaktifan perusahaan berlaku seketika). Sesi member, sesi tertunda MFA, dan tanpa sesi tidak pernah lolos.
+
+| Endpoint | Permission |
+|---|---|
+| `GET /roles`, `GET /staff`, `GET /approvals` | `user_role.view` |
+| `POST /staff/invitations`, `POST /staff/:id/roles` | `user_role.create` |
+| `DELETE /staff/:id/roles/:roleCode`, `POST /staff/:id/deactivate` | `user_role.deactivate` |
+| `POST/DELETE /staff/:id/companies…`, `POST/DELETE /staff/:id/all-companies`, `POST /staff/:id/mfa-reset` | `user_role.update` |
+| `POST /approvals/:id/approve`, `POST /approvals/:id/reject` | `user_role.approve` |
+| `GET /audit-logs` | `audit_log.view` |
+
+**Aturan:**
+- Peran **berhak tinggi** (Direktur, IT Administrator) tidak langsung berlaku: dibuat permintaan persetujuan (kedaluwarsa 72 jam) yang harus diputuskan pihak lain pemegang `user_role.approve` (Direktur). Pemohon ≠ penyetuju ditegakkan aplikasi dan constraint database.
+- **Pengecualian Direktur pertama:** admin yang memegang peran berasal dari bootstrap dapat menunjuk Direktur **pertama** langsung, hanya selagi belum ada peran Direktur (aktif atau diundang) sama sekali; teraudit (`auth.first_director.exception`).
+- **Akses seluruh perusahaan** dan **reset MFA** memerlukan persetujuan. Reset MFA mengembalikan akun ke undangan (faktor MFA, kode pemulihan, dan kata sandi dihapus; semua sesi dicabut) agar yang tahu kata sandi lama tidak dapat mendaftarkan TOTP-nya sendiri.
+- Tidak ada yang dapat mengubah peran, scope, atau status akunnya sendiri.
+- **Audit log:** pembacaan dibatasi RLS. Baris perusahaan hanya untuk pemegang scope perusahaan itu; baris global (company_id kosong: peristiwa auth/sistem) hanya untuk Direktur dan IT Administrator. IT tidak melihat PII (detail audit tidak memuat PII).
+- Kualifikator sel (mis. "rekanan", "internal", "draft") **belum ditegakkan**; diterapkan di modul terkait (Fase 5 dan seterusnya).
+

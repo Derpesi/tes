@@ -328,6 +328,320 @@
           "Autentikasi Member"
         ]
       }
+    },
+    "/roles": {
+      "get": {
+        "operationId": "AdminController_roles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Daftar peran beserta permission-nya"
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff": {
+      "get": {
+        "operationId": "AdminController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Daftar staff (keyset pagination)"
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/invitations": {
+      "post": {
+        "operationId": "AdminController_undang",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Undangan dikirim lewat email; token tidak pernah dikembalikan. Peran berhak tinggi menunggu persetujuan."
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/roles": {
+      "post": {
+        "operationId": "AdminController_beriPeran",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/roles/{roleCode}": {
+      "delete": {
+        "operationId": "AdminController_cabutPeran",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/companies": {
+      "post": {
+        "operationId": "AdminController_beriScope",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/companies/{companyId}": {
+      "delete": {
+        "operationId": "AdminController_cabutScope",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "companyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/all-companies": {
+      "post": {
+        "operationId": "AdminController_mintaSemuaPerusahaan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Akses seluruh perusahaan memerlukan persetujuan Direktur"
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminController_cabutSemua",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/deactivate": {
+      "post": {
+        "operationId": "AdminController_nonaktifkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/staff/{id}/mfa-reset": {
+      "post": {
+        "operationId": "AdminController_mintaResetMfa",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reset MFA memerlukan persetujuan Direktur; setelah disetujui akun kembali ke undangan"
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/approvals": {
+      "get": {
+        "operationId": "AdminController_daftarApproval",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/approvals/{id}/approve": {
+      "post": {
+        "operationId": "AdminController_setujui",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/approvals/{id}/reject": {
+      "post": {
+        "operationId": "AdminController_tolak",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
+    },
+    "/audit-logs": {
+      "get": {
+        "operationId": "AdminController_audit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Audit log terbatas scope (RLS); keyset pagination"
+          }
+        },
+        "tags": [
+          "Administrasi Staff"
+        ]
+      }
     }
   },
   "info": {

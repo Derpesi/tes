@@ -229,6 +229,7 @@ INSERT INTO role_permissions (role_code, permission_code) VALUES
   ('STAFF_KEUANGAN', 'report_consolidated.export');
 
 -- Down Migration
+-- Catatan: Down hanya dapat dijalankan pada database tanpa data yang memegang FK ke roles (mis. user_roles).
 DELETE FROM role_permissions;
 DELETE FROM permissions;
 DELETE FROM roles;

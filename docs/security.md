@@ -39,6 +39,9 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 - **Pemisahan realm:** sesi member tidak dapat memakai endpoint staff dan sebaliknya (`REALM_TIDAK_SESUAI`); sesi member idle 24 jam, mutlak 30 hari.
 - **Keterbatasan:** login Google sungguhan belum teruji (hanya IdP palsu lokal); Safari + `__Host-` pada `http://localhost` belum diuji; penentuan "satu orang satu akun" berdasarkan NIK menyusul di Fase 5.
 
+## RBAC, scope, dan persetujuan ganda (Fase 3D)
+Lihat bagian *Implementasi (Fase 3D)* di `rbac.md`. Ringkas: guard global deny-by-default (diuji dengan enumerasi rute), izin dihitung dari database per permintaan, pemisahan realm, persetujuan ganda dengan pemisahan tugas di aplikasi dan database, tidak ada perubahan akses diri sendiri, audit log dibatasi RLS, kursor keyset divalidasi ketat dan berpresisi mikrodetik, token undangan tidak pernah dikembalikan lewat API. **Keterbatasan:** belum ada pencegahan menghapus Direktur terakhir; kualifikator sel matriks belum ditegakkan; penegakan scope pada modul bisnis menyusul bersama modulnya.
+
 ## Role database aplikasi
 Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
 

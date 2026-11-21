@@ -55,12 +55,17 @@ jalan('login member via Google OIDC (IdP palsu lokal)', () => {
     invitations = app.get(InvitationService);
     worker = app.get(OutboxWorker);
     pool = new Pool({ connectionString: DB_URL, max: 3 });
+    await pool.query(`UPDATE notification_outbox SET status = 'GAGAL', payload_enc = NULL WHERE status = 'MENUNGGU'`); // sisa run sebelumnya
   });
   afterAll(async () => {
     await pool?.end();
     await app?.close();
     await idp?.berhenti();
   });
+  /** Mengosongkan outbox sepenuhnya (prosesBatch hanya mengambil sejumlah terbatas per panggilan). */
+  const kirimEmail = async () => {
+    for (let i = 0; i < 50 && (await worker.prosesBatch(100)) > 0; i++);
+  };
   beforeEach(() => {
     terkirim.length = 0;
   });
@@ -357,7 +362,7 @@ jalan('login member via Google OIDC (IdP palsu lokal)', () => {
     async function staffPenuh() {
       const email = `staff-${randomBytes(4).toString('hex')}@contoh.invalid`;
       await invitations.undang({ email, namaTampilan: 'SINTETIS Staff', diundangOleh: null });
-      await worker.prosesBatch();
+      await kirimEmail();
       const acc = await post('/auth/staff/invitation/accept').send({ token: tokenDariEmail(terkirim.find((m) => m.to === email)!), password: PASSWORD }).expect(200);
       const c1 = cookieNamed(acc, '__Host-sid');
       const st = await post('/auth/staff/mfa/enroll/start', { cookie: c1, csrf: acc.body.csrfToken }).expect(200);
