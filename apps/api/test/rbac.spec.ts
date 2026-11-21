@@ -56,8 +56,16 @@ jalan('RBAC, scope, persetujuan ganda, dan penampil audit (PostgreSQL asli)', ()
   let nomorIp = 1;
 
   beforeAll(async () => {
-    process.env.DATABASE_URL = DB_URL;
     execFileSync('node', ['scripts/migrate.js', 'up'], { env: { ...process.env, DATABASE_URL: DB_URL } });
+    // Syarat produksi (ADR-0003): aplikasi berjalan sebagai role NON-superuser tanpa BYPASSRLS. Superuser mem-bypass RLS,
+    // sehingga di CI (user DB = superuser) aplikasi dijalankan lewat role uji agar tes scope audit bermakna.
+    const admin = new Pool({ connectionString: DB_URL, max: 1 });
+    await admin.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'hris_app_uji') THEN CREATE ROLE hris_app_uji NOLOGIN NOSUPERUSER NOBYPASSRLS; END IF; END $$`);
+    await admin.query(`GRANT hris_app_uji TO CURRENT_USER`);
+    await admin.query(`GRANT ALL ON ALL TABLES IN SCHEMA public TO hris_app_uji`);
+    await admin.query(`GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO hris_app_uji`);
+    await admin.end();
+    process.env.DATABASE_URL = `${DB_URL}${DB_URL!.includes('?') ? '&' : '?'}options=${encodeURIComponent('-c role=hris_app_uji')}`;
     const { AppModule } = await import('../src/app.module');
     const { konfigurasiApp } = await import('../src/app.factory');
     const { EMAIL_CHANNEL } = await import('../src/notifications/email.channel');
@@ -75,7 +83,7 @@ jalan('RBAC, scope, persetujuan ganda, dan penampil audit (PostgreSQL asli)', ()
     sessions = app.get(SessionService);
     passwordHash = await app.get(PasswordService).hash(PASSWORD);
     encKey = Buffer.from(process.env.APP_ENCRYPTION_KEY!, 'base64');
-    pool = new Pool({ connectionString: DB_URL, max: 4 });
+    pool = new Pool({ connectionString: DB_URL, max: 4 }); // koneksi pemilik: hanya untuk menyiapkan/memeriksa data
     await pool.query(`UPDATE notification_outbox SET status = 'GAGAL', payload_enc = NULL WHERE status = 'MENUNGGU'`); // sisa run sebelumnya
     const a = await pool.query(`INSERT INTO companies (name) VALUES ($1) RETURNING id`, [`PT SINTETIS A ${randomBytes(3).toString('hex')}`]);
     const b = await pool.query(`INSERT INTO companies (name) VALUES ($1) RETURNING id`, [`PT SINTETIS B ${randomBytes(3).toString('hex')}`]);
@@ -159,6 +167,14 @@ jalan('RBAC, scope, persetujuan ganda, dan penampil audit (PostgreSQL asli)', ()
       c.release();
     }
   };
+
+  describe('prasyarat keamanan tes', () => {
+    it('aplikasi berjalan sebagai role non-superuser tanpa BYPASSRLS (RLS benar-benar berlaku)', async () => {
+      const { POOL } = await import('../src/database/tokens');
+      const r = await app.get<Pool>(POOL).query(`SELECT current_user AS u, (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = current_user) AS bypass`);
+      expect(r.rows[0]).toEqual({ u: 'hris_app_uji', bypass: false });
+    });
+  });
 
   // ---------- deny-by-default ----------
   describe('deny-by-default', () => {
