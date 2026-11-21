@@ -2550,6 +2550,48 @@
         ]
       }
     },
+    "/member/dashboard": {
+      "get": {
+        "operationId": "DashboardController_member",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Dashboard member: status, kontrak, penempatan; hanya data miliknya"
+          }
+        },
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/employees": {
+      "get": {
+        "operationId": "DashboardController_karyawan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Karyawan aktif dalam scope perusahaan (tanpa NIK/kontak); keyset"
+          }
+        },
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/employees/summary": {
+      "get": {
+        "operationId": "DashboardController_ringkasan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Ringkasan karyawan aktif, ditangguhkan, kontrak akan berakhir, dan per lokasi"
+          }
+        },
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",

@@ -29,3 +29,10 @@ export const PenempatanBuat = z
   .refine((v) => !v.endDate || v.endDate >= v.startDate, 'Tanggal selesai tidak boleh sebelum tanggal mulai');
 export const AlasanBody = z.object({ reason: alasan('Alasan') });
 export const PindahBody = z.object({ locationId: uuid('ID lokasi baru'), moveDate: tanggal('Tanggal pindah'), reason: alasan('Alasan') });
+
+export const DaftarKaryawanQuery = z.object({
+  cursor: z.string().max(500).optional(),
+  limit: z.coerce.number().int().min(1, 'limit minimal 1').max(100, 'limit maksimal 100').default(50),
+  locationId: uuid('ID lokasi').optional(),
+  akanBerakhir: z.enum(['true', 'false'], { error: 'akanBerakhir harus true atau false' }).transform((v) => v === 'true').optional(),
+});

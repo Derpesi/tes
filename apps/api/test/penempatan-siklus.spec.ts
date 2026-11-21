@@ -185,7 +185,7 @@ jalan('penempatan, siklus hidup kontrak, dan status member otomatis (PostgreSQL 
   let currentPerson = '';
   /** Pelamar -> kontrak DITANDATANGANI (periode MULAI..AKHIR) + lokasi, belum ada penempatan. */
   const kontrakSiap = async (t: Aktor, o: { start?: string; end?: string; extendsId?: string; lamaran?: string; person?: string; statusMember?: string } = {}) => {
-    const pel = o.lamaran ? { lamaran: o.lamaran, person: o.person!, pid: '' } : await siapPelamar(perusahaanA, 'SINTETIS Karyawan Uji', o.statusMember);
+    const pel = o.lamaran ? { lamaran: o.lamaran, person: o.person!, pid: '', nik: '', nama: '' } : await siapPelamar(perusahaanA, 'SINTETIS Karyawan Uji', o.statusMember);
     currentPerson = pel.person;
     const tpl = await templateOk(t);
     const k = (await buatKontrak(t.adm, pel.lamaran, tpl, { startDate: o.start ?? MULAI, endDate: o.end ?? AKHIR, ...(o.extendsId ? { extendsContractId: o.extendsId } : {}) }).expect(201)).body;
@@ -219,7 +219,7 @@ jalan('penempatan, siklus hidup kontrak, dan status member otomatis (PostgreSQL 
       expect(await statusMemberDb(k.pel.person)).toBe('BELUM_DITEMPATKAN');
       // sebelum tanggal mulai: tidak ada perubahan (idempoten)
       let r = await jalankanSiklus(hari(MULAI, -1));
-      expect(r).toEqual({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0 });
+      expect(r).toEqual({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0, notifikasiDiantre: 0 });
       expect(await statusKontrak(t, k.kontrakId)).toBe('DITANDATANGANI');
       // tanggal mulai tiba
       r = await jalankanSiklus(MULAI);
@@ -231,7 +231,7 @@ jalan('penempatan, siklus hidup kontrak, dan status member otomatis (PostgreSQL 
       expect(await statusMemberDb(k.pel.person)).toBe('KARYAWAN_AKTIF');
       // idempoten: menjalankan lagi tidak mengubah apa pun dan tidak menambah riwayat
       const sebelum = (await riwayatMember(k.pel.person)).length;
-      expect(await jalankanSiklus(MULAI)).toEqual({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0 });
+      expect(await jalankanSiklus(MULAI)).toEqual({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0, notifikasiDiantre: 0 });
       expect((await riwayatMember(k.pel.person)).length).toBe(sebelum);
       // ALUR NYATA -> LAMARAN DIBLOKIR di backend (tanpa mengatur status manual)
       expect((await lamar().expect(403)).body.kode).toBe('KARYAWAN_AKTIF_TIDAK_DAPAT_MELAMAR');

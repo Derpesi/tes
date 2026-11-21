@@ -4,6 +4,8 @@ import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { ScopedDb } from '../database/scoped-db';
 import { POOL } from '../database/tokens';
+import { NotificationService } from '../notifications/notification.service';
+import { tanggalPanjang } from './pdf';
 import { MemberStatusService } from './member-status.service';
 
 /** Tanggal kalender Asia/Jakarta (YYYY-MM-DD) dari sebuah instan waktu. Jam disuntikkan agar siklus dapat diuji deterministik. */
@@ -11,8 +13,8 @@ export function hariIni(sekarang: Date): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(sekarang);
 }
 
-export interface RingkasanSiklus { kontrakAktif: number; kontrakBerakhir: number; penempatanAktif: number; penempatanSelesai: number; statusMemberDiubah: number }
-const kosong = (): RingkasanSiklus => ({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0 });
+export interface RingkasanSiklus { kontrakAktif: number; kontrakBerakhir: number; penempatanAktif: number; penempatanSelesai: number; statusMemberDiubah: number; notifikasiDiantre: number }
+const kosong = (): RingkasanSiklus => ({ kontrakAktif: 0, kontrakBerakhir: 0, penempatanAktif: 0, penempatanSelesai: 0, statusMemberDiubah: 0, notifikasiDiantre: 0 });
 const tambah = (a: RingkasanSiklus, b: RingkasanSiklus) => { for (const k of Object.keys(a) as (keyof RingkasanSiklus)[]) a[k] += b[k]; };
 
 /**
@@ -30,6 +32,7 @@ export class ContractLifecycleService implements OnModuleInit, OnModuleDestroy {
     @Inject(ENV) private readonly env: Env,
     private readonly sdb: ScopedDb,
     private readonly status: MemberStatusService,
+    private readonly notif: NotificationService,
   ) {}
 
   onModuleInit() {
@@ -79,8 +82,37 @@ export class ContractLifecycleService implements OnModuleInit, OnModuleDestroy {
       await this.aktivasiPenempatan(c, personId, hari, r);
       await this.akhiriKontrakDanPenempatan(c, personId, hari, r);
       if (await this.status.sinkronkan(c, personId, hari)) r.statusMemberDiubah++;
+      await this.pengingatKontrakAkanBerakhir(c, personId, hari, r);
       return r;
     });
+  }
+
+  /**
+   * Pengingat sekali per kontrak ke HRD perusahaan terkait (email lewat outbox, dalam transaksi yang sama dengan penandaan
+   * expiry_notified_at sehingga tepat satu kali). Tidak dikirim bila sudah ada kontrak lanjutan yang ditandatangani.
+   */
+  private async pengingatKontrakAkanBerakhir(c: PoolClient, personId: string, hari: string, r: RingkasanSiklus) {
+    const kontrak = (await c.query(
+      `SELECT k.id, k.company_id, k.contract_number, k.position, k.end_date::text AS end_date, (k.end_date - $2::date) AS sisa, m.full_name, co.name AS perusahaan
+         FROM employment_contracts k JOIN companies co ON co.id = k.company_id LEFT JOIN member_profiles m ON m.person_id = k.person_id
+        WHERE k.person_id = $1 AND k.status = 'AKTIF' AND k.expiry_notified_at IS NULL AND k.end_date >= $2::date AND k.end_date - $2::date <= 30
+          AND NOT EXISTS (SELECT 1 FROM employment_contracts n WHERE n.extends_contract_id = k.id AND n.status IN ('DITANDATANGANI', 'AKTIF'))`,
+      [personId, hari],
+    )).rows;
+    for (const k of kontrak) {
+      const penerima = (await c.query(
+        `SELECT DISTINCT u.email FROM users u JOIN user_roles ur ON ur.user_id = u.id AND ur.role_code = 'HRD' AND ur.revoked_at IS NULL AND (ur.expires_at IS NULL OR ur.expires_at > now())
+           LEFT JOIN user_company_scopes s ON s.user_id = u.id AND s.revoked_at IS NULL
+          WHERE u.realm = 'staff' AND u.status = 'AKTIF' AND (u.all_companies OR s.scope_company_id = $1)`,
+        [k.company_id],
+      )).rows.map((x) => x.email as string);
+      if (!penerima.length) continue; // belum ada HRD: dicoba lagi pada siklus berikutnya
+      for (const to of penerima) {
+        await this.notif.enqueueEmail({ to, template: 'kontrak_akan_berakhir', data: { nomor: k.contract_number, nama: k.full_name ?? '-', jabatan: k.position, perusahaan: k.perusahaan, tanggal_akhir: tanggalPanjang(k.end_date), sisa_hari: String(k.sisa) } }, c);
+      }
+      await c.query(`UPDATE employment_contracts SET expiry_notified_at = now() WHERE id = $1 AND expiry_notified_at IS NULL`, [k.id]);
+      r.notifikasiDiantre += penerima.length;
+    }
   }
 
   private async catatKontrak(c: PoolClient, k: { id: string; company_id: string }, dari: string, ke: string, alasan: string) {
