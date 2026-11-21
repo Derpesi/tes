@@ -7,6 +7,8 @@ const PESAN_STANDAR: Record<number, string> = {
   403: 'Anda tidak memiliki izin untuk tindakan ini',
   404: 'Data tidak ditemukan',
   409: 'Terjadi konflik data',
+  413: 'Ukuran berkas melebihi batas yang diizinkan',
+  415: 'Jenis berkas tidak didukung',
   429: 'Terlalu banyak permintaan, coba lagi nanti',
   500: 'Terjadi kesalahan pada server',
   503: 'Layanan sedang tidak tersedia',

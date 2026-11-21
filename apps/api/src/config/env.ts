@@ -42,6 +42,8 @@ const skema = z
       (v) => (v === '' ? undefined : v),
       z.string().regex(/^(\/[a-z0-9_-]+)+$/, 'API_PUBLIC_PATH harus berupa jalur seperti /api').default('/api'),
     ),
+    /** Direktori penyimpanan objek (driver lokal). Bawaan ./.penyimpanan; di produksi gunakan volume privat. */
+    STORAGE_DIR: opsional(z.string().min(1)),
     SMTP_HOST: opsional(z.string().min(1)),
     SMTP_PORT: opsional(z.coerce.number().int().min(1).max(65535)),
     SMTP_FROM: opsional(z.string().min(3)),

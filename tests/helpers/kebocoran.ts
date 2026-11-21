@@ -25,13 +25,22 @@ export async function cekKebocoran(pool: Pool, k: KonfigKebocoran): Promise<stri
     const langsung = await c.query(`SELECT 1 FROM ${k.tabel} WHERE id = $1`, [k.idBarisB]);
     if (langsung.rowCount) bocor.push('SELECT per ID melihat baris perusahaan lain');
   });
+  // Galat (mis. pelanggaran FK) pada UPDATE/DELETE berarti baris TERJANGKAU oleh scope A => bocor.
   await dalamScope(pool, [k.companyA], async (c) => {
-    const u = await c.query(`UPDATE ${k.tabel} SET company_id = company_id WHERE id = $1`, [k.idBarisB]);
-    if (u.rowCount) bocor.push('UPDATE mengubah baris perusahaan lain');
+    try {
+      const u = await c.query(`UPDATE ${k.tabel} SET company_id = company_id WHERE id = $1`, [k.idBarisB]);
+      if (u.rowCount) bocor.push('UPDATE mengubah baris perusahaan lain');
+    } catch {
+      bocor.push('UPDATE mengubah baris perusahaan lain');
+    }
   });
   await dalamScope(pool, [k.companyA], async (c) => {
-    const d = await c.query(`DELETE FROM ${k.tabel} WHERE id = $1`, [k.idBarisB]);
-    if (d.rowCount) bocor.push('DELETE menghapus baris perusahaan lain');
+    try {
+      const d = await c.query(`DELETE FROM ${k.tabel} WHERE id = $1`, [k.idBarisB]);
+      if (d.rowCount) bocor.push('DELETE menghapus baris perusahaan lain');
+    } catch {
+      bocor.push('DELETE menghapus baris perusahaan lain');
+    }
   });
   await dalamScope(pool, [k.companyA], async (c) => {
     const { text, values } = k.sisipUntuk(k.companyB);

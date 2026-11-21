@@ -36,3 +36,4 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 tests/e2e/out/
+.penyimpanan/

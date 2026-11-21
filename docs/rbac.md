@@ -1,11 +1,12 @@
 # RBAC dan Hak Akses Staff Internal
 
-Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. (Koreksi Fase 3D: modul *Pengguna & role* diberi `V` untuk Direktur dan IT; tanpa `V` tidak ada yang dapat melihat daftar pengguna/persetujuan.) Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal.
+Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/verifikasi, **A** setujui, **E** ekspor, **F** finalisasi. `–` = tidak ada. `S` = hanya ringkasan tanpa PII/nominal. (Koreksi Fase 4A: IT `C` pada Perusahaan, Manager Operasional `D` pada Rekanan & lokasi, dan modul baru *Dokumen legalitas perusahaan*. Koreksi Fase 3D: modul *Pengguna & role* diberi `V` untuk Direktur dan IT; tanpa `V` tidak ada yang dapat melihat daftar pengguna/persetujuan.) Semua hak dibatasi scope perusahaan + lokasi di backend. Pembayaran/transfer tidak ada pada tahap awal.
 
 | Modul | Direktur | Mgr Ops | IT | HRD | Marketing | Adm | Pay-Abs Rekanan | Keuangan | Pay Internal |
 |---|---|---|---|---|---|---|---|---|---|
-| Perusahaan | V,A | V | V,U(konfig) | V | V | V | – | V | – |
-| Rekanan & lokasi | V | V,C,U | V | V | V,C,U | V,C,U | V | V | – |
+| Perusahaan | V,A | V | V,C,U(konfig) | V | V | V | – | V | – |
+| Dokumen legalitas perusahaan | V | – | V,C,U | – | – | V,C,U | – | V | – |
+| Rekanan & lokasi | V | V,C,U,D | V | V | V,C,U | V,C,U | V | V | – |
 | Kontrak layanan rekanan | V,A | V | – | V | V,C,U | V | – | V | – |
 | Database member | V | S | S | V,C,U,K,A,E | S | V,U(validasi) | – | – | – |
 | Lowongan & lamaran | V | V | – | V,C,U,K,A,E | V | V | – | – | – |

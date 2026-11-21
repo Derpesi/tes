@@ -1,18 +1,55 @@
 {
   "keterangan": "Pemetaan dari tabel docs/rbac.md ke kode peran dan permission. Dipakai generator seed migrasi dan tes harness. Ubah bersama docs/rbac.md.",
   "peran": {
-    "Direktur": { "kode": "DIREKTUR", "nama": "Direktur", "tinggi": true },
-    "Mgr Ops": { "kode": "MANAGER_OPERASIONAL", "nama": "Manager Operasional", "tinggi": false },
-    "IT": { "kode": "IT_ADMIN", "nama": "IT Administrator", "tinggi": true },
-    "HRD": { "kode": "HRD", "nama": "HRD", "tinggi": false },
-    "Marketing": { "kode": "MARKETING", "nama": "Marketing", "tinggi": false },
-    "Adm": { "kode": "STAFF_ADMINISTRASI", "nama": "Staff Administrasi", "tinggi": false },
-    "Pay-Abs Rekanan": { "kode": "STAFF_PAYROLL_ABSENSI_REKANAN", "nama": "Staff Payroll Absensi Rekanan", "tinggi": false },
-    "Keuangan": { "kode": "STAFF_KEUANGAN", "nama": "Staff Keuangan", "tinggi": false },
-    "Pay Internal": { "kode": "STAFF_PAYROLL_INTERNAL", "nama": "Staff Payroll Internal", "tinggi": false }
+    "Direktur": {
+      "kode": "DIREKTUR",
+      "nama": "Direktur",
+      "tinggi": true
+    },
+    "Mgr Ops": {
+      "kode": "MANAGER_OPERASIONAL",
+      "nama": "Manager Operasional",
+      "tinggi": false
+    },
+    "IT": {
+      "kode": "IT_ADMIN",
+      "nama": "IT Administrator",
+      "tinggi": true
+    },
+    "HRD": {
+      "kode": "HRD",
+      "nama": "HRD",
+      "tinggi": false
+    },
+    "Marketing": {
+      "kode": "MARKETING",
+      "nama": "Marketing",
+      "tinggi": false
+    },
+    "Adm": {
+      "kode": "STAFF_ADMINISTRASI",
+      "nama": "Staff Administrasi",
+      "tinggi": false
+    },
+    "Pay-Abs Rekanan": {
+      "kode": "STAFF_PAYROLL_ABSENSI_REKANAN",
+      "nama": "Staff Payroll Absensi Rekanan",
+      "tinggi": false
+    },
+    "Keuangan": {
+      "kode": "STAFF_KEUANGAN",
+      "nama": "Staff Keuangan",
+      "tinggi": false
+    },
+    "Pay Internal": {
+      "kode": "STAFF_PAYROLL_INTERNAL",
+      "nama": "Staff Payroll Internal",
+      "tinggi": false
+    }
   },
   "modul": {
     "Perusahaan": "company",
+    "Dokumen legalitas perusahaan": "company_document",
     "Rekanan & lokasi": "partner",
     "Kontrak layanan rekanan": "partner_contract",
     "Database member": "member",
