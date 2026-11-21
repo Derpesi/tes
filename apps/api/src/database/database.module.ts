@@ -1,8 +1,10 @@
 import { Global, Inject, Injectable, Module, OnApplicationShutdown } from '@nestjs/common';
 import { Pool } from 'pg';
 import { muatEnv } from '../config/env';
+import { ScopedDb } from './scoped-db';
+import { POOL } from './tokens';
 
-export const POOL = Symbol('PG_POOL');
+export { POOL };
 
 @Injectable()
 class PoolShutdown implements OnApplicationShutdown {
@@ -17,7 +19,8 @@ class PoolShutdown implements OnApplicationShutdown {
   providers: [
     { provide: POOL, useFactory: () => new Pool({ connectionString: muatEnv().DATABASE_URL, max: 10 }) },
     PoolShutdown,
+    ScopedDb,
   ],
-  exports: [POOL],
+  exports: [POOL, ScopedDb],
 })
 export class DatabaseModule {}

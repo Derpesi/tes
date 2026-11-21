@@ -1,0 +1,47 @@
+{
+  "keterangan": "Pemetaan dari tabel docs/rbac.md ke kode peran dan permission. Dipakai generator seed migrasi dan tes harness. Ubah bersama docs/rbac.md.",
+  "peran": {
+    "Direktur": { "kode": "DIREKTUR", "nama": "Direktur", "tinggi": true },
+    "Mgr Ops": { "kode": "MANAGER_OPERASIONAL", "nama": "Manager Operasional", "tinggi": false },
+    "IT": { "kode": "IT_ADMIN", "nama": "IT Administrator", "tinggi": true },
+    "HRD": { "kode": "HRD", "nama": "HRD", "tinggi": false },
+    "Marketing": { "kode": "MARKETING", "nama": "Marketing", "tinggi": false },
+    "Adm": { "kode": "STAFF_ADMINISTRASI", "nama": "Staff Administrasi", "tinggi": false },
+    "Pay-Abs Rekanan": { "kode": "STAFF_PAYROLL_ABSENSI_REKANAN", "nama": "Staff Payroll Absensi Rekanan", "tinggi": false },
+    "Keuangan": { "kode": "STAFF_KEUANGAN", "nama": "Staff Keuangan", "tinggi": false },
+    "Pay Internal": { "kode": "STAFF_PAYROLL_INTERNAL", "nama": "Staff Payroll Internal", "tinggi": false }
+  },
+  "modul": {
+    "Perusahaan": "company",
+    "Rekanan & lokasi": "partner",
+    "Kontrak layanan rekanan": "partner_contract",
+    "Database member": "member",
+    "Lowongan & lamaran": "vacancy_application",
+    "PKWT": "pkwt",
+    "Verifikasi dokumen PKWT": "pkwt_document",
+    "Penempatan & jadwal": "placement",
+    "Titik absensi & QR": "attendance_point",
+    "Rekap absensi": "attendance_recap",
+    "Lihat selfie": "selfie",
+    "Tinjau anomali absensi": "attendance_anomaly",
+    "Koreksi absensi": "attendance_adjustment",
+    "Rekap payroll rekanan": "payroll_recap_partner",
+    "Rekap payroll internal": "payroll_recap_internal",
+    "Persetujuan rekap": "payroll_approval",
+    "Pengguna & role": "user_role",
+    "Retensi/konfigurasi": "retention",
+    "Audit log": "audit_log",
+    "Laporan konsolidasi": "report_consolidated"
+  },
+  "aksi": {
+    "V": "view",
+    "C": "create",
+    "U": "update",
+    "D": "deactivate",
+    "K": "review",
+    "A": "approve",
+    "E": "export",
+    "F": "finalize",
+    "S": "view_summary"
+  }
+}

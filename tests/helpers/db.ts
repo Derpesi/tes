@@ -34,6 +34,8 @@ export async function siapkanRoleUji(pool: Pool): Promise<void> {
 export interface OpsiScope {
   /** true = COMMIT (data tetap). Bawaan false = ROLLBACK agar tes tidak saling mempengaruhi. */
   commit?: boolean;
+  /** true = izinkan membaca baris audit global (company_id NULL). */
+  auditGlobal?: boolean;
 }
 
 /**
@@ -51,6 +53,7 @@ export async function dalamScope<T>(
     await c.query('BEGIN');
     await c.query(`SET LOCAL ROLE ${ROLE_UJI}`);
     await c.query(`SELECT set_config('app.company_ids', $1, true)`, [companyIds.join(',')]);
+    await c.query(`SELECT set_config('app.audit_global', $1, true)`, [opsi.auditGlobal ? 'on' : 'off']);
     const hasil = await fn(c);
     await c.query(opsi.commit ? 'COMMIT' : 'ROLLBACK');
     return hasil;

@@ -58,6 +58,9 @@ erDiagram
 - `job_vacancies.managing_company_id` NOT NULL.
 - `attendance_selfies`: kunci objek dan `purge_after` (dari kebijakan retensi).
 
+## Sudah dibuat (Fase 3A)
+`companies` (minimal), `persons` (minimal), `users`, `google_identities`, `staff_credentials`, `staff_mfa_factors`, `mfa_recovery_codes`, `sessions`, `login_attempts`, `staff_invitations`, `password_reset_tokens`, `system_state`, `bootstrap_tokens`, `notification_outbox`, `roles`, `permissions`, `role_permissions`, `user_roles`, `user_company_scopes`, `approval_requests`. Identitas dan kredensial dibatasi per realm lewat FK komposit `(user_id, realm)`; email disimpan huruf kecil; token hanya disimpan sebagai hash. Tabel otorisasi memakai nama kolom `scope_company_id` (bukan `company_id`) karena bukan data tenant. Seed peran/permission dibangkitkan dari `docs/rbac.md` (`scripts/gen-rbac-seed.mjs`).
+
 ## Dirancang tapi belum dibuat (menunggu fase payroll)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
 

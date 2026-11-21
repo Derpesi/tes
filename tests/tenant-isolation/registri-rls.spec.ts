@@ -5,11 +5,7 @@ const ada = process.env.TEST_DATABASE_URL ? describe : describe.skip;
 
 /** Tabel ber-company_id yang BOLEH tanpa RLS. Setiap entri wajib beralasan dan berstatus. */
 export const PENGECUALIAN: { tabel: string; alasan: string; status: string }[] = [
-  {
-    tabel: 'audit_logs',
-    alasan: 'Log hanya-tambah lintas perusahaan; kebijakan akses baca per perusahaan belum ditetapkan',
-    status: 'SEMENTARA, diputuskan di Fase 3',
-  },
+  // Kosong: pengecualian audit_logs (A-13) ditutup di Fase 3A dengan kebijakan RLS khusus.
 ];
 
 export async function cariTabelTanpaRls(pool: Pool, pengecualian: string[]): Promise<string[]> {
