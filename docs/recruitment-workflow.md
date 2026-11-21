@@ -64,6 +64,8 @@ stateDiagram-v2
 ```
 Setiap perubahan = versi baru di `contract_versions` (tidak menimpa). Masa kerja, perpanjangan, dan kompensasi mengikuti aturan berversi yang diverifikasi ahli hukum.
 
+> **Status implementasi (Fase 5):** alur member dan lamaran di atas sudah diimplementasikan sampai lamaran `MENUNGGU_PKWT` dan member `BELUM_DITEMPATKAN`. PKWT, penempatan, dan status `KARYAWAN_AKTIF` dan seterusnya (otomatis) dikerjakan di Fase 6; `CanApply` sudah menegakkan blokir karyawan aktif di backend.
+
 ## Penempatan
 ```mermaid
 stateDiagram-v2

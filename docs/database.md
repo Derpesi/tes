@@ -71,6 +71,15 @@ companies 1─* company_documents
 ```
 Constraint: nama rekanan/lokasi aktif unik; `(company_id, contract_number)` unik; periode kontrak valid; koordinat lengkap-atau-kosong; radius 20–1000; penyetuju kontrak ≠ pembuat; kontrak AKTIF wajib punya penyetuju.
 
+## Sudah dibuat (Fase 5)
+`member_profiles` (status member, NIK `nik_enc` + `nik_hmac` unik, biodata, `review_note`), `member_documents`, `member_status_histories`, `job_vacancies` (`company_id`), `job_applications`, `application_status_histories`. Tabel member **tanpa `company_id`** (lintas perusahaan); tiga tabel lowongan/lamaran ber-RLS tenant ditambah kebijakan member (`lowongan_baca_member`, `lowongan_baca_pelamar`, `lamaran_baca_milik`, `lamaran_buat_milik`, `lamaran_tarik_milik`). Riwayat bersifat hanya-tambah (trigger).
+```
+persons 1─1 member_profiles ─┬─* member_documents
+                             └─* member_status_histories
+companies 1─* job_vacancies 1─* job_applications *─1 persons ; job_applications 1─* application_status_histories
+```
+Constraint: biodata wajib lengkap saat status ≥ MENUNGGU_VERIFIKASI; status terverifikasi wajib punya pemeriksa; satu KTP/foto diri aktif; satu lamaran aktif per (lowongan, orang).
+
 ## Dirancang tapi belum dibuat (menunggu fase payroll)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
 

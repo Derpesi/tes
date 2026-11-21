@@ -51,6 +51,10 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | REK-1 | Rekanan = master data | Tanpa tabel/rute/peran login atau portal rekanan (teruji); satu rekanan banyak lokasi berkoordinat dan radius valid (4C) |
 | KON-1 | Kontrak layanan | State machine ditegakkan; aktivasi Direktur ≠ pembuat; nomor unik per perusahaan; isi terkunci setelah aktif (4D) |
 | DOK-1 | Dokumen legalitas/lampiran | Unggahan palsu ditolak (magic bytes, ukuran, ekstensi); unduhan terkontrol izin + scope + audit tanpa URL publik (4B/4D) |
+| MEM-1 | Biodata dan dokumen member | Member melengkapi biodata + KTP lewat self-service; kelengkapan divalidasi backend; NIK terenkripsi + unik; isi dokumen terenkripsi (5B) |
+| MEM-2 | Verifikasi HRD | HRD mengembalikan (alasan wajib) atau menyetujui; riwayat status lengkap; NIK tersamar kecuali reveal teraudit (5C) |
+| LOW-1 | Lowongan lintas perusahaan | Staff mengelola lowongan dalam scope; member melihat lowongan DIBUKA semua perusahaan tanpa catatan internal (5D) |
+| SEL-1 | Seleksi lamaran | State machine DIAJUKAN→…→MENUNGGU_PKWT; keputusan diaudit; transisi ilegal 409 (5D) |
 | ORG-1 | Isolasi perusahaan | Pengguna scope A tidak dapat membaca data B lewat API, ID langsung, ekspor |
 | ORG-2 | Perusahaan baru | Tambah perusahaan lewat master data tanpa deploy ulang |
 | REK-1 | Rekanan hanya data | Tidak ada tabel, rute, atau role login rekanan (diuji otomatis) |

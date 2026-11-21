@@ -11,7 +11,7 @@ export class ApiError extends Error {
 }
 
 export interface OpsiApi {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   /** Token CSRF (wajib untuk method tulis pada rute bersesi). */
   csrf?: string;
@@ -53,4 +53,17 @@ export async function ambilSesi(): Promise<InfoSesi | null> {
     if (e instanceof ApiError && e.status === 401) return null;
     throw e;
   }
+}
+
+/** Unggah berkas (multipart). Content-Type diatur browser; token CSRF wajib. */
+export async function unggah<T = unknown>(path: string, data: FormData, csrf: string): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, { method: 'POST', headers: { 'X-CSRF-Token': csrf }, body: data, credentials: 'same-origin', cache: 'no-store' });
+  } catch {
+    throw new ApiError(0, 'JARINGAN', 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.');
+  }
+  const json = (await res.json().catch(() => ({}))) as { pesan?: string; kode?: string };
+  if (!res.ok) throw new ApiError(res.status, json.kode ?? `HTTP_${res.status}`, json.pesan ?? 'Terjadi kesalahan. Coba lagi.');
+  return json as T;
 }

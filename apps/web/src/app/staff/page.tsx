@@ -59,6 +59,21 @@ export default function BerandaStaff() {
                 Rekanan
               </Link>
             ) : null}
+            {info.permissions?.includes('member.view') ? (
+              <Link className="tombol-sekunder" href="/staff/anggota">
+                Database member
+              </Link>
+            ) : null}
+            {info.permissions?.includes('vacancy_application.view') ? (
+              <>
+                <Link className="tombol-sekunder" href="/staff/lowongan">
+                  Lowongan
+                </Link>
+                <Link className="tombol-sekunder" href="/staff/lamaran">
+                  Lamaran
+                </Link>
+              </>
+            ) : null}
             {info.permissions?.includes('user_role.view') ? (
               <Link className="tombol-sekunder" href="/staff/persetujuan">
                 Persetujuan

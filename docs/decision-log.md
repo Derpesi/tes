@@ -31,6 +31,13 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-24 | Dokumen: `ObjectStorage` + driver lokal sekarang, driver S3 menyusul setelah hosting dipilih; unggahan divalidasi magic bytes; unduhan lewat API terkontrol + audit |
 | D-25 | Kontrak layanan diaktifkan Direktur (satu penyetuju, bukan pembuat); isi terkunci setelah aktif |
 | D-26 | Adendum/versi kontrak pasca-aktif ditunda ke Fase 6 |
+| D-27 | Member = tabel global tanpa `company_id`; akses staff lewat permission `member.*`, self-service lewat `person_id` dari sesi (ADR-0006) |
+| D-28 | NIK dienkripsi + blind index berprefiks domain; tersamar di API staff, reveal hanya `member.review` dan diaudit |
+| D-29 | Isi dokumen identitas dienkripsi sebelum disimpan; unduhan hanya lewat API dengan audit |
+| D-30 | Lowongan ber-`company_id` + RLS; member membaca lowongan DIBUKA lintas perusahaan lewat kebijakan RLS khusus (flag transaksi `memberRead`) |
+| D-31 | CanApply di backend (403) sebagai satu-satunya sumber aturan; karyawan aktif/kontrak akan berakhir ditolak, dievaluasi dalam transaksi yang sama dengan status profil |
+| D-32 | Verifikasi HRD: kembalikan (alasan wajib, terlihat member) atau setujui (TERVERIFIKASI lalu BELUM_DITEMPATKAN); ubah saat menunggu verifikasi mengembalikan status |
+| D-33 | Akhir Fase 5 = lamaran `MENUNGGU_PKWT`; PKWT, penempatan, dan perubahan status karyawan di Fase 6 |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -61,6 +68,10 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-24 | Bentuk pengaturan payroll/dokumen perusahaan: `payrollSettings {periodType, cutOffDay 1–28}`, `documentSettings {contractNumberPrefix}`; hanya titik awal, menunggu kebijakan pemilik | Pemilik |
 | A-25 | Kode singkat perusahaan awal (DMR/OSI/PCP) adalah usulan; dapat diubah IT | Pemilik |
 | A-26 | Radius geofence bawaan 100 m (batas 20–1000 m); koordinat `numeric(9,6)` | Divalidasi saat Fase 7 |
+| A-27 | Biodata minimal: nama lengkap, NIK, tempat/tanggal lahir, jenis kelamin, alamat, kota, provinsi, telepon, pendidikan terakhir, kontak darurat; KTP wajib untuk pengajuan | Pemilik |
+| A-28 | Pendidikan terakhir: SD, SMP, SMA/SMK, D1-D3, D4/S1, S2, S3 | Pemilik |
+| A-29 | Retensi dokumen identitas member belum ditetapkan (hapus lunak, objek dipertahankan) | Tinjau terhadap UU PDP |
+| A-30 | Lowongan yang ditutup/kedaluwarsa tidak terlihat member kecuali oleh pelamarnya; lamaran yang ditolak tetap menghalangi lamaran ulang ke lowongan yang sama | Pemilik |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.
