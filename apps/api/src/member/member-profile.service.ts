@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { z } from 'zod';
 import { AuditService } from '../audit/audit.service';
@@ -61,9 +61,15 @@ export class MemberProfileService {
       reviewNote: p.review_note, submittedAt: p.submitted_at, verifiedAt: p.verified_at,
     };
   }
+  private readonly log = new Logger(MemberProfileService.name);
   private nikTersamar(p: Baris): string | null {
     if (!p.nik_enc) return null;
-    return samarkanNik(dekripsiNik(p.nik_enc as Buffer, this.kunci.enkripsi, p.id as string));
+    try {
+      return samarkanNik(dekripsiNik(p.nik_enc as Buffer, this.kunci.enkripsi, p.id as string));
+    } catch {
+      this.log.error(`NIK profil ${String(p.id)} tidak dapat didekripsi (kunci tidak cocok atau data rusak)`);
+      return null;
+    }
   }
 
   async profil(userId: string) {

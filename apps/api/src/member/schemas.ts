@@ -47,3 +47,13 @@ export const BiodataSimpan = z
 export const JENIS_DOKUMEN_MEMBER = ['KTP', 'FOTO_DIRI', 'IJAZAH', 'LAINNYA'] as const;
 export const DokumenMemberBody = z.object({ kind: z.enum(JENIS_DOKUMEN_MEMBER, { error: 'Jenis dokumen tidak valid' }) });
 export const IdParam = z.string({ error: 'ID wajib diisi' }).uuid('ID tidak valid');
+
+// ---------------- Sisi staff (verifikasi HRD) ----------------
+export const STATUS_MEMBER = ['TERDAFTAR', 'PROFIL_BELUM_LENGKAP', 'MENUNGGU_VERIFIKASI', 'TERVERIFIKASI', 'BELUM_DITEMPATKAN', 'KARYAWAN_AKTIF', 'KONTRAK_AKAN_BERAKHIR', 'KONTRAK_BERAKHIR', 'NONAKTIF'] as const;
+export const DaftarMemberQuery = z.object({
+  cursor: z.string().max(500).optional(),
+  limit: z.coerce.number().int().min(1, 'limit minimal 1').max(100, 'limit maksimal 100').default(50),
+  status: z.enum(STATUS_MEMBER, { error: 'Status tidak valid' }).optional(),
+  q: z.string().trim().min(2, 'Kata kunci minimal 2 karakter').max(100, 'Kata kunci terlalu panjang').optional(),
+});
+export const KembalikanBody = z.object({ reason: z.string({ error: 'Alasan wajib diisi' }).trim().min(3, 'Alasan wajib diisi (minimal 3 karakter)').max(500, 'Alasan terlalu panjang (maksimal 500 karakter)') });

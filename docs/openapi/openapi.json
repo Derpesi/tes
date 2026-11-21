@@ -1648,6 +1648,157 @@
           "Member (self-service)"
         ]
       }
+    },
+    "/members": {
+      "get": {
+        "operationId": "MembersController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Daftar member (keyset). NIK tersamar"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/summary": {
+      "get": {
+        "operationId": "MembersController_ringkasan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Hitungan member per status, tanpa data pribadi"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/{id}": {
+      "get": {
+        "operationId": "MembersController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/{id}/nik": {
+      "get": {
+        "operationId": "MembersController_nik",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "NIK penuh; setiap akses diaudit"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/{id}/documents/{docId}/download": {
+      "get": {
+        "operationId": "MembersController_unduh",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokumen identitas dialirkan setelah didekripsi; setiap unduhan diaudit"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/{id}/return": {
+      "post": {
+        "operationId": "MembersController_kembalikan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mengembalikan untuk revisi (alasan wajib)"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
+    },
+    "/members/{id}/approve": {
+      "post": {
+        "operationId": "MembersController_setujui",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menyetujui verifikasi: TERVERIFIKASI -> BELUM_DITEMPATKAN"
+          }
+        },
+        "tags": [
+          "Database Member (staff)"
+        ]
+      }
     }
   },
   "info": {
