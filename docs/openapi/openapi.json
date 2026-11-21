@@ -2857,6 +2857,256 @@
         ]
       }
     },
+    "/attendance/review": {
+      "get": {
+        "operationId": "AttendanceOpsController_daftarTinjauan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/review/{id}": {
+      "get": {
+        "operationId": "AttendanceOpsController_detailTinjauan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/review/{id}/check": {
+      "post": {
+        "operationId": "AttendanceOpsController_periksa",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Langkah 1: pemeriksaan (PayAbs/PayInt)"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/review/{id}/decide": {
+      "post": {
+        "operationId": "AttendanceOpsController_putuskan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Langkah 2: putusan (Mgr Ops), orang berbeda dari pemeriksa; rekaman asli tidak diubah"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/records/{id}/selfie": {
+      "get": {
+        "operationId": "AttendanceOpsController_lihatSelfie",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Isi selfie (JPEG) didekripsi sesuai permintaan; setiap akses diaudit; tanpa cache"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/records/{id}/selfie/hold": {
+      "post": {
+        "operationId": "AttendanceOpsController_tahan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menerapkan/mencabut legal hold; selfie yang ditahan tidak dihapus oleh retensi"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/adjustments": {
+      "get": {
+        "operationId": "AttendanceOpsController_daftarKoreksi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      },
+      "post": {
+        "operationId": "AttendanceOpsController_buatKoreksi",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/adjustments/{id}": {
+      "get": {
+        "operationId": "AttendanceOpsController_detailKoreksi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      },
+      "patch": {
+        "operationId": "AttendanceOpsController_ubahKoreksi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/adjustments/{id}/decide": {
+      "post": {
+        "operationId": "AttendanceOpsController_putuskanKoreksi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/recap": {
+      "get": {
+        "operationId": "AttendanceOpsController_daftarRekap",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Rekap per orang-hari dari rekaman efektif (putusan tinjauan dan koreksi disetujui); keyset"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
+    "/attendance/recap/export.csv": {
+      "get": {
+        "operationId": "AttendanceOpsController_eksporRekap",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Ekspor CSV (maksimal 10.000 baris) dengan perlindungan formula injection; diaudit"
+          }
+        },
+        "tags": [
+          "Absensi: operasional"
+        ]
+      }
+    },
     "/member/attendance": {
       "post": {
         "operationId": "MemberAttendanceController_absen",

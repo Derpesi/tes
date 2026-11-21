@@ -22,7 +22,13 @@ const kodeSingkat = z.string({ error: 'Kode singkat wajib diisi' }).trim().toUpp
 
 /** Pengaturan payroll dan dokumen divalidasi ketat (tanpa JSON bebas). Bentuk final menunggu kebijakan pemilik (A-24). */
 export const PengaturanPayroll = z.object({ periodType: z.enum(['BULANAN', 'MINGGUAN'], { error: 'Jenis periode tidak valid' }).optional(), cutOffDay: z.number({ error: 'Tanggal cut-off harus angka' }).int().min(1, 'Tanggal cut-off 1–28').max(28, 'Tanggal cut-off 1–28').optional() }).strict();
-export const PengaturanDokumen = z.object({ contractNumberPrefix: z.string().regex(/^[A-Z0-9/.-]{1,20}$/, 'Prefiks nomor kontrak tidak valid').optional() }).strict();
+export const PengaturanDokumen = z
+  .object({
+    contractNumberPrefix: z.string().regex(/^[A-Z0-9/.-]{1,20}$/, 'Prefiks nomor kontrak tidak valid').optional(),
+    /** Retensi selfie absensi (hari); bawaan 90. Kebijakan final wajib ditinjau terhadap UU Pelindungan Data Pribadi. */
+    selfieRetentionDays: z.number({ error: 'Retensi selfie harus angka' }).int('Retensi selfie harus bilangan bulat').min(7, 'Retensi selfie minimal 7 hari').max(3650, 'Retensi selfie maksimal 3650 hari').optional(),
+  })
+  .strict();
 
 export const PerusahaanBuat = z.object({
   name: teks('Nama perusahaan', 150),

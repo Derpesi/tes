@@ -61,3 +61,51 @@ export const AbsenBody = z.object({
   idempotencyKey: z.string({ error: 'Kunci idempotensi wajib diisi' }).regex(/^[A-Za-z0-9_-]{8,100}$/, 'Kunci idempotensi tidak valid'),
 });
 export const RiwayatAbsenQuery = z.object({ ...halaman });
+
+// ----- tinjauan, selfie, koreksi, rekap (staf) -----
+const alasan = (nama: string) => z.string({ error: `${nama} wajib diisi` }).trim().min(3, `${nama} wajib diisi (minimal 3 karakter)`).max(500, `${nama} terlalu panjang (maksimal 500 karakter)`);
+export const DaftarTinjauanQuery = z.object({
+  ...halaman,
+  tahap: z.enum(['MENUNGGU_PERIKSA', 'MENUNGGU_PUTUSAN', 'SELESAI'], { error: 'Tahap tidak valid' }).optional(),
+  locationId: uuid('ID lokasi').optional(),
+});
+export const PeriksaBody = z.object({ reason: alasan('Catatan pemeriksaan') });
+export const PutusanBody = z.object({
+  decision: z.enum(['DISETUJUI', 'DITOLAK'], { error: 'Putusan harus DISETUJUI atau DITOLAK' }),
+  reason: alasan('Alasan putusan'),
+  /** Hanya bila perangkat rekaman masih PERLU_VERIFIKASI: sekaligus menyetujui/menolak perangkat itu. */
+  device: z.enum(['SETUJUI', 'TOLAK'], { error: 'Tindakan perangkat harus SETUJUI atau TOLAK' }).optional(),
+});
+export const HoldBody = z.object({ hold: z.boolean({ error: 'hold harus true atau false' }), reason: alasan('Alasan') });
+
+export const KoreksiBuat = z.object({
+  personId: uuid('ID pekerja'),
+  shiftDate: tanggal('Tanggal shift'),
+  effect: z.enum(['HADIR', 'TIDAK_HADIR', 'IZIN', 'SAKIT'], { error: 'Efek koreksi tidak valid' }),
+  reason: alasan('Alasan koreksi'),
+  recordId: uuid('ID rekaman').optional(),
+});
+export const KoreksiUbah = z.object({ effect: z.enum(['HADIR', 'TIDAK_HADIR', 'IZIN', 'SAKIT'], { error: 'Efek koreksi tidak valid' }).optional(), reason: alasan('Alasan koreksi').optional() })
+  .refine((v) => Object.keys(v).length > 0, 'Tidak ada perubahan');
+export const KoreksiPutusan = z.object({ decision: z.enum(['DISETUJUI', 'DITOLAK'], { error: 'Putusan harus DISETUJUI atau DITOLAK' }), note: alasan('Catatan putusan') });
+export const DaftarKoreksiQuery = z.object({
+  ...halaman,
+  status: z.enum(['DIAJUKAN', 'DISETUJUI', 'DITOLAK'], { error: 'Status tidak valid' }).optional(),
+  personId: uuid('ID pekerja').optional(),
+});
+
+export const RekapQuery = z.object({
+  ...halaman,
+  from: tanggal('Dari tanggal'),
+  to: tanggal('Sampai tanggal'),
+  locationId: uuid('ID lokasi').optional(),
+  personId: uuid('ID pekerja').optional(),
+}).refine((v) => v.to >= v.from, { message: 'Sampai tanggal tidak boleh sebelum dari tanggal', path: ['to'] })
+  .refine((v) => (Date.parse(v.to) - Date.parse(v.from)) / 86400000 <= 92, { message: 'Rentang rekap maksimal 93 hari', path: ['to'] });
+export const RekapEksporQuery = z.object({
+  from: tanggal('Dari tanggal'),
+  to: tanggal('Sampai tanggal'),
+  locationId: uuid('ID lokasi').optional(),
+  personId: uuid('ID pekerja').optional(),
+}).refine((v) => v.to >= v.from, { message: 'Sampai tanggal tidak boleh sebelum dari tanggal', path: ['to'] })
+  .refine((v) => (Date.parse(v.to) - Date.parse(v.from)) / 86400000 <= 92, { message: 'Rentang rekap maksimal 93 hari', path: ['to'] });

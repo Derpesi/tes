@@ -5,7 +5,7 @@ import { samaAman } from '../common/crypto/crypto';
 import { ENV } from '../config/config.module';
 import type { Env } from '../config/env';
 import { Akses, AksesService } from '../rbac/akses.service';
-import { IZIN } from '../rbac/rbac.decorators';
+import { IZIN, IZIN_ALTERNATIF } from '../rbac/rbac.decorators';
 import { COOKIE_SESI } from './auth.constants';
 import { OPSI_SESI, OpsiSesi, PUBLIK } from './decorators';
 import { SesiAktif, SessionService } from './session.service';
@@ -69,7 +69,8 @@ export class AuthGuard implements CanActivate {
     const izin = this.reflector.getAllAndOverride<string | undefined>(IZIN, target);
     if (izin) {
       const a = await this.akses.muat(sesi.userId);
-      if (!a.permissions.has(izin)) throw new ForbiddenException({ kode: 'IZIN_DITOLAK', message: 'Anda tidak memiliki izin untuk tindakan ini' });
+      const alternatif = this.reflector.getAllAndOverride<string[] | undefined>(IZIN_ALTERNATIF, target) ?? [];
+      if (!a.permissions.has(izin) && !alternatif.some((x) => a.permissions.has(x))) throw new ForbiddenException({ kode: 'IZIN_DITOLAK', message: 'Anda tidak memiliki izin untuk tindakan ini' });
       req.akses = a;
     }
     return true;
