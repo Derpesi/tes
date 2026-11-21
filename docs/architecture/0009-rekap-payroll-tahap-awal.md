@@ -1,0 +1,25 @@
+# ADR-0009: Rekap Payroll Tahap Awal dan Ekspor
+
+- Status: **Disetujui** (diimplementasikan dan diuji pada Fase 8)
+- Tanggal: 2026-11-22
+
+## Konteks
+Setelah absensi (Fase 7), perusahaan membutuhkan rekap per periode sebagai bahan payroll: rekap absensi, komponen masukan (tunjangan, potongan, insentif), verifikasi, persetujuan, dan ekspor. Aturan keras: **tahap awal hanya rekap dan masukan**; dilarang menghitung gaji final, PPh 21, BPJS, slip, atau pembayaran/transfer; uang `NUMERIC`/Decimal; rekap disetujui tidak diubah diam-diam; pembuat, pemeriksa, penyetuju, dan finalisator orang berbeda; ekspor anti formula injection dan diaudit.
+
+## Keputusan
+1. **Dua jenis rekap terpisah**: `PARTNER` (tenaga kerja pada rekanan; bersumber dari absensi) dan `INTERNAL` (staf internal; baris manual). Izin mengikuti `rbac.md`: PayAbs (buat/ubah rekanan), PayInt (buat/ubah/ekspor internal), Keuangan (periksa + ekspor rekanan, periksa internal, setujui + finalisasi), Direktur (lihat, setujui + finalisasi). Izin per jenis diperiksa di layanan; rute baca memakai izin "salah satu" (ADR-0008 butir 14).
+2. **Periode** (`payroll_periods`): rentang ≤ 93 hari; tidak tumpang tindih per (perusahaan, jenis) — exclusion constraint database. Membuka periode membuat **rekap versi 1** (DRAFT).
+3. **Rekap berversi** (`payroll_recaps`): `DRAFT → DIVERIFIKASI → DISETUJUI → DIFINALISASI`, `DIGANTIKAN`. Dikembalikan ke DRAFT dengan alasan wajib. Transisi sah dijaga trigger database; guard status atomik (`UPDATE … WHERE status`) + `FOR UPDATE` untuk keserentakan. Tidak pernah dihapus.
+4. **Empat orang berbeda**: pembuat, pemeriksa, penyetuju, finalisator; penyunting terakhir bukan pemeriksa. Ditegakkan **aplikasi dan CHECK database** (`payroll_recaps_sod`). Konsekuensi operasional: finalisasi membutuhkan ≥ 2 orang Keuangan/Direktur selain pemeriksa.
+5. **Snapshot absensi** (`POST …/pull`, DRAFT, PARTNER, idempoten): per orang hari hadir/tidak hadir/izin/sakit, jumlah terlambat dan pulang cepat, jam kerja (menit → jam desimal dengan bilangan bulat), rekaman menunggu verifikasi; sumber tunggal = `RecapService.ambil` (rekaman efektif + putusan tinjauan + koreksi disetujui; hari terkoreksi tidak dihitung jam kerjanya). Komponen dan masukan manual dipertahankan; orang yang datanya hilang dinolkan, bukan dihapus.
+6. **Prasyarat verifikasi**: rekap tidak kosong; absensi sudah ditarik; **tidak ada rekaman absensi PERLU_VERIFIKASI pada periode (diperiksa langsung ke data, bukan hanya snapshot)**.
+7. **Komponen** (`payroll_components`): jenis TUNJANGAN/POTONGAN/INSENTIF, `NUMERIC(14,2) ≥ 0`. API menerima **hanya teks desimal** (`^\d{1,12}(\.\d{1,2})?$`); angka JS/float ditolak. Penjumlahan memakai `bigint` sen (`uang.ts`). Ringkasan hanya **subtotal per jenis**; **tidak ada bidang total gaji/neto/PPh/BPJS/slip** (diuji). Masukan manual `days_leave` dan `overtime_hours` tidak ditafsirkan (aturan lembur = regulasi).
+8. **Kekekalan**: trigger menolak INSERT/UPDATE/DELETE baris dan komponen bila rekap bukan DRAFT; identitas, pelaku, dan hash rekap tidak berubah setelah disetujui. Saat DISETUJUI disimpan **hash SHA-256 isi kanonik**; dicek ulang saat finalisasi dan ekspor (perubahan diam-diam → 409 `INTEGRITAS_REKAP_GAGAL`).
+9. **Koreksi resmi**: dari versi terbaru berstatus DISETUJUI/DIFINALISASI dibuat versi n+1 bernomor `KRP/<tahun>/<urut 5 digit>` (alasan wajib) berisi salinan DRAFT; satu versi terbuka per periode (indeks unik parsial). Versi lama tetap utuh sampai versi baru disetujui, lalu `DIGANTIKAN` dengan riwayat.
+10. **Ekspor** CSV, xlsx, PDF (hanya DISETUJUI/DIFINALISASI; izin `payroll_recap_<jenis>.export`): dibangkitkan sesuai permintaan (≤ 5.000 baris), dicatat di `payroll_exports` (format, baris, SHA-256, pengekspor) dan audit tanpa nominal/nama. Sel berawalan `= + - @ TAB CR` dinetralkan di semua format; di xlsx selalu string. Kolom bersifat **sementara** menunggu format pemilik (A-42). **xlsx**: `exceljs` ditolak kebijakan lisensi (Unlicense/MIT-X11/Unknown pada dependency transitif) dan audit (uuid); ditulis penulis OOXML + ZIP minimal tanpa dependency baru (`xlsx.ts`, CRC32 bawaan Node).
+11. **RLS** pada semua tabel (`company_id`); rekap payroll bukan untuk member. Audit memuat ID, versi, status, jenis, dan jumlah baris saja.
+12. **Dilarang dan tidak dibuat**: hitung gaji final, PPh 21, BPJS, slip, pembayaran, `payroll_runs/items/payment_records/rule_versions`.
+13. **Web**: `/staff/payroll` (daftar + buka periode) dan `/staff/payroll/[id]` (tarik absensi, komponen, alur status, koreksi, ekspor, versi, riwayat ekspor).
+
+## Konsekuensi dan keterbatasan
+Format kolom ekspor final dan tarif/regulasi (lembur, PPh 21, BPJS, kompensasi PKWT) menunggu pemilik/ahli; ekspor sinkron tanpa antrean latar/bucket privat (ukuran kecil; antrean bila beban menuntut); rekap INTERNAL berbasis input manual dan memilih orang lewat ID (belum ada pencarian staf); rekap tidak menurunkan hari tanpa absen dari jadwal; kualifikator sel matriks belum ditegakkan; empat peran berbeda butuh cukup personel Keuangan/Direktur.

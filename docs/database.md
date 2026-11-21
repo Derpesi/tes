@@ -99,8 +99,16 @@ persons 1─* attendance_adjustments
 ```
 Pelindung database: satu titik aktif per lokasi; kode QR unik; `crosses_midnight` konsisten dengan jam; unik (orang, titik, jenis, tanggal-shift) non-DITOLAK; kunci idempotensi unik per orang; alasan tolak sesuai status; putusan tinjauan wajib didahului pemeriksaan oleh orang berbeda (trigger); penyetuju koreksi ≠ pembuat (CHECK); selfie ≤ 300 KB, satu per rekaman; tinjauan hanya-tambah. Kebijakan baca-milik member dan dua kebijakan SELECT sempit (`titik_baca_kode`, `perangkat_baca_hash`) bergantung variabel transaksi yang hanya disetel kode server.
 
-## Dirancang tapi belum dibuat (menunggu fase payroll)
-`payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions`.
+## Sudah dibuat (Fase 8)
+`payroll_periods`, `payroll_recaps` (berversi), `payroll_recap_lines`, `payroll_components`, `payroll_recap_status_histories` (hanya-tambah), `payroll_exports` (hanya-tambah). Semua ber-`company_id` + RLS (migrasi 020).
+```
+companies 1─* payroll_periods 1─* payroll_recaps (versi 1..n) 1─* payroll_recap_lines 1─* payroll_components
+payroll_recaps 1─* payroll_recap_status_histories ; payroll_recaps 1─* payroll_exports
+```
+Pelindung database: periode tidak tumpang tindih (exclusion), rentang ≤ 93 hari; satu versi terbuka per periode; versi ≥ 2 wajib bernomor dan beralasan; empat pelaku berbeda dan penyunting terakhir bukan pemeriksa (CHECK); kelengkapan pelaku/hash menurut status; transisi status sah; identitas/pelaku/hash tidak berubah setelah disetujui; rekap tidak dihapus; baris dan komponen hanya berubah saat DRAFT; nominal `NUMERIC(14,2) ≥ 0`.
+
+## Dirancang tapi belum dibuat (menunggu persetujuan fase payroll penuh)
+`payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions` (hitung gaji, PPh 21, BPJS, slip, pembayaran).
 
 ## Constraint kunci
 - Satu penempatan aktif per karyawan per rentang tanggal (exclusion constraint).

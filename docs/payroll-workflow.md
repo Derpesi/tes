@@ -30,3 +30,5 @@ Format **xlsx, CSV, PDF**. Pekerjaan latar untuk data besar; file di bucket priv
 
 ## Aturan regulasi
 Tarif dan ketentuan (PPh 21, BPJS, kompensasi PKWT, lembur) tidak boleh diasumsikan. Pada fase berikutnya disimpan sebagai data berversi dengan tanggal berlaku dan diverifikasi ahli.
+
+> **Status implementasi (Fase 8):** diimplementasikan (ADR-0009). Penyederhanaan dari diagram awal: status rekap `DRAFT → DIVERIFIKASI → DISETUJUI → DIFINALISASI` (+ `DIGANTIKAN`); "tarik absensi" dan "isi komponen" terjadi dalam DRAFT; `DIEKSPOR` bukan status melainkan catatan ekspor (`payroll_exports`); `DIKOREKSI` = versi koreksi bernomor `KRP/<tahun>/<urut>` yang menempuh alur penuh. Rute: `/payroll/periods`, `/payroll/recaps/:id` (+ `pull`, `lines`, `components`, `verify`, `return`, `approve`, `finalize`, `correct`, `export.csv|xlsx|pdf`, `exports`). Pembuat, pemeriksa, penyetuju, finalisator harus orang berbeda (aplikasi + database). Tidak ada hitung gaji final, PPh 21, BPJS, slip, atau pembayaran. Kolom ekspor sementara (A-42).

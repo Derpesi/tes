@@ -71,6 +71,6 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | ABS-2 | Scan absensi | Luar radius ditolak; duplikat ditolak; tanpa selfie kamera ditolak; waktu dari server; shift lintas tengah malam benar (7C) |
 | ABS-3 | Koreksi | Rekaman asli tak berubah; koreksi butuh persetujuan; teraudit (7D) |
 | ABS-4 | Retensi selfie | Selfie melewati masa retensi terhapus oleh pekerjaan harian; legal hold dikecualikan; penghapusan teraudit (7D) |
-| PAY-1 | Rekap absensi | Rekap per periode sesuai data absensi; setelah disetujui tak bisa diubah tanpa koreksi resmi (rekap absensi 7D; persetujuan rekap Fase 8) |
-| EXP-1 | Ekspor | xlsx, CSV, PDF terbentuk; sel berawalan `=+-@` dinetralkan; ekspor teraudit (CSV absensi 7D; xlsx/PDF Fase 8) |
+| PAY-1 | Rekap absensi | Rekap per periode sesuai data absensi; setelah disetujui tak bisa diubah tanpa koreksi resmi (rekap absensi 7D; rekap payroll, verifikasi, persetujuan, finalisasi, dan koreksi bernomor 8C) |
+| EXP-1 | Ekspor | xlsx, CSV, PDF terbentuk; sel berawalan `=+-@` dinetralkan; ekspor teraudit (CSV absensi 7D; CSV/xlsx/PDF rekap payroll 8D) |
 | AUD-1 | Audit | Aksi sensitif tercatat; tabel tidak bisa UPDATE/DELETE |

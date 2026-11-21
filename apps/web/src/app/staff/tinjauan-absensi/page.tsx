@@ -41,9 +41,11 @@ export default function TinjauanAbsensi() {
     if (info && lihatDaftar) void muat();
   }, [info, muat]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function bukaDetail(id: string) {
-    setGalat(null);
-    setSukses(null);
+  async function bukaDetail(id: string, jagaPesan = false) {
+    if (!jagaPesan) {
+      setGalat(null);
+      setSukses(null);
+    }
     setTampilFoto(false);
     try {
       setBuka(await api<Detail>(`/attendance/review/${id}`));
@@ -63,7 +65,7 @@ export default function TinjauanAbsensi() {
       await api(`/attendance/${jalur}`, { method: 'POST', csrf: info.csrfToken, body });
       setSukses(pesan);
       await muat();
-      await bukaDetail(buka.id);
+      await bukaDetail(buka.id, true); // pesan sukses tidak boleh terhapus oleh pemuatan ulang rincian
     } catch (err) {
       setGalat((err as ApiError).message);
     }

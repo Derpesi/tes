@@ -78,3 +78,11 @@ details.lipat > summary { min-height: 44px; display: flex; align-items: center; 
 .hari-kerja label { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 44px; padding: 0 0.5rem; border: 1px solid #8a96a8; border-radius: 8px; }
 .hari-kerja input { width: 20px; height: 20px; }
 .foto-tinjau { display: block; max-width: 100%; width: 14rem; border-radius: 8px; border: 1px solid #d5dbe5; margin: 0.5rem 0; }
+
+/* ---- payroll ---- */
+.lencana-diverifikasi { color: #0b1f3a; background: #eaf0fa; }
+.lencana-difinalisasi { color: #0f3d21; background: #d6efdd; }
+.lencana-digantikan { color: #44546a; background: #eef0f4; }
+.lencana-ditolak, .lencana-nonaktif { color: #5f120d; background: #fdecea; }
+.baris-angka { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; font-size: 0.875rem; color: #44546a; margin: 0.25rem 0; }
+.komponen { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.375rem 0; border-top: 1px solid #eef0f4; overflow-wrap: anywhere; }

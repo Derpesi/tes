@@ -119,6 +119,11 @@ export default function BerandaStaff() {
                 Rekap absensi
               </Link>
             ) : null}
+            {['payroll_recap_partner.view', 'payroll_recap_partner.create', 'payroll_recap_partner.update', 'payroll_recap_partner.review', 'payroll_recap_partner.export', 'payroll_recap_internal.view', 'payroll_recap_internal.create', 'payroll_recap_internal.update', 'payroll_recap_internal.review', 'payroll_recap_internal.export', 'payroll_approval.approve', 'payroll_approval.finalize'].some((i) => info.permissions?.includes(i)) ? (
+              <Link className="tombol-sekunder" href="/staff/payroll">
+                Rekap payroll
+              </Link>
+            ) : null}
             {info.permissions?.includes('user_role.view') ? (
               <Link className="tombol-sekunder" href="/staff/persetujuan">
                 Persetujuan

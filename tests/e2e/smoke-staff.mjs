@@ -680,6 +680,97 @@ async function utama() {
   await page.goto(`${WEB}/staff/koreksi-absensi`); await page.waitForSelector('text=Koreksi absensi');
   await periksa('koreksi-absensi');
 
+  // 12. Fase 8: rekap payroll TAHAP AWAL. PayAbs membuka periode, menarik absensi, mengisi komponen; Keuangan memverifikasi; Direktur menyetujui;
+  // Keuangan lain memfinalisasi; ekspor; koreksi resmi. Pembuat, pemeriksa, penyetuju, finalisator harus orang berbeda (pelanggaran ditolak backend).
+  await ctx.clearCookies();
+  await masukSesi(payabs7);
+  await page.goto(`${WEB}/staff/payroll`); await page.waitForSelector('summary:has-text("Buka periode baru")');
+  assert.match(await page.textContent('body'), /Tidak ada perhitungan gaji, PPh 21, BPJS/);
+  await page.click('summary:has-text("Buka periode baru")');
+  await page.selectOption('#kind', 'PARTNER'); assert.equal(await page.locator('#kind option').count(), 2, 'PayAbs hanya dapat membuka rekap rekanan');
+  await page.fill('#label', 'Periode E2E'); await page.fill('#mulai', hariIni7); await page.fill('#akhir', hariIni7);
+  await page.click('button:has-text("Buka periode")');
+  assert.match(await page.textContent('[role=status].sukses'), /Periode dibuka/);
+  await page.click('a:has-text("Buka rekap Periode E2E")'); await page.waitForSelector('button:has-text("Tarik absensi")');
+  const urlRekap = page.url();
+  await page.click('button:has-text("Tarik absensi")');
+  await page.waitForSelector('.butir:has-text("SINTETIS Pelamar E2E")');
+  assert.match(await page.textContent('.butir:has-text("SINTETIS Pelamar E2E")'), /Hadir 1/);
+  await page.click('button:has-text("Tambah komponen untuk SINTETIS Pelamar E2E")'); await page.waitForSelector('#k-kind');
+  await page.selectOption('#k-kind', 'TUNJANGAN'); await page.fill('#k-nama', 'Uang makan'); await page.fill('#k-nominal', '150.000,50');
+  await page.click('button:has-text("Simpan komponen")');
+  assert.match(await page.textContent('[role=alert].galat'), /Nominal harus berupa angka desimal/);
+  await page.fill('#k-nominal', '150000.50'); await page.click('button:has-text("Simpan komponen")');
+  assert.match(await page.textContent('[role=status].sukses'), /Komponen ditambahkan/);
+  await page.click('button:has-text("Tambah komponen untuk SINTETIS Pelamar E2E")'); await page.waitForSelector('#k-kind');
+  await page.selectOption('#k-kind', 'POTONGAN'); await page.fill('#k-nama', 'Seragam'); await page.fill('#k-nominal', '20000'); await page.click('button:has-text("Simpan komponen")');
+  await page.waitForSelector('.komponen:has-text("Seragam")');
+  assert.match(await page.textContent('.kartu'), /Tunjangan 150000\.50 · Potongan 20000\.00 · Insentif 0\.00/);
+  assert.ok(!(await page.isVisible('button:has-text("Verifikasi rekap")')), 'PayAbs tidak memegang izin verifikasi');
+  assert.ok(!(await page.isVisible('a:has-text("Ekspor csv")')), 'belum disetujui: tanpa ekspor');
+  await periksa('payroll-draf'); await foto('38-payroll-draf');
+  await ctx.clearCookies();
+
+  const keu1 = await buatStaffScope('keu1', ['STAFF_KEUANGAN']);
+  const dir8 = await buatStaffScope('dir8', ['DIREKTUR']);
+  const keu2 = await buatStaffScope('keu2', ['STAFF_KEUANGAN']);
+  await masukSesi(keu1);
+  await page.goto(urlRekap); await page.waitForSelector('button:has-text("Verifikasi rekap")');
+  assert.ok(!(await page.isVisible('button:has-text("Tarik absensi")')), 'Keuangan tidak menyunting');
+  await page.click('button:has-text("Verifikasi rekap")');
+  assert.match(await page.textContent('[role=status].sukses'), /diverifikasi/);
+  await page.waitForSelector('button:has-text("Setujui rekap")');
+  await page.click('button:has-text("Setujui rekap")'); // pemeriksa yang sama: ditolak backend
+  assert.match(await page.textContent('[role=alert].galat'), /Penyetuju tidak boleh sama dengan pembuat atau pemeriksa/);
+  await periksa('payroll-diverifikasi'); await foto('39-payroll-diverifikasi');
+  await ctx.clearCookies();
+  await masukSesi(dir8);
+  await page.goto(urlRekap); await page.waitForSelector('button:has-text("Setujui rekap")');
+  await page.click('button:has-text("Setujui rekap")');
+  assert.match(await page.textContent('[role=status].sukses'), /disetujui/);
+  await page.waitForSelector('button:has-text("Finalisasi rekap")');
+  await page.click('button:has-text("Finalisasi rekap")'); // penyetuju yang sama: ditolak backend
+  assert.match(await page.textContent('[role=alert].galat'), /Finalisator tidak boleh sama/);
+  assert.ok(!(await page.isVisible('a:has-text("Ekspor csv")')), 'Direktur tidak memegang izin ekspor rekap rekanan');
+  await ctx.clearCookies();
+  await masukSesi(keu2);
+  await page.goto(urlRekap); await page.waitForSelector('button:has-text("Finalisasi rekap")');
+  await page.click('button:has-text("Finalisasi rekap")');
+  assert.match(await page.textContent('[role=status].sukses'), /difinalisasi/);
+  await ctx.clearCookies();
+
+  // 12b. Ekspor oleh Keuangan (izin export rekanan); setiap ekspor dicatat; formula injection dinetralkan
+  await masukSesi(keu1);
+  await page.goto(urlRekap); await page.waitForSelector('a:has-text("Ekspor csv")');
+  const idRekap = new URL(urlRekap).pathname.split('/').pop();
+  const csvP = await page.request.get(`${WEB}/api/payroll/recaps/${idRekap}/export.csv`);
+  assert.equal(csvP.status(), 200);
+  const teksP = (await csvP.body()).toString('utf8');
+  assert.equal(teksP.charCodeAt(0), 0xfeff); assert.match(teksP, /SINTETIS Pelamar E2E/); assert.match(teksP, /150000\.50,20000\.00,0\.00/);
+  const xl = await page.request.get(`${WEB}/api/payroll/recaps/${idRekap}/export.xlsx`);
+  assert.equal(xl.status(), 200); assert.equal((await xl.body()).subarray(0, 2).toString(), 'PK');
+  const pd = await page.request.get(`${WEB}/api/payroll/recaps/${idRekap}/export.pdf`);
+  assert.equal(pd.status(), 200); assert.equal((await pd.body()).subarray(0, 5).toString(), '%PDF-');
+  await page.reload(); await page.waitForSelector('text=Riwayat ekspor');
+  assert.equal(await page.locator('#h-eks ~ p').count(), 3, 'tiga ekspor tercatat');
+  await periksa('payroll-difinalisasi'); await foto('40-payroll-difinalisasi');
+  await ctx.clearCookies();
+
+  // 12c. Koreksi resmi oleh PayAbs: versi baru bernomor (salinan DRAFT); versi lama tetap utuh
+  await masukSesi(payabs7);
+  await page.goto(urlRekap); await page.waitForSelector('summary:has-text("Koreksi resmi")');
+  assert.ok(!(await page.isVisible('button:has-text("Tarik absensi")')), 'rekap final tidak dapat disunting langsung');
+  await page.click('summary:has-text("Koreksi resmi")');
+  await page.fill('#alasan-koreksi', 'Uang makan perlu disesuaikan'); await page.click('button:has-text("Buat versi koreksi")');
+  await page.waitForFunction(() => /Versi 2|versi 2/.test(document.body.textContent ?? '') && /KRP\//.test(document.body.textContent ?? ''));
+  assert.match(await page.textContent('.kartu'), /Draf \(disusun\)/);
+  assert.match(await page.textContent('.kartu'), /Alasan koreksi: Uang makan perlu disesuaikan/);
+  await page.waitForSelector('.butir:has-text("SINTETIS Pelamar E2E") .komponen:has-text("Uang makan")'); // komponen tersalin
+  await periksa('payroll-koreksi'); await foto('41-payroll-koreksi');
+  const v1 = await tenantQ((c) => c.query(`SELECT status FROM payroll_recaps WHERE id = $1`, [idRekap]));
+  assert.equal(v1.rows[0].status, 'DIFINALISASI', 'versi 1 tetap utuh sampai versi koreksi disetujui');
+  await ctx.clearCookies();
+
   assert.deepEqual(galatKonsol, [], `galat konsol/CSP: ${galatKonsol.join(' | ')}`);
   await browser.close();
   await pool.end();

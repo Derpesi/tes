@@ -55,6 +55,12 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-48 | Koreksi absensi bernomor `KOR/<tahun>/<urut>`; penyetuju ≠ pembuat; hanya koreksi disetujui dipakai rekap |
 | D-49 | Rekap absensi per orang-hari dan ekspor CSV (≤ 10.000 baris) dengan perlindungan formula injection dan audit; xlsx/PDF di Fase 8 |
 | D-50 | `RequirePermission` mendukung izin alternatif ("salah satu") hanya untuk daftar baca; Permissions-Policy membuka kamera/lokasi hanya di `/absen` |
+| D-51 | Rekap payroll tahap awal: hanya rekap dan masukan; dilarang hitung gaji final, PPh 21, BPJS, slip, pembayaran (ADR-0009); uang teks desimal/bigint sen, tanpa float |
+| D-52 | Rekap berversi (DRAFT→DIVERIFIKASI→DISETUJUI→DIFINALISASI, DIGANTIKAN); pembuat, pemeriksa, penyetuju, finalisator berbeda (aplikasi + CHECK database); penyunting terakhir bukan pemeriksa |
+| D-53 | Isi rekap terkunci setelah diverifikasi (trigger); hash SHA-256 saat disetujui dicek ulang saat finalisasi dan ekspor; perubahan hanya lewat koreksi resmi bernomor `KRP/<tahun>/<urut>` |
+| D-54 | Snapshot absensi bersumber dari rekap absensi (rekaman efektif + koreksi); verifikasi diblokir bila masih ada rekaman PERLU_VERIFIKASI (dicek langsung ke data) |
+| D-55 | Ekspor CSV/xlsx/PDF hanya untuk rekap disetujui; dicatat (SHA-256) dan diaudit tanpa nominal; sel berawalan = + - @ dinetralkan di semua format |
+| D-56 | `exceljs` ditolak (lisensi dan kerentanan); xlsx ditulis penulis OOXML/ZIP minimal tanpa dependency baru |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -99,6 +105,11 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-38 | Legal hold diterapkan Mgr Ops (`attendance_anomaly.approve`); matriks belum memiliki izin khusus | Pemilik |
 | A-39 | Daftar baca (titik, tinjauan, koreksi) terbuka bagi pemegang izin aksi terkait selain izin lihat | Pemilik meninjau matriks |
 | A-40 | Partisi bulanan `attendance_records` ditunda; indeks (orang, tanggal), (titik, waktu), (perusahaan, tanggal) disiapkan | Uji beban k6 (Fase 10) |
+| A-41 | `payroll_recap_internal.approve` (Direktur) tidak dipakai terpisah; persetujuan dan finalisasi kedua jenis lewat `payroll_approval.*` (Direktur dan Keuangan) | Pemilik meninjau matriks |
+| A-42 | Kolom ekspor payroll bersifat sementara (No, Nama, Sumber, hari hadir/tidak hadir/izin/sakit/cuti, terlambat, pulang cepat, jam kerja, jam lembur, subtotal tunjangan/potongan/insentif, catatan) | Format final dari pemilik |
+| A-43 | Rekap INTERNAL berbasis masukan manual (staf internal tidak memakai absensi QR); orang dipilih lewat ID | Pemilik menentukan sumber data internal |
+| A-44 | Ekspor sinkron (≤ 5.000 baris), tidak disimpan; antrean latar dan bucket privat bila beban menuntut | Uji beban (Fase 10) |
+| A-45 | Rekap hanya memuat orang yang punya rekaman absensi atau koreksi pada periode; hari tanpa absen belum diturunkan dari jadwal | Pemilik |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

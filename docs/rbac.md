@@ -65,3 +65,6 @@ Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/veri
 
 ## Catatan penegakan Fase 7
 `RequirePermission(izin, ...alternatif)` berarti pemegang **salah satu** izin diizinkan; dipakai hanya untuk daftar baca yang harus terbuka bagi pelaksana tindakan (antrean tinjauan: `attendance_anomaly.view|review|approve`; koreksi: `attendance_adjustment.view|create|update|approve`; titik absensi: `attendance_point.view|create|update|export`). Izin aksi tetap tunggal dan tidak berubah. Kualifikator sel (mis. PayAbs "U(shift)", penampil selfie "rekanan/internal") belum ditegakkan di kode.
+
+## Catatan penegakan Fase 8
+Rekap payroll: izin dipisah per jenis (`payroll_recap_partner.*` untuk rekanan, `payroll_recap_internal.*` untuk internal) dan diperiksa di layanan; rute baca terbuka bagi pemegang izin apa pun lalu disaring per jenis. Persetujuan dan finalisasi memakai `payroll_approval.approve|finalize` untuk kedua jenis (A-41). Pembuat, pemeriksa, penyetuju, finalisator harus orang berbeda (aplikasi + database).
