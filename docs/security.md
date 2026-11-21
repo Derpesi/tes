@@ -42,6 +42,13 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 ## RBAC, scope, dan persetujuan ganda (Fase 3D)
 Lihat bagian *Implementasi (Fase 3D)* di `rbac.md`. Ringkas: guard global deny-by-default (diuji dengan enumerasi rute), izin dihitung dari database per permintaan, pemisahan realm, persetujuan ganda dengan pemisahan tugas di aplikasi dan database, tidak ada perubahan akses diri sendiri, audit log dibatasi RLS, kursor keyset divalidasi ketat dan berpresisi mikrodetik, token undangan tidak pernah dikembalikan lewat API. **Keterbatasan:** belum ada pencegahan menghapus Direktur terakhir; kualifikator sel matriks belum ditegakkan; penegakan scope pada modul bisnis menyusul bersama modulnya.
 
+## Web (Fase 3F)
+- **Same-origin:** browser hanya berbicara ke web; `/api/*` diteruskan ke API (rewrite Next.js; tujuan lewat `API_URL`, bawaan `http://localhost:3001`). Tidak ada CORS lintas origin.
+- **Header:** CSP (`default-src 'self'`, `frame-ancestors 'none'`, `form-action 'self'`; `'unsafe-inline'` masih diperlukan oleh Next.js), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` membatasi kamera/mikrofon/lokasi; `X-Powered-By` dimatikan.
+- **Token di URL:** token undangan/reset dibaca sekali lalu **dibuang dari URL dan riwayat**; kode QR dan kunci TOTP hanya ditampilkan sekali; kode pemulihan wajib dikonfirmasi tersimpan sebelum lanjut.
+- **Cookie sesi** tidak terbaca JavaScript (`HttpOnly`); token CSRF diambil dari `GET /auth/session` dan disimpan hanya di memori halaman.
+- **Diuji E2E** (Chromium 360 px): alur undangan → kata sandi → TOTP → kode pemulihan → beranda → keluar → masuk ulang dengan MFA; asersi header, flag cookie, tanpa gulir horizontal, input berlabel, target sentuh ≥ 44 px, kontras WCAG AA, tanpa galat konsol/CSP. E2E belum berjalan di CI (butuh browser).
+
 ## Role database aplikasi
 Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
 

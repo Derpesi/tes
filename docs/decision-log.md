@@ -41,7 +41,7 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-09 | Penampil selfie: Manager Operasional, Staff Payroll Absensi Rekanan, Staff Payroll Internal | Persetujuan pemilik |
 | A-10 | Library: openid-client, otplib, argon2id, exceljs, pdfkit/pdfmake, pino, @nestjs/swagger, pnpm workspace | ADR-0002 + cek lisensi |
 | A-11 | Penyedia email belum dipilih; dev memakai Mailpit lokal | Pemilik menentukan |
-| A-12 | Isolasi perusahaan via `set_config('app.company_ids')` per transaksi + `enable_tenant_rls` (ADR-0003, diusulkan) | Harness 2D, lalu modul pertama dan uji beban |
+| A-12 | ~~Isolasi perusahaan via `set_config('app.company_ids')` + `enable_tenant_rls`~~ **Diadopsi sebagai ADR-0003 (Fase 3)**; kinerja pada tabel besar masih perlu diukur | Uji beban (Fase 10) |
 | A-13 | ~~`audit_logs` dikecualikan sementara dari RLS~~ **DITUTUP di Fase 3A**: `audit_logs` memakai kebijakan RLS khusus (baca per scope atau global bila `app.audit_global`; tulis selalu boleh); pengecualian registri kosong | Tes `audit-rls` dan registri |
 | A-14 | Batas sesi staff: idle 30 menit, mutlak 8 jam; **member: idle 24 jam, mutlak 30 hari**; sesi tertunda (menunggu MFA/pendaftaran) 10 menit | Divalidasi pemilik |
 | A-15 | Kunci akun: 5 gagal berturut-turut (kata sandi atau MFA) mengunci 15 menit, juga untuk email tak terdaftar; undangan berlaku 7 hari, tautan reset 30 menit (maks 3 permintaan/jam/akun) | Divalidasi pemilik |
@@ -52,6 +52,7 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-20 | Login Google: `prompt=select_account` (perangkat bersama), scope `openid email profile`, tanpa refresh token; tanda tangan id_token diverifikasi ulang dengan JWKS (di atas TLS) | Uji dengan klien Google sungguhan oleh pemilik |
 | A-21 | Permintaan persetujuan kedaluwarsa dalam 72 jam | Divalidasi pemilik |
 | A-22 | Baris audit global dapat dibaca Direktur dan IT Administrator saja | Divalidasi pemilik |
+| A-23 | CSP web memakai `'unsafe-inline'` untuk skrip/gaya (Next.js tanpa nonce); `'unsafe-eval'` hanya di pengembangan | Pengetatan dengan nonce (pekerjaan lanjutan) |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

@@ -28,6 +28,8 @@ Kedua variabel harus diisi bersamaan atau dikosongkan bersamaan. Tanpa keduanya,
 
 Prefiks `/api` dapat diubah lewat `API_PUBLIC_PATH` (mis. `/layanan`), asalkan reverse proxy atau rewrite web meneruskan jalur itu ke API dan redirect URI di Google ikut diubah.
 
+Web meneruskan `/api/*` ke API lewat rewrite Next.js; atur `API_URL` (bawaan `http://localhost:3001`) saat **build** web bila API berjalan di alamat lain.
+
 ## 4. Cara menguji
 1. Jalankan API dan web, buka `http://localhost:3000/api/auth/member/google/start`.
 2. Pilih akun uji, setujui, dan pastikan Anda kembali ke aplikasi.

@@ -1,6 +1,6 @@
 # ADR-0003: Mekanisme Isolasi Perusahaan (RLS)
 
-- Status: **Diusulkan** (diuji lewat harness 2D; belum dipakai tabel bisnis)
+- Status: **Disetujui** (dipakai `audit_logs` dan `ScopedDb` sejak Fase 3; diuji pada role non-superuser)
 - Tanggal: 2026-11-21
 
 ## Konteks

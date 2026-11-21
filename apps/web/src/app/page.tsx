@@ -1,13 +1,16 @@
+import Link from 'next/link';
+import { Halaman } from '../components/ui';
+
 export default function Beranda() {
   return (
-    <div className="halaman">
-      <header className="kepala">
-        <h1>DAMARINDO GROUP HRIS</h1>
-      </header>
-      <main className="isi">
-        <h2>Selamat datang</h2>
-        <p>Sistem sedang dalam tahap pengembangan awal. Fitur masuk dan pendaftaran belum tersedia.</p>
-      </main>
-    </div>
+    <Halaman judul="Selamat datang">
+      <p>Pilih cara masuk sesuai peran Anda.</p>
+      <Link className="tombol" href="/masuk">
+        Masuk sebagai member / tenaga kerja
+      </Link>
+      <Link className="tombol-sekunder" href="/staff/masuk">
+        Masuk sebagai staff internal
+      </Link>
+    </Halaman>
   );
 }

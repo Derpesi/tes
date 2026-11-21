@@ -7,6 +7,7 @@ HRIS Outsourcing DAMARINDO GROUP (rencana: proprietary). Stack: Next.js + NestJS
 - `.claude/rules/` — aturan keamanan, koding, dan alur git
 - `apps/api` — NestJS (REST + OpenAPI); `apps/web` — Next.js (PWA, mobile-first)
 - `db/migrations/` — migrasi SQL PostgreSQL
+- `tests/` — harness isolasi, RBAC, E2E (`tests/e2e`), dan kerangka k6
 - `docs/` — arsitektur dan panduan kontribusi
 - `.github/` — CI, template PR, CODEOWNERS
 
