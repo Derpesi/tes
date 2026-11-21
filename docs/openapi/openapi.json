@@ -1225,6 +1225,274 @@
           "Rekanan dan Lokasi"
         ]
       }
+    },
+    "/partner-contracts": {
+      "get": {
+        "operationId": "ContractsController_daftar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      },
+      "post": {
+        "operationId": "ContractsController_buat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Kontrak dibuat berstatus DRAFT"
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}": {
+      "get": {
+        "operationId": "ContractsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      },
+      "patch": {
+        "operationId": "ContractsController_ubah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hanya kontrak DRAFT yang dapat diubah"
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/activate": {
+      "post": {
+        "operationId": "ContractsController_aktifkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DRAFT -> AKTIF oleh penyetuju yang bukan pembuat"
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/end": {
+      "post": {
+        "operationId": "ContractsController_akhiri",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/cancel": {
+      "post": {
+        "operationId": "ContractsController_batalkan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/documents": {
+      "get": {
+        "operationId": "ContractsController_daftarLampiran",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      },
+      "post": {
+        "operationId": "ContractsController_unggah",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "berkas",
+                  "title"
+                ],
+                "properties": {
+                  "berkas": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/documents/{docId}/download": {
+      "get": {
+        "operationId": "ContractsController_unduh",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berkas dialirkan lewat API (tanpa URL publik); setiap unduhan diaudit"
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
+    },
+    "/partner-contracts/{id}/documents/{docId}": {
+      "delete": {
+        "operationId": "ContractsController_hapusLampiran",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Kontrak Layanan Rekanan"
+        ]
+      }
     }
   },
   "info": {

@@ -143,3 +143,33 @@ export const KebutuhanBuat = z
     notes: opsi('Catatan', 1000),
   })
   .refine((v) => !v.validTo || v.validTo >= v.validFrom, 'Tanggal selesai tidak boleh sebelum tanggal mulai');
+
+// ---------------- Kontrak layanan rekanan ----------------
+const nomorKontrak = z.string({ error: 'Nomor kontrak wajib diisi' }).trim().min(1, 'Nomor kontrak wajib diisi').max(80, 'Nomor kontrak terlalu panjang (maksimal 80 karakter)');
+const periodeValid = (v: { startDate?: string; endDate?: string }) => !v.startDate || !v.endDate || v.endDate >= v.startDate;
+const PESAN_PERIODE = 'Tanggal berakhir tidak boleh sebelum tanggal mulai';
+
+export const KontrakBuat = z
+  .object({
+    partnerId: z.string({ error: 'Rekanan wajib dipilih' }).uuid('ID rekanan tidak valid'),
+    contractNumber: nomorKontrak,
+    serviceType: teks('Jenis layanan', 100),
+    startDate: tanggal('Tanggal mulai'),
+    endDate: tanggal('Tanggal berakhir'),
+    notes: opsi('Catatan', 1000),
+  })
+  .refine(periodeValid, PESAN_PERIODE);
+
+export const KontrakUbah = z
+  .object({ contractNumber: nomorKontrak, serviceType: teks('Jenis layanan', 100), startDate: tanggal('Tanggal mulai'), endDate: tanggal('Tanggal berakhir'), notes: opsi('Catatan', 1000) })
+  .partial()
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, 'Tidak ada perubahan yang dikirim')
+  .refine(periodeValid, PESAN_PERIODE);
+
+export const DaftarKontrakQuery = DaftarQuery.extend({
+  partnerId: z.string().uuid('ID rekanan tidak valid').optional(),
+  status: z.enum(['DRAFT', 'AKTIF', 'BERAKHIR', 'DIBATALKAN'], { error: 'Status tidak valid' }).optional(),
+});
+
+export const LampiranKontrakBody = z.object({ title: teks('Judul lampiran', 150) });
