@@ -13,12 +13,14 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "test:integration": "pnpm --filter @hris/api test:integration",
+    "test:integration": "pnpm -r --workspace-concurrency=1 --if-present test:integration",
     "db:migrate": "pnpm --filter @hris/api db:migrate",
     "db:rollback": "pnpm --filter @hris/api db:rollback",
     "export:openapi": "pnpm --filter @hris/api export:openapi",
     "test:scripts": "node --test scripts/lisensi.test.mjs",
-    "check:licenses": "node scripts/lisensi.mjs"
+    "check:licenses": "node scripts/lisensi.mjs",
+    "test:isolation": "pnpm --filter @hris/tests test:integration",
+    "test:rbac": "pnpm --filter @hris/tests test"
   },
   "pnpm": {
     "overrides": {

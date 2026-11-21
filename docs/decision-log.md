@@ -33,6 +33,8 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-09 | Penampil selfie: Manager Operasional, Staff Payroll Absensi Rekanan, Staff Payroll Internal | Persetujuan pemilik |
 | A-10 | Library: openid-client, otplib, argon2id, exceljs, pdfkit/pdfmake, pino, @nestjs/swagger, pnpm workspace | ADR-0002 + cek lisensi |
 | A-11 | Penyedia email belum dipilih; dev memakai Mailpit lokal | Pemilik menentukan |
+| A-12 | Isolasi perusahaan via `set_config('app.company_ids')` per transaksi + `enable_tenant_rls` (ADR-0003, diusulkan) | Harness 2D, lalu modul pertama dan uji beban |
+| A-13 | `audit_logs` dikecualikan sementara dari kewajiban RLS | Diputuskan di Fase 3 |
 
 ## Masih Terbuka
 Penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

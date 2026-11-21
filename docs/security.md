@@ -18,6 +18,9 @@ Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif
 | Rahasia | Variabel lingkungan/secret manager; gitleaks di CI; repo private; `.env.example` tanpa nilai |
 | Pemulihan | Backup terenkripsi, uji restore berkala, rencana DR (RPO 24 jam, RTO 8 jam: asumsi) |
 
+## Role database aplikasi
+Aplikasi wajib memakai role PostgreSQL non-superuser, non-owner tabel, tanpa `BYPASSRLS`; superuser mem-bypass RLS walau `FORCE` aktif (ADR-0003). Role migrasi dipisah dari role aplikasi.
+
 ## Bootstrap admin
 1. CLI `bootstrap` dijalankan operator di server (bukan endpoint publik), hanya saat belum ada staff.
 2. Email admin diisi saat eksekusi (tanpa default); token sekali pakai (256-bit, disimpan hash, kedaluwarsa 24 jam).
