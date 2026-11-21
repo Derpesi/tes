@@ -241,6 +241,31 @@ ada('Absensi: invarian skema, pelindung database, dan isolasi RLS', () => {
       expect(saring(await cekKebocoran(pool, k))).toEqual([]);
     });
 
+    it('kebijakan sempit titik_baca_kode dan perangkat_baca_hash: hanya baris yang cocok persis dengan variabel transaksi', async () => {
+      const kode = (await dalamScope(pool, [A], async (c) => (await c.query(`SELECT public_code FROM attendance_points WHERE id = $1`, [d.A.titik])).rows[0].public_code as string));
+      const hashA = hash();
+      await dalamScope(pool, [A], async (c) => void (await c.query(`INSERT INTO device_registrations (company_id, person_id, device_hash) VALUES ($1, $2, $3)`, [A, d.A.person, hashA])), { commit: true });
+      const baca = (set: [string, string][], sql: string, params: unknown[] = []) =>
+        dalamScope(pool, [], async (c) => {
+          for (const [k, v] of set) await c.query(`SELECT set_config($1, $2, true)`, [k, v]);
+          return (await c.query(sql, params)).rowCount;
+        });
+      // tanpa scope perusahaan: kosong; dengan variabel yang cocok: tepat satu baris; variabel lain/kode lain: kosong
+      expect(await baca([], `SELECT 1 FROM attendance_points`)).toBe(0);
+      expect(await baca([['app.titik_kode', kode]], `SELECT 1 FROM attendance_points`)).toBe(1);
+      expect(await baca([['app.titik_kode', randomUUID()]], `SELECT 1 FROM attendance_points`)).toBe(0);
+      expect(await baca([['app.titik_kode', kode]], `SELECT 1 FROM attendance_points WHERE company_id = $1`, [B])).toBe(0);
+      expect(await baca([['app.perangkat_hash', hashA]], `SELECT 1 FROM device_registrations`)).toBe(1);
+      expect(await baca([['app.perangkat_hash', hash()]], `SELECT 1 FROM device_registrations`)).toBe(0);
+      expect(await baca([], `SELECT 1 FROM device_registrations`)).toBe(0);
+      // kebijakan hanya memberi SELECT: tidak dapat menulis/menghapus lewat jalur ini
+      await dalamScope(pool, [], async (c) => {
+        await c.query(`SELECT set_config('app.titik_kode', $1, true)`, [kode]);
+        expect((await c.query(`UPDATE attendance_points SET status = 'NONAKTIF' WHERE id = $1`, [d.A.titik])).rowCount).toBe(0);
+        expect((await c.query(`DELETE FROM attendance_points WHERE id = $1`, [d.A.titik])).rowCount).toBe(0);
+      });
+    });
+
     it('tampilan attendance_effective mengikuti RLS (scope A tidak melihat rekaman B)', async () => {
       const ids = await dalamScope(pool, [A], async (c) => (await c.query(`SELECT company_id FROM attendance_effective`)).rows.map((r) => r.company_id as string));
       expect(ids.length).toBeGreaterThan(0);

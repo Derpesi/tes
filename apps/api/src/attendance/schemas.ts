@@ -46,3 +46,18 @@ export const LiburBuat = z.object({
   name: z.string({ error: 'Nama libur wajib diisi' }).trim().min(1, 'Nama libur wajib diisi').max(120, 'Nama libur terlalu panjang (maksimal 120 karakter)'),
 }).refine((v) => (v.scope === 'LOKASI') === !!v.locationId, { message: 'Lokasi wajib untuk cakupan LOKASI dan dilarang untuk cakupan lain', path: ['locationId'] });
 export const DaftarLiburQuery = z.object({ ...halaman, year: z.coerce.number().int().min(2000).max(2100).optional() });
+
+// ----- absen member (multipart: semua nilai berupa teks) -----
+const angka = (nama: string, min: number, max: number) =>
+  z.coerce.number({ error: `${nama} harus berupa angka` }).refine((v) => Number.isFinite(v), `${nama} harus berupa angka`).refine((v) => v >= min && v <= max, `${nama} harus antara ${min} dan ${max}`);
+export const AbsenBody = z.object({
+  code: z.string({ error: 'Kode titik wajib diisi' }).uuid('Kode titik tidak valid'),
+  kind: z.enum(['MASUK', 'PULANG'], { error: 'Jenis absen harus MASUK atau PULANG' }),
+  latitude: angka('Lintang', -90, 90),
+  longitude: angka('Bujur', -180, 180),
+  accuracy: angka('Akurasi', 0, 100000).optional(),
+  clientTime: z.string().datetime({ offset: true, error: 'Waktu perangkat harus berformat ISO 8601' }).optional(),
+  deviceId: z.string({ error: 'ID perangkat wajib diisi' }).regex(/^[A-Za-z0-9_-]{16,100}$/, 'ID perangkat tidak valid'),
+  idempotencyKey: z.string({ error: 'Kunci idempotensi wajib diisi' }).regex(/^[A-Za-z0-9_-]{8,100}$/, 'Kunci idempotensi tidak valid'),
+});
+export const RiwayatAbsenQuery = z.object({ ...halaman });

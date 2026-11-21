@@ -2857,6 +2857,102 @@
         ]
       }
     },
+    "/member/attendance": {
+      "post": {
+        "operationId": "MemberAttendanceController_absen",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "kind",
+                  "latitude",
+                  "longitude",
+                  "deviceId",
+                  "idempotencyKey"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Kode titik dari QR"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "MASUK",
+                      "PULANG"
+                    ]
+                  },
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  },
+                  "accuracy": {
+                    "type": "number"
+                  },
+                  "clientTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "deviceId": {
+                    "type": "string"
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  },
+                  "selfie": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "JPEG dari kamera, maksimal 300 KB"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hasil absen: VALID, PERLU_VERIFIKASI, atau DITOLAK (tercatat). Pengulangan kunci idempotensi mengembalikan hasil awal dengan status 200."
+          }
+        },
+        "tags": [
+          "Absensi (member)"
+        ]
+      },
+      "get": {
+        "operationId": "MemberAttendanceController_riwayat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Riwayat absen milik sendiri; keyset"
+          }
+        },
+        "tags": [
+          "Absensi (member)"
+        ]
+      }
+    },
+    "/member/attendance/today": {
+      "get": {
+        "operationId": "MemberAttendanceController_hariIni",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lokasi penempatan aktif dan rekaman 36 jam terakhir"
+          }
+        },
+        "tags": [
+          "Absensi (member)"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
