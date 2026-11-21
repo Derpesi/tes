@@ -445,26 +445,37 @@ jalan('login member via Google OIDC (IdP palsu lokal)', () => {
       }
     });
 
-    it('log HTTP tidak memuat code, state, atau token dari callback', async () => {
+    it('log aplikasi nyata tidak memuat code, state, atau pengikat (pemeriksaan tambahan; bukti utama ada di src/common/log.spec.ts)', async () => {
       const tertulis: string[] = [];
-      const asli = fs.write as (...a: unknown[]) => unknown;
-      const spy = jest.spyOn(fs, 'write').mockImplementation(((fd: number, data: unknown, ...rest: unknown[]) => {
-        if (fd === 1 || fd === 2) tertulis.push(typeof data === 'string' ? data : Buffer.from(data as Uint8Array).toString());
-        return asli.call(fs, fd, data, ...rest);
-      }) as unknown as typeof fs.write);
+      const tangkap = (data: unknown) => void tertulis.push(typeof data === 'string' ? data : Buffer.from(data as Uint8Array).toString());
+      const asliWrite = fs.write as (...a: unknown[]) => unknown;
+      const asliWriteSync = fs.writeSync as (...a: unknown[]) => number;
+      const asliStdout = process.stdout.write.bind(process.stdout) as (...a: unknown[]) => boolean;
+      const spies = [
+        jest.spyOn(fs, 'write').mockImplementation(((fd: number, data: unknown, ...r: unknown[]) => {
+          if (fd === 1 || fd === 2) tangkap(data);
+          return asliWrite.call(fs, fd, data, ...r);
+        }) as unknown as typeof fs.write),
+        jest.spyOn(fs, 'writeSync').mockImplementation(((fd: number, data: unknown, ...r: unknown[]) => {
+          if (fd === 1 || fd === 2) tangkap(data);
+          return asliWriteSync.call(fs, fd, data, ...r);
+        }) as unknown as typeof fs.writeSync),
+        jest.spyOn(process.stdout, 'write').mockImplementation(((data: unknown, ...r: unknown[]) => {
+          tangkap(data);
+          return asliStdout(data, ...r);
+        }) as unknown as typeof process.stdout.write),
+      ];
       try {
-        const k = klaimBaru();
-        const { query, binding } = await login(k);
+        const { query, binding } = await login(klaimBaru());
         const code = new URLSearchParams(query).get('code')!;
         const state = new URLSearchParams(query).get('state')!;
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 500));
         const log = tertulis.join('');
-        expect(log).toContain('/auth/member/google/callback'); // bukti penangkapan log bekerja (bukan lolos semu)
         expect(log).not.toContain(code);
         expect(log).not.toContain(state);
         expect(log).not.toContain(binding.split('=')[1]);
       } finally {
-        spy.mockRestore();
+        spies.forEach((s) => s.mockRestore());
       }
     });
   });
