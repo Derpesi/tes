@@ -1,4 +1,4 @@
-import { ekstrakVariabel, isiTemplate, variabelTidakDikenal, VARIABEL_TEMPLATE } from './variabel';
+import { ekstrakVariabel, isiTemplate, isiTemplateLengkap, TITIK_ISIAN, variabelTidakDikenal, VARIABEL_ISIAN_TANGAN, VARIABEL_TEMPLATE, VARIABEL_WAJIB } from './variabel';
 
 describe('variabel template PKWT', () => {
   it('mengekstrak variabel unik dengan spasi opsional', () => {
@@ -15,5 +15,16 @@ describe('variabel template PKWT', () => {
   });
   it('nilai yang berisi pola variabel tidak diperluas ulang (tanpa injeksi templat)', () => {
     expect(isiTemplate('{{nama}}', { nama: '{{nik}}' })).toBe('{{nik}}');
+  });
+  it('variabel inti tetap WAJIB; variabel isian-tangan tanpa nilai menjadi titik-titik dan dilaporkan (nama saja)', () => {
+    const h = isiTemplateLengkap('{{nama}} di {{pengguna_jasa}}; legalitas: {{perusahaan_legalitas}}; {{pengguna_jasa}}', { nama: 'X' });
+    expect(h.teks).toBe(`X di ${TITIK_ISIAN}; legalitas: ${TITIK_ISIAN}; ${TITIK_ISIAN}`);
+    expect(h.isianTangan).toEqual(['pengguna_jasa', 'perusahaan_legalitas']);
+    expect(() => isiTemplateLengkap('{{nama}} {{nomor}}', { nama: 'X' })).toThrow(/nomor/);
+    expect(isiTemplateLengkap('{{pengguna_jasa}}', { pengguna_jasa: '   ' }).isianTangan).toEqual(['pengguna_jasa']); // spasi saja dianggap kosong
+  });
+  it('daftar wajib dan isian-tangan tidak tumpang tindih dan gabungannya = daftar putih', () => {
+    expect(VARIABEL_WAJIB.filter((v) => (VARIABEL_ISIAN_TANGAN as readonly string[]).includes(v))).toEqual([]);
+    expect([...VARIABEL_WAJIB, ...VARIABEL_ISIAN_TANGAN]).toEqual([...VARIABEL_TEMPLATE]);
   });
 });

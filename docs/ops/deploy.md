@@ -44,7 +44,8 @@ Tabel `audit_logs` dilindungi trigger hanya-tambah (UPDATE/DELETE/TRUNCATE ditol
 - **Data rusak**: restore ke database baru (`restore.md`), verifikasi, lalu alihkan `DATABASE_URL`.
 
 ## Bootstrap administrator awal (sekali)
-`docker compose run --rm -it api node dist/cli/bootstrap.js --email <email> --nama "<Nama>"` — wajib terminal interaktif (TTY); lihat `docs/bootstrap-admin.md`. Tidak ada kredensial/OTP bawaan.
+
+Setelah administrator dan Direktur aktif dan data perusahaan diisi: **impor templat PKWT** (draf pemilik, `docs/templates/pkwt-alih-daya/README.md`): `docker compose run --rm -v <folder-templat>:/templat:ro -e IMPOR_DATABASE_URL=... api node dist/cli/impor-templat-pkwt.js --isi /templat/isi.txt --oleh <userId staf>`. Templat berstatus BELUM_DIVERIFIKASI sampai staf berwenang (bukan pembuat) memverifikasinya.`docker compose run --rm -it api node dist/cli/bootstrap.js --email <email> --nama "<Nama>"` — wajib terminal interaktif (TTY); lihat `docs/bootstrap-admin.md`. Tidak ada kredensial/OTP bawaan.
 
 ## Setelah restore atau insiden: cabut semua sesi
 `UPDATE sessions SET revoked_at = now(), revoked_reason = 'restore' WHERE revoked_at IS NULL;` (role pemilik). Semua pengguna login ulang.

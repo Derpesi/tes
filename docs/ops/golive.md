@@ -7,7 +7,7 @@ Status sistem: **kode siap staging**. Item berikut belum dapat diselesaikan oleh
 | 1 | Hosting, domain, TLS, penyedia PostgreSQL | Pemilik | Belum dipilih (ADR). Image belum pernah dibangun di sini. |
 | 2 | OAuth Google (client id/secret, redirect URI) | Pemilik | `docs/google-oauth-setup.md`; tanpa ini member tidak dapat login. |
 | 3 | SMTP produksi (invitasi/reset staf) | Pemilik | Tanpa SMTP outbox tidak mengirim. |
-| 4 | Template PKWT resmi + (opsional) PSrE tanda tangan | Pemilik/Hukum | Tidak ada klausul hukum karangan; tombol setuju bukan tanda tangan sah. |
+| 4 | Template PKWT: **draf pemilik 2022 sudah menjadi templat awal (ADR-0015)** tetapi **wajib ditinjau ahli hukum lalu diverifikasi** (catatan peninjau di `docs/templates/pkwt-alih-daya/README.md`); isi pengaturan PKWT dan legalitas PT. OSI dan PT. Pancormas Perkasa; (opsional) PSrE | Pemilik/Hukum | Tidak ada klausul karangan; tombol setuju bukan tanda tangan sah. |
 | 5 | Kebijakan retensi final (dokumen, audit; selfie bila diaktifkan lagi) vs UU PDP | Pemilik/Hukum | Selfie ditiadakan sementara (ADR-0012); usulan 90 hari berlaku bila diaktifkan. |
 | 6 | `LICENSE` + nama pemegang hak cipta | Pemilik | Repo proprietary; tidak diubah tanpa persetujuan. |
 | 7 | Branch protection `main` + wajib CI hijau | Pemilik | Pengaturan GitHub. |

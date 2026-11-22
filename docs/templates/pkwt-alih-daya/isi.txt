@@ -1,0 +1,224 @@
+PERJANJIAN KERJA WAKTU TERTENTU
+( TENAGA ALIH DAYA )
+
+NOMOR : {{nomor}}
+
+Pada hari ini, ………………………………………. Tanggal ……………………… Bulan ..…..…….…………..……………. Tahun 20…….., bertempat di Kantor {{perusahaan_hukum}}, yang bertanda tangan dibawah ini :
+
+1. Nama : {{penandatangan_nama}}, selaku {{penandatangan_jabatan}}, dalam hal ini bertindak untuk dan atas nama perusahaan {{perusahaan_hukum}}. Yang beralamat di {{perusahaan_alamat}}.
+
+Selanjutnya disebut sebagai PIHAK PERTAMA.
+
+2. Nama : {{nama}}
+Tempat & Tgl Lahir : {{tempat_lahir}}, {{tanggal_lahir}}
+Pendidikan / Jurusan : {{pendidikan}}
+Agama : …………………………………………………………………………………………………………
+Nomor KTP : {{nik}}
+Alamat : {{alamat_pekerja}}
+Telp / HP / Email : {{kontak_pekerja}}
+
+Dalam hal ini bertindak untuk dan atas nama diri sendiri ( Pribadi ), yang dalam hal ini selanjutnya disebut PIHAK KEDUA.
+
+Bahwa sejalan dengan tugas pokok {{perusahaan_hukum}} yaitu sebagai perusahaan jasa yang bergerak dalam bidang penempatan, pengelolaan Sumber Daya Manusia (SDM) dan Pemborongan Pekerjaan atau disebut Jasa Tenaga Alih Daya (Outsourcing), yang sifat pekerjaannya tidak menentu sesuai dengan permintaan dari perusahaan pengguna jasa atau pemberi pekerjaan, maka PIHAK PERTAMA dan PIHAK KEDUA telah sepakat untuk mengadakan pengikatan lewat Perjanjian Kerja Waktu Tertentu ini, berdasarkan pada :
+
+{{perusahaan_legalitas}}
+
+Maka PIHAK PERTAMA dan PIHAK KEDUA secara bersama-sama selanjutnya disebut KEDUA BELAH PIHAK menerangkan terlebih dahulu :
+
+a. PIHAK PERTAMA merupakan Perseroan Terbatas (PT) yang bergerak dalam bidang jasa penyediaan, penempatan, pengelolaan Sumber Daya Manusia (SDM) dan Pemborongan Pekerjaan atau disebut Jasa Tenaga Alih Daya (Outsourcing), yang sifat pekerjaannya tidak menentu sesuai dengan permintaan dari perusahaan pengguna jasa atau pemberi pekerjaan.
+
+b. PIHAK PERTAMA sesuai fungsi, wewenang dan tanggung jawab yang diberikan pihak pengguna jasa tenaga kerja, adalah perusahaan penyalur tenaga kerja alih daya dengan kesepakatan kerja waktu tertentu untuk tenaga alih daya yang akan dipekerjakan.
+
+c. PIHAK KEDUA adalah tenaga kerja yang memiliki kualifikasi serta kemampuan untuk dijadikan tenaga kerja alih daya pada perusahaan pengguna jasa.
+
+d. Perusahaan pengguna jasa adalah perusahaan yang membutuhkan tenaga kerja dari PIHAK PERTAMA untuk dipekerjakan pada perusahaan pengguna jasa sesuai dengan keahlian dan permintaan yang diterima oleh PIHAK PERTAMA.
+
+Bahwa dalam rangka upaya memberikan pelayanan kepada perusahaan pengguna jasa tenaga kerja, maka PIHAK PERTAMA dan PIHAK KEDUA setuju dan sepakat untuk mengadakan pengikatan yang dituangkan dalam bentuk Perjanjian Kerja Waktu Tertentu untuk Pekerjaan Alih Daya dengan syarat-syarat dan ketentuan sebagaimana diatur dalam pasal-pasal berikut ini :
+
+PASAL 1
+PENGERTIAN DAN KETENTUAN UMUM
+
+1. Kesepakatan pengikatan didalam Perjanjian Kerja Waktu Tertentu untuk tenaga kerja alih daya, adalah tenaga kerja yang telah mengerti dan setuju untuk ditempatkan oleh PIHAK PERTAMA dengan batasan waktu kerja serta pengupahan yang telah ditentukan.
+
+2. Perjanjian Kerja Waktu Tertentu untuk tenaga kerja alih daya, adalah suatu Perjanjian Kerja atau pengikatan antara penerima pekerjaan dengan tenaga kerja yang waktunya ditentukan oleh perusahaan pemberi pekerjaan.
+
+3. Jam kerja adalah ketentuan yang harus ditaati dan diikuti oleh pekerja yang ditempatkan PIHAK PERTAMA yang jam serta jumlah hari kerjanya terdiri dari 7 (tujuh) jam sehari atau 40 (empat puluh) jam dalam seminggu, atau jam kerja sesuai dengan kebutuhan perusahaan pengguna jasa (tidak menyimpang dari peraturan pemerintah yang berlaku).
+
+4. Pekerjaan lembur adalah pekerjaan yang dilaksanakan diluar jam kerja, dan berpedoman kepada peraturan perundang-undangan serta ketentuan yang berlaku.
+
+5. Hari Libur Resmi adalah hari libur yang ditetapkan oleh pemerintah.
+
+6. Hari Libur lainnya adalah hari libur yang diberikan kepada pekerja selama 1 ( satu ) hari setiap minggu setelah melaksanakan pekerjaan selama 6 (enam) hari berturut-turut.
+
+7. Upah adalah uang yang diberikan dan diterima oleh tenaga kerja setelah melaksanakan pekerjaan.
+
+8. Status PIHAK KEDUA adalah karyawan PIHAK PERTAMA yang ditempatkan di perusahaan pengguna jasa.
+
+PASAL 2
+PRINSIP PERJANJIAN ALIH DAYA
+
+1. PIHAK PERTAMA dalam menempatkan PIHAK KEDUA didasarkan kepada penyerahan sebagian pelaksanaan pekerjaan kepada perusahaan penerima pekerjaan atau perusahaan penyedia jasa pekerja/buruh.
+
+2. Penempatan PIHAK KEDUA oleh PIHAK PERTAMA setelah dilakukan pengikatan kesepakatan kerja sama secara tertulis antara PIHAK PERTAMA dengan perusahaan yang menggunakan tenaga kerja (perusahaan pengguna jasa).
+
+3. PIHAK KEDUA dinyatakan telah mengerti, paham dan setuju untuk ditempatkan oleh PIHAK PERTAMA dan akan selalu taat dengan peraturan dari PIHAK PERTAMA.
+
+4. PIHAK KEDUA akan mengikuti dan taat kepada peraturan serta ketentuan yang telah ditetapkan oleh PIHAK PERTAMA dan perusahaan pemberi pekerjaan (perusahaan pengguna jasa).
+
+PASAL 3
+TEMPAT, JENIS PEKERJAAN DAN MASA KERJA
+
+PIHAK KEDUA bersedia ditempatkan oleh PIHAK PERTAMA pada :
+
+a. Perusahaan : {{pengguna_jasa}}
+b. Beralamat di : {{alamat_pengguna_jasa}}
+c. Jenis Pekerjaan : {{jenis_pekerjaan}}
+d. Mulai tanggal : {{tanggal_mulai}}
+
+PASAL 4
+HAK DAN KEWAJIBAN PIHAK PERTAMA
+
+1. PIHAK PERTAMA berkewajiban membayar upah setiap bulan 1 (satu) kali, setiap 2 (dua) minggu atau setiap minggu 1 (satu) kali ataupun dengan ketentuan yang berlaku di perusahaan pemakai jasa kepada PIHAK KEDUA, tanpa dapat diwakilkan, kecuali PIHAK KEDUA berhalangan hadir dapat diwakilkan oleh orang lain. Ketentuan perwakilan harus sesuai dengan ketentuan hukum, antara lain :
+a. Membawa kartu indentitas (KTP) yang bersangkutan dan identitas (KTP) yang mewakili (ASLI).
+b. Membawa suarat kuasa yang dilampiri materai dengan nominal Rp. 10.000,- (sepuluh ribu rupiah) dan foto copy KTP yang meberi kuasa dan yang dikuasakan 1 lembar beserta Id Card {{perusahaan_hukum}} yang bersangkutan.
+
+2. PIHAK PERTAMA berhak, tanpa sepengetahuan PIHAK KEDUA dapat melakukan pengawasan, menentukan, menambah dan mengganti PIHAK KEDUA sewaktu-waktu tanpa pemberitahuan kepada PIHAK KEDUA.
+
+3. PIHAK PERTAMA berkewajiban membayar upah / gaji PIHAK KEDUA sesuai dengan hasil kerja dan sistem kerja di perusahaan pengguna jasa.
+
+4. PIHAK PERTAMA berhak mengatur waktu pembagian upah / gaji PIHAK KEDUA sesuai dengan jadwal yang ditentukan PIHAK PERTAMA.
+
+5. PIHAK PERTAMA berkewajiban menempatkan kembali PIHAK KEDUA di perusahaan yang sama atau di perusahaan yang lain berdasarkan sisa masa kerja di perusahaan sebelumnya.
+
+6. PIHAK PERTAMA berhak menentukan tempat kerja PIHAK KEDUA di perusahaan rekanan PIHAK PERTAMA.
+PASAL 5
+HAK DAN KEWAJIBAN PIHAK KEDUA
+
+1. PIHAK KEDUA berkewajiban melaksanakan pekerjaan yang diberikan oleh perusahaan pengguna jasa selama 7 (tujuh) jam sehari untuk 6 (enam) hari kerja atau 8 (delapan) jam sehari untuk 5 (lima) hari kerja atau 40 (empat puluh) jam dalam seminggu.
+
+2. PIHAK KEDUA berkewajiban taat serta patuh terhadap waktu kerja dan peraturan di perusahaan pengguna jasa.
+
+3. PIHAK KEDUA berhak mendapatkan upah lembur, apabila waktu kerja lebih dari sebagaimana dimaksud pada Pasal 5 ayat 1 diatas, maka dihitung lembur dengan berpedoman pada peraturan pemerintah yang berlaku dan berdasarkan pada Surat Perintah Lembur (SPL) dari perusahaan pengguna jasa/pemberi pekerjaan.
+
+4. PIHAK KEDUA wajib berkelakuan baik, sopan santun, tertib dan taat kepada peraturan di perusahaan pengguna jasa dan ditempat PIHAK PERTAMA.
+
+5. PIHAK KEDUA berkewajiban melaksanakan pekerjaan dengan penuh tanggung jawab.
+
+6. PIHAK KEDUA berhak atas hari libur resmi sesuai dengan libur yang ditetapkan oleh pemerintah atau perusahaan, diberikan libur selama 1 (satu) hari setelah bekerja selama 1 (satu) minggu berturut-turut.
+
+7. PIHAK KEDUA berkewajiban untuk tidak melakukan tindakan provokasi kepada siapapun dan / atau terprovokasi dari pihak lain, baik didalam lingkungan kerja maupun diluar lingkungan kerja perusahaan pengguna jasa.
+
+8. PIHAK KEDUA berhak memperoleh upah yang besarnya disesuaikan dengan sistem kerja serta pengupahan yang berlaku di perusahaan pengguna jasa/pemberi pekerjaan, dengan rincian sebagai berikut :
+
+ Upah Pokok : Rp. …………………………………………………………………………………….
+ Tunjangan Jabatan : Rp. …………………………………………………………………………………….
+ Bonus Kehadiran : Rp. …………………………………………………………………………………….
+ Pot. BPJS Ketenagakerjaan (3%) : Rp. …………………………………………………………………………………….
+ Pot. BPJS Kesehatan (1%) : Rp. …………………………………………………………………………………….
+ Pot. Bank (admin payroll) : Rp. ……………………………………………………………………………………. _
+
+ TAKE HOME PAY : Rp. …………………………………………………………………………………….
+
+9. PIHAK KEDUA berkewajiban menjaga nama baik perusahaan pengguna jasa/pemberi pekerjaan dan PIHAK PERTAMA dimata umum / masyarakat.
+
+10. PIHAK KEDUA akan mendapatkan fasilitas kesehatan, apabila ada atau disediakan kartu BPJS kesehatan yang
+ telah disepakati oleh PIHAK pengguna jasa dengan PIHAK PERTAMA, apabila terjadi kecelakaan kerja pada saat melaksanakan pekerjaan dan dapat berobat ke Poliklinik atau Rumah Sakit yang ditunjuk oleh PIHAK PERTAMA atau pihak perusahaan pengguna jasa.
+
+PASAL 6
+DENDA DAN SANKSI
+
+1. KEDUA BELAH PIHAK sepakat :
+
+a. Apabila PIHAK KEDUA tidak melaksanakan tugas, tanggung jawab dan kewajibannya serta tidak melaksanakan pekerjaan dengan baik sesuai isi perjanjian ini dan peraturan yang berlaku maka PIHAK PERTAMA berhak memberikan teguran baik secara lisan maupun tulisan kepada PIHAK KEDUA, dan apabila tidak diindahkan, maka akan dilakukan tindakan berupa Pemutusan Hubungan Kerja (PHK) tanpa syarat apapun.
+
+b. PIHAK PERTAMA serta Pihak pemberi pekerjaan (pengguna jasa) berhak memantau dan mengevaluasi pelaksanaan serta hasil pekerjaan yang dilaksanakan oleh PIHAK KEDUA, dan apabila PIHAK PERTAMA serta Pihak pemberi pekerjaan (pengguna jasa) menemukan kesalahan fatal yang dilakukan PIHAK KEDUA sehingga mengakibatkan kerugian bagi PIHAK PERTAMA maupun Pihak pemberi pekerjaan (pengguna jasa), maka PIHAK PERTAMA maupun Pihak pemberi pekerjaan (pengguna jasa) berhak melakukan tindakan berupa Pemutusan Hubungan Kerja (PHK) tanpa syarat apapun.
+
+c. Meminta ganti rugi kepada PIHAK KEDUA dengan nominal sebesar upah pekerja/buruh yang diberikan, terhitung sejak PIHAK KEDUA mengajukan pengakhiran hubungan kerjanya sampai batas waktu berakhirnya jangka waktu perjanjian kerja ini.
+
+2. PIHAK KEDUA harus tunduk dan melaksanakan segala peraturan yang berlaku, tindakan yang menyimpang dinyatakan sebagai pelanggaran dan bersedia menerima sanksi apapun dari PIHAK PERTAMA.
+
+3. Apabila PIHAK KEDUA melakukan tindakan yang berakibat kerugian dan melawan hukum, maka PIHAK PERTAMA dan / atau perusahaan pengguna jasa berhak untuk mengambil langkah-langkah hukum, baik pidana maupun perdata.
+
+PASAL 7
+KERAHASIAAN
+
+1. Semua data dan informasi yang berhubungan dengan isi perjanjian ini bersifat rahasia, dan karenanya akan dianggap sebagai dokumen rahasia yang hanya boleh diketahui oleh KEDUA BELAH PIHAK.
+
+2. PIHAK KEDUA dalam keadaan dan alasan apapun tidak diperkenankan atau diperbolehkan untuk memberitahukan kepada pihak lain dan / atau membiarkan data informasi tersebut menjadi terbuka dan bebas diketahui oleh PIHAK KETIGA manapun juga, kecuali atas permintaan dari instansi yang terkait / berwenang dengan persetujuan tertulis terlebih dahulu dari PIHAK PERTAMA.
+
+3. Pelanggaran atas ketentuan diatas diatur dalam pasal 322 dan 323 Kitab Undang-Undang Hukum Pidana, dan PIHAK PERTAMA akan melakukan langkah hukum jika terjadi atas apa yang telah tertuang dalam Pasal 7 ayat 1 dan 2 tersebut.
+PASAL 8
+HAL-HAL DI LUAR KEKUASAAN / FORCE MAJEUR
+
+1. KEDUA BELAH PIHAK sepakat membebaskan masing-masing bila terjadi hal-hal diluar kekuasaan manusia / force majeur.
+
+2. Yang dimaksud force majeur adalah segala hal yang berkaitan dengan kebakaran, bencana alam, huru-hara, peperangan, pemogokan, yang menyeluruh ( massal ) dan adanya peraturan perundang-undangan dan peraturan pemerintah atau pengusaha setempat yang secara langsung dapat mempengaruhi kewajiban masing-masing pihak.
+
+PASAL 9
+PENYELESAIAN PERSELISIHAN
+
+1. KEDUA BELAH PIHAK sepakat untuk melaksanakan isi kesepakatan / perjanjian berdasarkan itikad baik.
+
+2. PIHAK KEDUA tidak akan menuntut dalam bentuk apapun dengan segala sesuatu yang terjadi sebagai dampak dari perjanjian ini baik pidana maupun perdata terhadap PIHAK PERTAMA dan perusahaan pengguna jasa.
+
+3. Apabila timbul perbedaan penafsiran atau perselisihan diantara KEDUA BELAH PIHAK sehubungan dengan ini dan / atau pelaksanaan perjanjian, maka KEDUA BELAH PIHAK sepakat untuk menyelesaikannya secara musyawarah.
+
+4. Dalam hal kata mufakat tidak tercapai, maka KEDUA BELAH PIHAK sepakat untuk menyelesaikan perselisihan tersebut melalui jalur hukum.
+
+5. KEDUA BELAH PIHAK sepakat untuk menunjuk domisili hukum yang tetap dan tak berubah pada Kantor Pengadilan Negeri {{pengadilan_negeri}}.
+
+ PASAL 10
+ PENGAKHIRAN PERJANJIAN
+
+1. Perjanjian ini akan berakhir dengan sendirinya apabila Pasal 3, Pasal 5 ayat 1, ayat 2, ayat 4, ayat 5, ayat 7, dan ayat 9, serta pasal 7 ayat 1 tidak sesuai dengan ketentuan yang tertuang dalam perjanjian ini.
+
+2. Salah satu pihak menyatakan secara tertulis dengan tegas untuk mengakhiri perjanjian ini.
+
+3. PIHAK KEDUA tidak melakukan hal-hal yang dipersyaratkan dalam perjanjian ini (Wanprestasi) dan / atau melakukan hal-hal yang dilarang dalam perjanjian ini.
+
+4. Dalam hal terjadi pengakhiran atau pembatalan perjanjian, maka KEDUA BELAH PIHAK sepakat untuk tidak memberlakukan ketentuan yang terdapat dalam pasal 1266 dan 1267 Kitab Undang-Undang Hukum Perdata atau tidak ada kewajiban dari PIHAK PERTAMA untuk memberikan uang ganti rugi, pesangon dan / atau uang kebijaksanaan (kompensasi) dalam bentuk apapun kepada PIHAK KEDUA.
+
+5. PIHAK PERTAMA berhak setiap waktu mengakhiri Perjanjian Kerja Waktu Tertentu ini karena adanya alasan memaksa atau PIHAK KEDUA tidak masuk kerja tanpa keterangan yang sah ( mangkir ) lebih dari 2 (dua) hari dan / atau melakukan kesalahan / pelanggaran lainnya yang merugikan PIHAK PERTAMA ataupun pihak pengguna jasa, dan / atau dianggap tidak cakap / tidak mampu dalam melaksanakan pekerjaan yang dibebankan kepada PIHAK KEDUA.
+
+ PASAL 11
+ PENUTUP
+
+ Segala sesuatu yang belum diatur dalam perjanjian ini akan diatur dalam perjanjian tersendiri ( Addendum / Amandemen ) yang merupakan bagian yang menyatu dan tidak terpisahkan dengan perjanjian ini.
+
+ Perjanjian ini dibuat dan ditandatangani oleh KEDUA BELAH PIHAK pada hari, tanggal, bulan dan tahun sebagaimana tersebut diatas, dibuat dalam kertas bermaterai secukupnya yang sifatnya mengikat serta mempunyai kekuatan hukum dan tanpa paksaan / tekanan dari siapapun.
+
+PIHAK PERTAMA                                                            PIHAK KEDUA
+{{perusahaan_hukum_kapital}}
+
+Materai Rp. 10.000,-
+
+( {{penandatangan_nama}} )                                                  ( ………………………………………………………………… )
+
+SURAT PERNYATAAN
+
+Saya yang bertanda tangan dibawah ini :
+
+Nama : ……………………………………….…………………………….…
+Alamat : ……………………………………………………….……………….
+
+Dengan ini menyatakan, bahwa:
+1. Surat Pernyataan ini saya tandatangani sebagai persyaratan yang harus dipenuhi agar saya dapat diterima bekerja di perusahaan pemberi pekerjaan dimana saya ditempatkan.
+
+2. Jika dikemudian hari saya diterima bekerja saya akan mematuhi dan mentaati perjanjian kerja, peraturan perusahaan yang berlaku diperusahaan dimana saya ditempatkan dan tidak akan mengikuti, melakukan atau mengajak teman sekerja untuk melakukan perbuatan-perbuatan, tindakan-tindakan baik sendiri-sendiri maupun secara bersama-sama yang dapat merugikan perusahaan pemberi pekerjaan dimana saya ditempatkan bekerja.
+
+3. Saya tidak akan melakukan tuntutan untuk diterima sebagai karyawan tetap di perusahaan pemberi pekerjaan dimana saya ditempatkan bekerja.
+
+4. Saya akan mengikuti aturan upah yang diberikan oleh perusahaan pemberi pekerjaan dimana saya ditempatkan sesuai dengan kesepakatan bersama yang dituangkan didalam Perjanjian Kerja ini.
+
+5. Saya tidak akan mengajak teman-teman bahkan diri saya sendiri untuk ikut berserikat ataupun mendirikan serikat diperusahaan pemberi kerja / jasa, apabila terbukti saya bersedia untuk melakukan pengunduran diri disertai dengan surat pengunduran diri tanpa adanya paksaan dari pihak manapun.
+
+6. Apabila saya melanggar perjanjian yang saya tanda tangani, saya bersedia untuk dituntut sesuai aturan yang berlaku dan bersedia di kenakan sanksi denda berupa uang pinalti yg di tentukan oleh pihak pertama dan pemberi kerja/pengguna jasa.
+
+Demikianlah Surat Pernyataan yang saya tanda tangani di {{kota_penandatanganan}}, pada tanggal ……../ ……./ 20…… dalam keadaan sadar, sehat jasmani dan rohani serta tanpa adanya unsur paksaan atau tekanan dari pihak manapun juga.
+
+{{kota_penandatanganan}}, ……../ ……./ 20……
+YANG MEMBERI PERNYATAAN,
+
+                    Materai 10.000
+
+(…...……………...…………………………)

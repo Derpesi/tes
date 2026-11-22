@@ -409,6 +409,66 @@ jalan('alur kontrak PKWT, PDF, dan scan bertanda tangan (PostgreSQL asli)', () =
     });
   });
 
+  describe('templat PKWT alih daya dari draf pemilik (docs/templates/pkwt-alih-daya/isi.txt)', () => {
+    const isi = fs.readFileSync(join(__dirname, '../../../docs/templates/pkwt-alih-daya/isi.txt'), 'utf8');
+    const ringkas = (b: Buffer) => teksPdf(b).replace(/\s+/g, ' ');
+
+    it('dua perusahaan memakai templat yang SAMA dengan pengaturan PKWT masing-masing; tidak ada kebocoran antar perusahaan; tanpa pengaturan => isian tangan (titik-titik) dan audit hanya memuat NAMA variabel', async () => {
+      const pA = await pemeranA();
+      const pB = { adm: await buatStaff('STAFF_ADMINISTRASI', [perusahaanB]), hrd: await buatStaff('HRD', [perusahaanB]), dir: await buatStaff('DIREKTUR', [perusahaanB]) };
+      await pool.query(`UPDATE companies SET legal_name = 'PT Sintetis Alfa Hukum', address = 'Jl. Alfa 1', city = 'Bandung', province = 'Jawa Barat', document_settings = document_settings || $2::jsonb WHERE id = $1`,
+        [perusahaanA, JSON.stringify({ pkwt: { penandatanganNama: 'Penanda Alfa', penandatanganJabatan: 'Personalia', legalitas: ['Akta ALFA-001', 'NIB ALFA-002'], pengadilanNegeri: 'Bandung' } })]);
+      await pool.query(`UPDATE companies SET legal_name = 'PT Sintetis Beta Hukum', document_settings = document_settings || $2::jsonb WHERE id = $1`, [perusahaanB, JSON.stringify({ pkwt: { legalitas: ['Akta BETA-001'] } })]);
+      const tplA = await templateOk(pA, isi);
+      const tplB = (await http('post', '/pkwt/templates', pB.hrd).send({ name: `Alih ${randomBytes(3).toString('hex')}`, body: isi }).expect(201)).body.id as string;
+      await http('post', `/pkwt/templates/${tplB}/verify`, pB.dir).send({ note: 'Diverifikasi ahli hukum (uji)' }).expect(200);
+
+      const pelA = await siapPelamar(perusahaanA, 'SINTETIS Alfa Pekerja');
+      const kA = (await buatKontrak(pA.adm, pelA.lamaran, tplA).expect(201)).body;
+      const a = ringkas((await tanganiBuffer(http('get', `/pkwt/${kA.id}/pdf`, pA.hrdU)).expect(200)).body as Buffer);
+      for (const x of ['PT Sintetis Alfa Hukum', 'PT SINTETIS ALFA HUKUM', 'Jl. Alfa 1, Bandung, Jawa Barat', 'a. Akta ALFA-001', 'b. NIB ALFA-002', 'Penanda Alfa', 'selaku Personalia', 'Pengadilan Negeri Bandung', pelA.nik, 'SINTETIS Alfa Pekerja', kA.contractNumber]) expect(a).toContain(x);
+      expect(a).not.toMatch(/BETA/i);
+      expect(a).not.toMatch(/\{\{|\}\}/);
+      expect(a).toContain('PERJANJIAN KERJA WAKTU TERTENTU'); // teks klausul dari draf pemilik, tidak diubah
+      expect(a).not.toContain('TEMPLATE BELUM DIVERIFIKASI');
+
+      const pelB = await siapPelamar(perusahaanB, 'SINTETIS Beta Pekerja');
+      const kB = (await buatKontrak(pB.adm, pelB.lamaran, tplB).expect(201)).body;
+      const b = ringkas((await tanganiBuffer(http('get', `/pkwt/${kB.id}/pdf`, pB.hrd)).expect(200)).body as Buffer);
+      for (const x of ['PT Sintetis Beta Hukum', 'PT SINTETIS BETA HUKUM', 'a. Akta BETA-001', 'SINTETIS Beta Pekerja']) expect(b).toContain(x);
+      expect(b).not.toMatch(/ALFA/i);
+      expect(b).toMatch(/\u0085{5,}/); // penandatangan/alamat/pengguna jasa belum diisi => titik-titik untuk diisi tangan
+      await http('get', `/pkwt/${kA.id}/pdf`, pB.hrd).expect(404); // lintas perusahaan tetap 404
+
+      const audA = await auditObjek(perusahaanA, 'pkwt.pdf.generated', kA.id);
+      const audB = await auditObjek(perusahaanB, 'pkwt.pdf.generated', kB.id);
+      expect(JSON.parse(audA[0].d).isianTangan).toEqual(expect.arrayContaining(['pengguna_jasa', 'alamat_pengguna_jasa']));
+      expect(JSON.parse(audA[0].d).isianTangan).not.toContain('penandatangan_nama');
+      expect(JSON.parse(audB[0].d).isianTangan).toEqual(expect.arrayContaining(['penandatangan_nama', 'penandatangan_jabatan', 'perusahaan_alamat']));
+      expect([...audA, ...audB].some((x) => x.d.includes(pelA.nik) || x.d.includes(pelB.nik) || x.d.includes('Alfa') || x.d.includes('Beta'))).toBe(false);
+    });
+
+    it('perusahaan pengguna jasa terisi dari lowongan -> lokasi -> rekanan; templat belum diverifikasi tetap diberi peringatan draf', async () => {
+      const pA = await pemeranA();
+      const t = (await http('post', '/pkwt/templates', pA.hrdU).send({ name: `Alih ${randomBytes(3).toString('hex')}`, body: isi }).expect(201)).body;
+      const pel = await siapPelamar(perusahaanA, 'SINTETIS Penempatan');
+      await tenant([perusahaanA], async (c) => {
+        const u = (await c.query(`SELECT created_by FROM job_vacancies WHERE id = (SELECT vacancy_id FROM job_applications WHERE id = $1)`, [pel.lamaran])).rows[0].created_by;
+        const rek = (await c.query(`INSERT INTO partners (company_id, name, created_by) VALUES ($1, 'Rekanan Pengguna Sintetis', $2) RETURNING id`, [perusahaanA, u])).rows[0].id;
+        const lok = (await c.query(`INSERT INTO partner_locations (company_id, partner_id, name, address, city, created_by) VALUES ($1, $2, 'Lokasi Sintetis', 'Jl. Lokasi 9', 'Tangerang', $3) RETURNING id`, [perusahaanA, rek, u])).rows[0].id;
+        await c.query(`UPDATE job_vacancies SET location_id = $2 WHERE id = (SELECT vacancy_id FROM job_applications WHERE id = $1)`, [pel.lamaran, lok]);
+      });
+      const k = (await buatKontrak(pA.adm, pel.lamaran, t.id).expect(201)).body;
+      const teks = ringkas((await tanganiBuffer(http('get', `/pkwt/${k.id}/pdf`, pA.hrdU)).expect(200)).body as Buffer);
+      expect(teks).toContain('a. Perusahaan : Rekanan Pengguna Sintetis');
+      expect(teks).toContain('b. Beralamat di : Jl. Lokasi 9, Tangerang');
+      expect(teks).toContain('c. Jenis Pekerjaan : Satpam');
+      expect(teks).toContain('TEMPLATE BELUM DIVERIFIKASI');
+      const aud = await auditObjek(perusahaanA, 'pkwt.pdf.generated', k.id);
+      expect(JSON.parse(aud[0].d).isianTangan).not.toContain('pengguna_jasa');
+    });
+  });
+
   describe('scan bertanda tangan', () => {
     it('hanya saat PENANDATANGANAN; berkas palsu/kosong/besar ditolak; tersimpan TERENKRIPSI; unduh terdekripsi untuk pkwt_document.review; ditolak -> unggah ulang -> verifikasi', async () => {
       const p = await pemeranA();

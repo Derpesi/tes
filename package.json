@@ -29,7 +29,8 @@
     "ops:backup": "node scripts/ops/backup.mjs",
     "ops:restore": "node scripts/ops/restore.mjs",
     "ops:verifikasi": "node scripts/ops/verifikasi-restore.mjs",
-    "ops:rotasi": "node apps/api/dist/cli/rotasi-kunci.js"
+    "ops:rotasi": "node apps/api/dist/cli/rotasi-kunci.js",
+    "ops:impor-templat-pkwt": "node apps/api/dist/cli/impor-templat-pkwt.js"
   },
   "pnpm": {
     "overrides": {

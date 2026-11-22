@@ -23,11 +23,23 @@ const kodeSingkat = z.string({ error: 'Kode singkat wajib diisi' }).trim().toUpp
 
 /** Pengaturan payroll dan dokumen divalidasi ketat (tanpa JSON bebas). Bentuk final menunggu kebijakan pemilik (A-24). */
 export const PengaturanPayroll = z.object({ periodType: z.enum(['BULANAN', 'MINGGUAN'], { error: 'Jenis periode tidak valid' }).optional(), cutOffDay: z.number({ error: 'Tanggal cut-off harus angka' }).int().min(1, 'Tanggal cut-off 1–28').max(28, 'Tanggal cut-off 1–28').optional() }).strict();
+const teksPendek = (nama: string, maks: number) => z.string({ error: `${nama} harus berupa teks` }).trim().min(1, `${nama} tidak boleh kosong`).max(maks, `${nama} maksimal ${maks} karakter`);
+/** Data perusahaan yang masuk ke templat PKWT (variabel templat). Bukan teks hukum; yang kosong dicetak sebagai titik-titik untuk diisi tangan. */
+export const PengaturanPkwt = z
+  .object({
+    penandatanganNama: teksPendek('Nama penandatangan', 100).optional(),
+    penandatanganJabatan: teksPendek('Jabatan penandatangan', 100).optional(),
+    kota: teksPendek('Kota penandatanganan', 100).optional(),
+    pengadilanNegeri: teksPendek('Pengadilan negeri', 100).optional(),
+    legalitas: z.array(teksPendek('Butir legalitas', 300), { error: 'Legalitas harus berupa daftar teks' }).max(10, 'Legalitas maksimal 10 butir').optional(),
+  })
+  .strict();
 export const PengaturanDokumen = z
   .object({
     contractNumberPrefix: z.string().regex(/^[A-Z0-9/.-]{1,20}$/, 'Prefiks nomor kontrak tidak valid').optional(),
     /** Retensi selfie absensi (hari); bawaan 90. Kebijakan final wajib ditinjau terhadap UU Pelindungan Data Pribadi. */
     selfieRetentionDays: z.number({ error: 'Retensi selfie harus angka' }).int('Retensi selfie harus bilangan bulat').min(7, 'Retensi selfie minimal 7 hari').max(3650, 'Retensi selfie maksimal 3650 hari').optional(),
+    pkwt: PengaturanPkwt.optional(),
   })
   .strict();
 

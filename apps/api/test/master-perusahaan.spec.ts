@@ -226,6 +226,22 @@ jalan('Master perusahaan dan dokumen legalitas (PostgreSQL asli)', () => {
       expect(aud.some((x) => x.d.includes('Bandung'))).toBe(false);
     });
 
+    it('pengaturan PKWT (penandatangan, kota, legalitas): divalidasi, digabung tanpa menghapus pengaturan lain, dan audit memuat nama bidang saja', async () => {
+      const it = await buatStaffMasuk(['IT_ADMIN'], { companyIds: [perusahaanA] });
+      await api(it, 'patch', `/companies/${perusahaanA}`, { documentSettings: { contractNumberPrefix: 'KTR' } }).expect(200);
+      for (const buruk of [{ legalitas: Array.from({ length: 11 }, () => 'x') }, { legalitas: ['x'.repeat(301)] }, { penandatanganNama: '' }, { klausul: 'bebas' }]) {
+        const r = await api(it, 'patch', `/companies/${perusahaanA}`, { documentSettings: { pkwt: buruk } }).expect(400);
+        expect(JSON.stringify(r.body)).toMatch(/[A-Za-z]/);
+      }
+      const ok = await api(it, 'patch', `/companies/${perusahaanA}`, { documentSettings: { pkwt: { penandatanganNama: 'Rahasia Penanda Sintetis', penandatanganJabatan: 'Personalia', kota: 'Bandung', legalitas: ['Akta Sintetis RAHASIA-123'] } } }).expect(200);
+      expect(ok.body.documentSettings.pkwt).toMatchObject({ penandatanganNama: 'Rahasia Penanda Sintetis', legalitas: ['Akta Sintetis RAHASIA-123'] });
+      expect(ok.body.documentSettings.contractNumberPrefix).toBe('KTR'); // pengaturan lain tidak hilang
+      const aud = await bacaAuditSql('master.company.updated', it.userId);
+      expect(aud.some((x) => x.d.includes('RAHASIA') || x.d.includes('Rahasia Penanda'))).toBe(false);
+      // perusahaan lain tidak terpengaruh dan tidak dapat diubah dari scope A
+      await api(it, 'patch', `/companies/${perusahaanB}`, { documentSettings: { pkwt: { kota: 'X' } } }).expect(404);
+    });
+
     const matriks: { izin: string; peran: string; metode: 'get' | 'post' | 'patch'; path: () => string; body?: object }[] = [];
     for (const r of ROLES.filter((x) => x !== 'IT_ADMIN')) matriks.push({ izin: 'company.create', peran: r, metode: 'post', path: () => '/companies', body: { name: 'PT SINTETIS X', shortCode: 'XX' } });
     for (const r of ['HRD', 'MARKETING', 'STAFF_PAYROLL_ABSENSI_REKANAN', 'STAFF_PAYROLL_INTERNAL', 'MANAGER_OPERASIONAL']) {

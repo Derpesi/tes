@@ -11,9 +11,10 @@ import { ScopedDb } from '../database/scoped-db';
 import type { Akses } from '../rbac/akses.service';
 import { ContractLifecycleService } from './lifecycle.service';
 import { NumberingService } from './numbering.service';
-import { buatPdf, tanggalPanjang } from './pdf';
+import { buatPdf } from './pdf';
+import { type DataPekerja, type DataPenempatan, type DataPerusahaan, susunNilaiTemplate } from './nilai-template';
 import { AlasanBody, DaftarKontrakQuery, KontrakBuat, KontrakUbah } from './schemas';
-import { isiTemplate } from './variabel';
+import { isiTemplateLengkap } from './variabel';
 
 const TDK_KONTRAK = () => new NotFoundException({ kode: 'KONTRAK_TIDAK_DITEMUKAN', message: 'Kontrak tidak ditemukan' });
 const TDK_DOKUMEN = () => new NotFoundException({ kode: 'DOKUMEN_TIDAK_DITEMUKAN', message: 'Dokumen tidak ditemukan' });
@@ -268,20 +269,36 @@ export class PkwtService {
   // ---------- PDF ----------
   /** Dibangkitkan sesuai permintaan dari data saat ini; NIK didekripsi saat itu juga dan tidak disimpan/dicatat. */
   async pdf(a: Akses, id: string): Promise<Buffer> {
-    const { k, isi, perusahaan, nik, nama, terverifikasi } = await this.tx(a, async (c) => {
+    const { k, isi, perusahaan, pekerja, penempatan, terverifikasi } = await this.tx(a, async (c) => {
       const k = await this.muat(c, id);
       if (k.status === 'DIBATALKAN') throw konflik('KONTRAK_DIBATALKAN', 'Kontrak yang dibatalkan tidak dapat dicetak');
       const t = await c.query(`SELECT body, verified_at FROM contract_templates WHERE id = $1`, [k.template_id]);
-      const p = await c.query(`SELECT id, full_name, nik_enc FROM member_profiles WHERE person_id = $1`, [k.person_id]);
-      const co = await c.query(`SELECT name FROM companies WHERE id = $1`, [k.company_id]);
+      const p = await c.query(`SELECT id, full_name, nik_enc, birth_place, birth_date::text AS birth_date, education, address, city, phone FROM member_profiles WHERE person_id = $1`, [k.person_id]);
+      const co = await c.query(`SELECT name, legal_name, address, city, province, document_settings->'pkwt' AS pkwt FROM companies WHERE id = $1`, [k.company_id]);
       if (!p.rowCount || !p.rows[0].full_name || !p.rows[0].nik_enc) throw konflik('DATA_PEKERJA_BELUM_LENGKAP', 'Biodata pekerja (nama/NIK) belum lengkap untuk mencetak kontrak');
-      return { k, isi: t.rows[0].body as string, perusahaan: co.rows[0].name as string, nik: dekripsiNik(p.rows[0].nik_enc as Buffer, this.kunci.enkripsi, p.rows[0].id as string), nama: p.rows[0].full_name as string, terverifikasi: !!t.rows[0].verified_at };
+      // Perusahaan pengguna jasa: lowongan -> lokasi -> rekanan (dapat kosong; menjadi isian tangan).
+      const pn = await c.query(
+        `SELECT pt.name AS rekanan, concat_ws(', ', NULLIF(btrim(l.address), ''), NULLIF(btrim(l.city), ''), NULLIF(btrim(l.province), '')) AS alamat
+           FROM job_applications ja JOIN job_vacancies v ON v.id = ja.vacancy_id
+           LEFT JOIN partner_locations l ON l.id = v.location_id LEFT JOIN partners pt ON pt.id = l.partner_id
+          WHERE ja.id = $1`,
+        [k.application_id],
+      );
+      const pr = p.rows[0];
+      return {
+        k,
+        isi: t.rows[0].body as string,
+        perusahaan: co.rows[0] as DataPerusahaan,
+        pekerja: { ...pr, full_name: pr.full_name as string, nik: dekripsiNik(pr.nik_enc as Buffer, this.kunci.enkripsi, pr.id as string) } as DataPekerja,
+        penempatan: (pn.rows[0] ?? null) as DataPenempatan | null,
+        terverifikasi: !!t.rows[0].verified_at,
+      };
     });
     const sah = ['PENANDATANGANAN', 'MENUNGGU_VERIFIKASI_DOKUMEN', 'DITANDATANGANI', 'AKTIF', 'BERAKHIR', 'DIAKHIRI_LEBIH_AWAL'].includes(k.status as string);
-    const teks = isiTemplate(isi, {
-      nama, nik, nomor: k.contract_number as string, jabatan: k.position as string, tanggal_mulai: tanggalPanjang(k.start_date as string), tanggal_akhir: tanggalPanjang(k.end_date as string),
-      perusahaan, tanggal_cetak: tanggalPanjang(new Date().toISOString().slice(0, 10)),
-    });
+    const { teks, isianTangan } = isiTemplateLengkap(
+      isi,
+      susunNilaiTemplate({ perusahaan, pekerja, kontrak: { contract_number: k.contract_number as string, position: k.position as string, start_date: k.start_date as string, end_date: k.end_date as string }, penempatan, tanggalCetakIso: new Date().toISOString().slice(0, 10) }),
+    );
     const pdf = await buatPdf({
       judul: `Nomor: ${k.contract_number}`,
       isi: teks,
@@ -290,7 +307,7 @@ export class PkwtService {
         ? 'Dokumen untuk ditandatangani basah. Belum sah sebelum scan bertanda tangan diunggah dan diverifikasi HRD.'
         : 'DRAF — belum disetujui. Bukan dokumen yang sah.',
     });
-    await this.audit.catat({ aksi: 'pkwt.pdf.generated', aktorId: a.userId, companyId: k.company_id as string, objek: 'employment_contract', objekId: id, detail: { versi: k.current_version } });
+    await this.audit.catat({ aksi: 'pkwt.pdf.generated', aktorId: a.userId, companyId: k.company_id as string, objek: 'employment_contract', objekId: id, detail: { versi: k.current_version, isianTangan } });
     return pdf;
   }
 

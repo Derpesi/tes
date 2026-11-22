@@ -11,4 +11,14 @@ describe('PengaturanDokumen', () => {
     expect(r.success ? '' : r.error.issues[0].message).toBe('Retensi selfie minimal 7 hari');
     expect(PengaturanDokumen.safeParse({ lain: 1 }).success).toBe(false);
   });
+  it('pkwt: penandatangan/kota/legalitas; batas panjang dan jumlah; kunci tak dikenal ditolak', () => {
+    expect(PengaturanDokumen.safeParse({ pkwt: { penandatanganNama: 'Nama Sintetis', penandatanganJabatan: 'Personalia', kota: 'Tangerang', legalitas: ['Butir satu', 'Butir dua'] } }).success).toBe(true);
+    expect(PengaturanDokumen.safeParse({ pkwt: {} }).success).toBe(true);
+    expect(PengaturanDokumen.safeParse({ pkwt: { legalitas: Array.from({ length: 11 }, () => 'x') } }).success).toBe(false);
+    expect(PengaturanDokumen.safeParse({ pkwt: { legalitas: ['x'.repeat(301)] } }).success).toBe(false);
+    expect(PengaturanDokumen.safeParse({ pkwt: { penandatanganNama: '' } }).success).toBe(false);
+    expect(PengaturanDokumen.safeParse({ pkwt: { klausul: 'x' } }).success).toBe(false);
+    const r = PengaturanDokumen.safeParse({ pkwt: { legalitas: Array.from({ length: 11 }, () => 'x') } });
+    expect(r.success ? '' : r.error.issues[0].message).toBe('Legalitas maksimal 10 butir');
+  });
 });

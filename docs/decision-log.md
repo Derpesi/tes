@@ -81,6 +81,9 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-74 | Kunci lama dipertahankan selama masih ada cadangan sebelum rotasi dalam retensi; `verifikasi` membuktikan data terbaca hanya dengan kunci aktif sebelum kunci lama dibuang |
 | D-75 | **Rekap absensi tanpa filter lokasi/pekerja maksimal 7 hari** (dengan filter 93 hari) pada `GET /attendance/recap` dan ekspor CSV; ditegakkan di server (zod), UI memilih lokasi. `RecapService.ambil` (sumber snapshot payroll) tidak dibatasi |
 | D-76 | **Pembatas konkurensi kueri berat** (`LaporanBeratInterceptor`): bawaan 2 bersamaan, antrean 20, tunggu 10 dtk → 503 `SISTEM_SIBUK` + `Retry-After`; dipasang di `/reports/:nama(.csv)` dan `/attendance/recap(.csv)`; env `BATAS_LAPORAN_BERAT`. Bukti: scan 40 req/dtk tetap p95 88 ms saat 12 req/dtk pembacaan berat (tanpa pembatas p95 38 dtk). ADR-0014 |
+| D-77 | **Templat PKWT awal dari draf pemilik (2022)** disimpan sebagai berkas data `docs/templates/pkwt-alih-daya/isi.txt` (generik; klausul TIDAK diubah, hanya data diganti variabel), bukan teks hukum di kode; masuk ke perusahaan lewat alat impor sebagai BELUM_DIVERIFIKASI. ADR-0015 |
+| D-78 | Variabel templat diperluas (Pihak Pertama dari master perusahaan, Pihak Kedua dari biodata, penempatan dari lowongan→lokasi→rekanan); variabel inti tetap wajib, variabel data master/penempatan yang kosong dicetak sebagai titik-titik untuk diisi tangan dan dilaporkan di audit (nama variabel saja) |
+| D-79 | Pengaturan PKWT per perusahaan (`document_settings.pkwt`: penandatangan, jabatan, kota, pengadilan negeri, legalitas ≤10 butir) disunting lewat UI Perusahaan (izin `company.update` = IT Administrator); perusahaan baru cukup mengisi master data, tanpa ubah kode |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -147,6 +150,8 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-60 | Rotasi `AUTH_HMAC_KEY` (indeks buta NIK/email/sub, hash kode pemulihan, CSRF) belum ada; butuh re-index dan verifikasi dua-kunci | Fase tersendiri sebelum produksi bila kebijakan rotasi HMAC dibutuhkan |
 | A-61 | Dokumen master (`company_documents`, kontrak layanan rekanan) disimpan apa adanya (tidak dienkripsi aplikasi); bukan PII, di luar rotasi. Enkripsi di penyimpanan (volume/bucket) direkomendasikan | Pemilik/penyedia penyimpanan |
 | A-62 | Ambang rekap tanpa filter 7 hari berdasar ukur (7 hari ≈ 0,6 dtk; 30 hari ≈ 2,3 dtk pada 10.000 pekerja, 1 VM); dapat disetel setelah ukur di staging | Pengukuran staging |
+| A-63 | Isi draf PKWT 2022 perlu tinjauan ahli hukum sebelum diverifikasi: denda/pinalti pekerja, pernyataan tidak berserikat/tidak menuntut tetap, rujukan KUHP, tarif BPJS tertulis di teks, legalitas bertahun 2019–2022, Pasal 3 tanpa tanggal berakhir, nomor kontrak format draf berbeda dari format sistem | Ahli hukum/pemilik; peninjau memutuskan perubahan teks (di luar wewenang sistem/pengembang) |
+| A-64 | Pengaturan PKWT disunting IT Administrator (pemegang `company.update`); pemilik dapat meminta izin khusus (mis. HRD) sebagai pekerjaan RBAC terpisah | Pemilik |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

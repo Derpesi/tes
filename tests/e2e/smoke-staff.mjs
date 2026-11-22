@@ -212,6 +212,18 @@ async function utama() {
   assert.match(await page.textContent('[role=status].sukses'), /menunggu persetujuan/i);
   assert.match(await page.textContent('.butir'), /MENUNGGU PERSETUJUAN/);
   await periksa('perusahaan-it'); await foto('08-perusahaan-it');
+  // 8a'. Pengaturan PKWT per perusahaan (data untuk templat PKWT): IT mengisi penandatangan dan legalitas; yang kosong tetap boleh
+  const kartu = page.locator('.butir', { hasText: 'PT SINTETIS E2E' });
+  await kartu.locator('summary:has-text("Pengaturan PKWT")').click();
+  await kartu.locator('input[id^=pn-]').fill('Penandatangan Sintetis E2E');
+  await kartu.locator('input[id^=pj-]').fill('Personalia');
+  await kartu.locator('textarea[id^=pl-]').fill('Akta Sintetis E2E Nomor 1\nNIB Sintetis E2E 2');
+  await kartu.locator('button:has-text("Simpan pengaturan PKWT")').click();
+  await page.waitForSelector('[role=status].sukses:has-text("Pengaturan PKWT disimpan"), [role=alert].galat');
+  assert.ok(await page.isVisible('[role=status].sukses:has-text("Pengaturan PKWT disimpan")'), `pengaturan PKWT gagal disimpan: ${await page.locator('[role=alert].galat').allTextContents()}`);
+  const pk = (await pool.query(`SELECT document_settings->'pkwt' AS p FROM companies WHERE short_code = $1`, [KODE])).rows[0].p;
+  assert.equal(pk.penandatanganNama, 'Penandatangan Sintetis E2E');
+  assert.deepEqual(pk.legalitas, ['Akta Sintetis E2E Nomor 1', 'NIB Sintetis E2E 2']);
   await keluarUI();
 
   // 8b. Direktur menyetujui aktivasi
