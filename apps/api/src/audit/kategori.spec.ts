@@ -5,7 +5,7 @@ import { AWALAN_DIKENAL, kategoriAksi, kebijakanUntuk, KUNCI_DETAIL_BOLEH, sarin
 describe('kategoriAksi', () => {
   it.each([
     ['auth.login.success', 'TEKNIS'], ['auth.role.granted', 'TEKNIS'], ['system.apa-saja', 'TEKNIS'],
-    ['payroll.recap.approved', 'TRANSAKSI'], ['payroll.recap.exported', 'TRANSAKSI'],
+    ['payroll.recap.approved', 'TRANSAKSI'], ['payroll.recap.exported', 'TRANSAKSI'], ['report.exported', 'TRANSAKSI'], ['reports.bukan', 'OPERASIONAL'],
     ['attendance.selfie.viewed', 'OPERASIONAL'], ['master.company.created', 'OPERASIONAL'], ['member.nik.revealed', 'OPERASIONAL'], ['pkwt.contract.created', 'OPERASIONAL'],
     ['placement.approved', 'OPERASIONAL'], ['recruitment.vacancy.opened', 'OPERASIONAL'],
     ['aksi.tidak.dikenal', 'OPERASIONAL'], ['authx.bukan-teknis', 'OPERASIONAL'], ['xpayroll.bukan', 'OPERASIONAL'], ['', 'OPERASIONAL'],

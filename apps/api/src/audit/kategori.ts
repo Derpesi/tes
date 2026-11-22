@@ -1,16 +1,16 @@
 /**
  * Kategori audit diturunkan dari AWALAN aksi dan ditegakkan di SQL (bukan hanya UI):
  * - TEKNIS: `auth.*` dan `system.*` (login, peran, scope, MFA, bootstrap).
- * - TRANSAKSI: `payroll.*`.
+ * - TRANSAKSI: `payroll.*` dan `report.*` (ekspor laporan konsolidasi).
  * - OPERASIONAL: selain itu (master data, member, rekrutmen, PKWT, penempatan, absensi). Aksi baru yang tak terpetakan jatuh ke OPERASIONAL,
  *   sehingga TIDAK terlihat oleh IT dan Keuangan (deny-by-default bagi peran terbatas).
  */
 export type KategoriAudit = 'TEKNIS' | 'TRANSAKSI' | 'OPERASIONAL';
 export const SEMUA_KATEGORI: readonly KategoriAudit[] = ['TEKNIS', 'TRANSAKSI', 'OPERASIONAL'];
 export const AWALAN_TEKNIS = ['auth.', 'system.'] as const;
-export const AWALAN_TRANSAKSI = ['payroll.'] as const;
+export const AWALAN_TRANSAKSI = ['payroll.', 'report.'] as const;
 /** Awalan teratas yang dikenal; aksi baru wajib memakai salah satunya (dijaga tes penelusuran sumber). */
-export const AWALAN_DIKENAL = ['attendance', 'auth', 'master', 'member', 'payroll', 'pkwt', 'placement', 'recruitment', 'system'] as const;
+export const AWALAN_DIKENAL = ['attendance', 'auth', 'master', 'member', 'payroll', 'pkwt', 'placement', 'recruitment', 'report', 'system'] as const;
 
 export function kategoriAksi(aksi: string): KategoriAudit {
   if (AWALAN_TEKNIS.some((p) => aksi.startsWith(p))) return 'TEKNIS';

@@ -10,6 +10,7 @@ import { PkwtModule } from './pkwt/pkwt.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PayrollModule } from './payroll/payroll.module';
+import { ReportsModule } from './reports/reports.module';
 import { PlacementsModule } from './placements/placements.module';
 import { RecruitmentModule } from './recruitment/recruitment.module';
 import { AuthModule } from './auth/auth.module';
@@ -39,6 +40,7 @@ import { HealthController } from './health/health.controller';
     AttendanceModule,
     PayrollModule,
     DashboardModule,
+    ReportsModule,
     RecruitmentModule,
   ],
   controllers: [HealthController],

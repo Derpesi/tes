@@ -3709,6 +3709,34 @@
         ]
       }
     },
+    "/reports/{nama}": {
+      "get": {
+        "operationId": "ReportsController_ambil",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Laporan agregat per perusahaan dalam scope (RLS); rentang maksimal 366 hari; tanpa data pribadi"
+          }
+        },
+        "tags": [
+          "Laporan"
+        ]
+      }
+    },
+    "/reports/{nama}/export.csv": {
+      "get": {
+        "operationId": "ReportsController_csv",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Ekspor CSV (BOM UTF-8; sel berawalan = + - @ dinetralkan; maksimal 5.000 baris); diaudit"
+          }
+        },
+        "tags": [
+          "Laporan"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",
