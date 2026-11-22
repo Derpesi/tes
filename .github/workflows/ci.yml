@@ -17,7 +17,7 @@ jobs:
     name: Pindai rahasia (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # CLI via image resmi: tidak butuh lisensi seperti gitleaks-action untuk repo organisasi.
@@ -30,7 +30,7 @@ jobs:
     name: Cek berkas sensitif
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tolak berkas rahasia yang ter-track
         run: |
           if git ls-files | grep -E '(^|/)\.env($|\.)|\.pem$|\.key$|\.p12$|\.pfx$|\.keystore$|\.jks$' | grep -v '\.env\.example$'; then
@@ -41,7 +41,7 @@ jobs:
     name: Lint, tipe, tes unit, build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:
@@ -75,7 +75,7 @@ jobs:
       DATABASE_URL: postgres://ci_user:ci_ephemeral_db@localhost:5432/hris_test
       TEST_DATABASE_URL: postgres://ci_user:ci_ephemeral_db@localhost:5432/hris_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:
@@ -94,7 +94,7 @@ jobs:
     name: Deteksi perubahan kontrak OpenAPI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:
@@ -111,7 +111,7 @@ jobs:
     name: Audit dependency dan lisensi
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:
@@ -127,7 +127,7 @@ jobs:
     name: Bangun image Docker (tanpa push)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Image API
         run: docker build -f apps/api/Dockerfile -t hris-api:ci .
       - name: Image web
