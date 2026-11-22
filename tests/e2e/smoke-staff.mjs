@@ -684,6 +684,17 @@ async function utama() {
   await page.waitForSelector('.butir:has-text("SINTETIS Pelamar E2E")');
   assert.match(await page.textContent('.butir:has-text("SINTETIS Pelamar E2E")'), /Hadir/);
   await periksa('rekap-absensi'); await foto('37-rekap-absensi');
+  // A-62: tanpa lokasi rentang > 7 hari ditolak (UI dan server); memilih lokasi mengizinkan rentang panjang
+  const sepuluhHari = new Date(Date.parse(hariIni7) - 10 * 86400000).toISOString().slice(0, 10);
+  await page.fill('#dari', sepuluhHari);
+  await page.waitForSelector('[role=alert]:has-text("Pilih lokasi kerja")');
+  assert.ok(await page.isDisabled('button:has-text("Tampilkan rekap")'), 'tombol nonaktif untuk rentang lebar tanpa lokasi');
+  assert.equal((await page.request.get(`${WEB}/api/attendance/recap?from=${sepuluhHari}&to=${hariIni7}`)).status(), 400);
+  await page.waitForFunction(() => document.querySelectorAll('#lokasi option').length > 1);
+  await page.selectOption('#lokasi', { index: 1 });
+  assert.ok(!(await page.isDisabled('button:has-text("Tampilkan rekap")')), 'dengan lokasi rentang 11 hari diizinkan');
+  await page.click('button:has-text("Tampilkan rekap")');
+  await page.waitForSelector('.butir, p:has-text("Tidak ada data")');
   const csv = await page.request.get(`${WEB}/api/attendance/recap/export.csv?from=${hariIni7}&to=${hariIni7}`);
   assert.equal(csv.status(), 200);
   assert.match(csv.headers()['content-type'], /text\/csv/);

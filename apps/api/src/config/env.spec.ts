@@ -173,3 +173,12 @@ describe('APP_ENCRYPTION_KEYS (kunci enkripsi berversi, ADR-0013)', () => {
     try { muatEnv(prod); } catch (x) { expect(String(x)).not.toContain(lemah); }
   });
 });
+
+describe('BATAS_LAPORAN_BERAT (Fase 11C)', () => {
+  it('bawaan 2; 1-20 diterima; di luar itu atau bukan angka ditolak', () => {
+    expect(muatEnv(sah()).BATAS_LAPORAN_BERAT).toBe(2);
+    expect(muatEnv({ ...sah(), BATAS_LAPORAN_BERAT: '5' }).BATAS_LAPORAN_BERAT).toBe(5);
+    expect(muatEnv({ ...sah(), BATAS_LAPORAN_BERAT: '' }).BATAS_LAPORAN_BERAT).toBe(2);
+    for (const bad of ['0', '21', 'abc']) expect(() => muatEnv({ ...sah(), BATAS_LAPORAN_BERAT: bad })).toThrow(/BATAS_LAPORAN_BERAT/);
+  });
+});

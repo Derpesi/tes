@@ -5,6 +5,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool, PoolClient } from 'pg';
 import request from 'supertest';
+import { batasLaporanBerat } from '../src/common/batas-konkurensi';
 import { urlAplikasiTanpaBypass } from './helpers/role-app';
 
 const DB_URL = process.env.TEST_DATABASE_URL;
@@ -263,6 +264,45 @@ jalan('Laporan konsolidasi: izin per bagian, akurasi, isolasi, ekspor CSV (Postg
       expect(april.sections.rekanan.some((b) => b.measure.includes('subtotal'))).toBe(false);
       expect(Object.keys((await lap(s.mo, 'payroll')).sections)).toEqual(['rekanan']);
       expect(nilai(await lap(s.keu, 'payroll'), 'rekanan', NAMA_A, 'Rekanan: subtotal potongan (rekap disetujui, bukan gaji)')).toBe('10.00');
+    });
+  });
+
+  describe('pembatas konkurensi kueri berat (Fase 11C)', () => {
+    const tahan = () => {
+      let lepas!: () => void;
+      const p = new Promise<void>((r) => { lepas = r; });
+      return { p, lepas };
+    };
+    afterEach(() => batasLaporanBerat.atur(2, 20, 10_000));
+
+    it('slot penuh dan antrean penuh => 503 SISTEM_SIBUK dengan Retry-After pada laporan dan rekap; rute lain tidak terpengaruh; pulih setelah slot dilepas', async () => {
+      batasLaporanBerat.atur(1, 0, 3000);
+      const t = tahan();
+      const penuh = batasLaporanBerat.jalankan(() => t.p);
+      for (const path of [`/reports/workforce?${MARET}`, `/reports/workforce/export.csv?${MARET}`, '/attendance/recap?from=2026-03-01&to=2026-03-02']) {
+        const r = await http(path, s.dir).expect(503);
+        expect(r.body).toMatchObject({ kode: 'SISTEM_SIBUK' });
+        expect(r.body.pesan).toMatch(/sibuk/i);
+        expect(Number(r.headers['retry-after'])).toBeGreaterThanOrEqual(1);
+      }
+      await http('/dashboard/staff', s.dir).expect(200); // rute non-berat tetap jalan saat slot berat penuh
+      await http(`/reports/workforce?${MARET}`, s.it).expect(403); // otorisasi tetap lebih dulu daripada antrean
+      t.lepas();
+      await penuh;
+      await http(`/reports/workforce?${MARET}`, s.dir).expect(200);
+      expect(batasLaporanBerat.status).toEqual({ berjalan: 0, antre: 0 });
+    });
+
+    it('permintaan di dalam antrean menunggu lalu berhasil setelah slot dilepas', async () => {
+      batasLaporanBerat.atur(1, 5, 5000);
+      const t = tahan();
+      const penuh = batasLaporanBerat.jalankan(() => t.p);
+      const menunggu = http(`/reports/workforce?${MARET}`, s.dir).then((r) => r.status);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(batasLaporanBerat.status.antre).toBe(1);
+      t.lepas();
+      await penuh;
+      expect(await menunggu).toBe(200);
     });
   });
 

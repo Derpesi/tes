@@ -3,7 +3,7 @@
 // tidak menunggu respons sebelumnya, sehingga antrean server tampak sebagai kenaikan latensi (bukan melambatnya pengirim).
 // Pakai (staging/lokal SAJA, data sintetis hasil seed-besar.mjs; jangan arahkan ke production):
 //   BASE_URL=http://127.0.0.1:3001 APP_BASE_URL=<sama dengan API> AUTH_HMAC_KEY=<sama dengan API> \
-//   node tests/load/runner.mjs --skenario scan --rps 100 --durasi 60 [--ramp 10] [--selfie] [--keluaran hasil.json]
+//   node tests/load/runner.mjs --skenario scan --rps 100 --durasi 60 [--ramp 10] [--selfie] [--lokasi <uuid>] [--keluaran hasil.json]
 // Skenario: scan (POST /member/attendance + selfie sintetis ~100 KB, pekerja berbeda per permintaan),
 //           baca (campuran GET staf: dashboard, rekap, tinjauan, laporan, audit), ekspor (CSV laporan absensi, sinkron; ekspor rekap butuh izin khusus dan filter lokasi, tidak diukur di sini).
 import { createHmac, randomBytes } from 'node:crypto';
@@ -21,6 +21,7 @@ const rps = Number(arg('rps', 20));
 const durasi = Number(arg('durasi', 30));
 const ramp = Number(arg('ramp', 0));
 const mulaiNo = Number(arg('mulai', 0));
+const lokasiId = arg('lokasi'); // locationId untuk rekap (tanpa ini rekap memakai rentang 7 hari, batas server A-62)
 const denganSelfie = process.argv.includes('--selfie'); // selfie ditiadakan sementara (bawaan produk); aktifkan hanya bila API memakai ABSENSI_SELFIE=on
 const sesi = JSON.parse(readFileSync(arg('sesi', 'tests/load/.keluaran/sesi.json'), 'utf8'));
 const kunci = Buffer.from(KUNCI, 'base64');
@@ -45,7 +46,7 @@ const aksi = {
     const s = sesi.staf[i % sesi.staf.length];
     const pilih = [
       ['dashboard', '/dashboard/staff'],
-      ['rekap', `/attendance/recap?from=${awal}&to=${kemarin}&limit=50`],
+      ['rekap', lokasiId ? `/attendance/recap?from=${awal}&to=${kemarin}&locationId=${lokasiId}&limit=50` : `/attendance/recap?from=${new Date(Date.now() + 7 * 3600e3 - 7 * 86400e3).toISOString().slice(0, 10)}&to=${kemarin}&limit=50`],
       ['tinjauan', '/attendance/review?tahap=MENUNGGU_PERIKSA&limit=50'],
       ['laporan-absensi', `/reports/attendance?from=${awal}&to=${kemarin}`],
       ['laporan-tenaga', `/reports/workforce?from=${awal}&to=${kemarin}`],

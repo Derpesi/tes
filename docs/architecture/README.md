@@ -17,5 +17,6 @@ Catat setiap keputusan penting sebagai ADR bernama `NNNN-judul.md` dengan bagian
 | 0011 | Uji Keamanan, Uji Beban, Cadangan/Restore, dan Kesiapan Deployment | Diimplementasikan (menunggu persetujuan pemilik) |
 | 0012 | Selfie Absensi Ditiadakan Sementara | Diimplementasikan (menunggu persetujuan pemilik) |
 | 0013 | Rotasi Kunci Enkripsi Berversi | Diimplementasikan (menunggu persetujuan pemilik) |
+| 0014 | Batas Rentang Rekap dan Pembatas Konkurensi Laporan Berat | Diimplementasikan (menunggu persetujuan pemilik) |
 
 Ringkasan arsitektur: `../architecture.md`. Daftar keputusan dan asumsi: `../decision-log.md`.

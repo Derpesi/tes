@@ -3099,7 +3099,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Rekap per orang-hari dari rekaman efektif (putusan tinjauan dan koreksi disetujui); keyset"
+            "description": "Rekap per orang-hari dari rekaman efektif (putusan tinjauan dan koreksi disetujui); keyset. Tanpa locationId/personId rentang maksimal 7 hari (dengan filter 93 hari). Kueri berat dibatasi konkurensinya: 503 SISTEM_SIBUK bila antrean penuh"
           }
         },
         "tags": [

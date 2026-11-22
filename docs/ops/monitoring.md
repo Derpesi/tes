@@ -1,5 +1,6 @@
 # Runbook: Pemantauan, Log, dan Peringatan Minimal
 
+> **Fase 11C:** respons **503 `SISTEM_SIBUK`** (dengan `Retry-After`) pada `/reports/*` dan `/attendance/recap*` berarti pembatas konkurensi laporan berat penuh (`BATAS_LAPORAN_BERAT`, bawaan 2). Lonjakan terus-menerus = pengguna meminta laporan berat bersamaan atau rentang terlalu lebar; periksa penggunaan, jangan langsung menaikkan batas (kolam DB `DB_POOL_MAX` dibagi dengan scan absen).
 Belum ada platform pemantauan terpilih (keputusan pemilik). Berikut kebutuhan **minimum** agar staging/produksi dapat dioperasikan.
 
 ## Sinyal kesehatan

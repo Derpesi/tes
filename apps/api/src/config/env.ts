@@ -96,6 +96,8 @@ const skema = z
     API_DOCS: opsional(z.enum(['on', 'off'], { error: 'API_DOCS harus on atau off' })),
     /** Selfie absensi (Fase 10+): bawaan MATI (ditiadakan sementara atas keputusan pemilik). `on` mewajibkan selfie JPEG dari kamera seperti rancangan ADR-0008. */
     ABSENSI_SELFIE: opsional(z.enum(['on', 'off'], { error: 'ABSENSI_SELFIE harus on atau off' })),
+    /** Maksimum kueri laporan/rekap berat yang berjalan bersamaan per proses (sisanya antre; lewat antrean → 503). */
+    BATAS_LAPORAN_BERAT: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(1, 'BATAS_LAPORAN_BERAT minimal 1').max(20, 'BATAS_LAPORAN_BERAT maksimal 20').default(2)),
     /** Ukuran maksimum pool koneksi PostgreSQL per proses API. */
     DB_POOL_MAX: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(2, 'DB_POOL_MAX minimal 2').max(100, 'DB_POOL_MAX maksimal 100').default(10)),
     /** Direktori penyimpanan objek (driver lokal). Bawaan ./.penyimpanan; di produksi gunakan volume privat. */

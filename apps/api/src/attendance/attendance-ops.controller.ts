@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Res, UseInterceptors } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
+import { LaporanBeratInterceptor } from '../common/batas-konkurensi';
 import { ZodPipe } from '../common/zod.pipe';
 import type { Akses } from '../rbac/akses.service';
 import { AksesStaff, RequirePermission } from '../rbac/rbac.decorators';
@@ -108,13 +109,15 @@ export class AttendanceOpsController {
 
   // ----- rekap -----
   @RequirePermission('attendance_recap.view')
+  @UseInterceptors(LaporanBeratInterceptor)
   @Get('recap')
-  @ApiOkResponse({ description: 'Rekap per orang-hari dari rekaman efektif (putusan tinjauan dan koreksi disetujui); keyset' })
+  @ApiOkResponse({ description: 'Rekap per orang-hari dari rekaman efektif (putusan tinjauan dan koreksi disetujui); keyset. Tanpa locationId/personId rentang maksimal 7 hari (dengan filter 93 hari). Kueri berat dibatasi konkurensinya: 503 SISTEM_SIBUK bila antrean penuh' })
   daftarRekap(@AksesStaff() a: Akses, @Query(new ZodPipe(RekapQuery)) q: z.infer<typeof RekapQuery>) {
     return this.rekap.daftar(a, q);
   }
 
   @RequirePermission('attendance_recap.export')
+  @UseInterceptors(LaporanBeratInterceptor)
   @Get('recap/export.csv')
   @ApiOkResponse({ description: 'Ekspor CSV (maksimal 10.000 baris) dengan perlindungan formula injection; diaudit' })
   async eksporRekap(@AksesStaff() a: Akses, @Query(new ZodPipe(RekapEksporQuery)) q: z.infer<typeof RekapEksporQuery>, @Res() res: Response) {

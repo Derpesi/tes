@@ -1,5 +1,6 @@
 # Alur Absensi
 
+> **Rekap (Fase 11C, A-62):** rekap/ekspor tanpa filter lokasi atau pekerja dibatasi **7 hari**; dengan filter sampai **93 hari** (ditegakkan di server). Rekap payroll memakai sumber yang sama tanpa batas ini.
 > **Pembaruan (selfie ditiadakan sementara, ADR-0012):** saklar `ABSENSI_SELFIE` bawaan **off**. Saat off, langkah selfie tidak ada: server tidak mewajibkan, tidak memvalidasi, dan tidak menyimpan selfie; UI tidak meminta kamera. Aturan selfie di dokumen ini berlaku bila saklar diaktifkan kembali (`on`).
 
 

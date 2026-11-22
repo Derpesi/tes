@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, UseInterceptors } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
+import { LaporanBeratInterceptor } from '../common/batas-konkurensi';
 import { ZodPipe } from '../common/zod.pipe';
 import type { Akses } from '../rbac/akses.service';
 import { AksesStaff, RequirePermission } from '../rbac/rbac.decorators';
@@ -15,6 +16,7 @@ export class ReportsController {
   constructor(private readonly svc: ReportsService) {}
 
   @RequirePermission('report_consolidated.view')
+  @UseInterceptors(LaporanBeratInterceptor)
   @Get(':nama')
   @ApiOkResponse({ description: 'Laporan agregat per perusahaan dalam scope (RLS); rentang maksimal 366 hari; tanpa data pribadi' })
   ambil(@AksesStaff() a: Akses, @Param('nama', new ZodPipe(NamaParam)) nama: NamaLaporan, @Query(new ZodPipe(LaporanQuery)) q: z.infer<typeof LaporanQuery>) {
@@ -22,6 +24,7 @@ export class ReportsController {
   }
 
   @RequirePermission('report_consolidated.export')
+  @UseInterceptors(LaporanBeratInterceptor)
   @Get(':nama/export.csv')
   @ApiOkResponse({ description: 'Ekspor CSV (BOM UTF-8; sel berawalan = + - @ dinetralkan; maksimal 5.000 baris); diaudit' })
   async csv(@AksesStaff() a: Akses, @Param('nama', new ZodPipe(NamaParam)) nama: NamaLaporan, @Query(new ZodPipe(LaporanQuery)) q: z.infer<typeof LaporanQuery>, @Res() res: Response) {

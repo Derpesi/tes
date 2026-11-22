@@ -44,7 +44,7 @@ Prasyarat: Node ≥22.12, pnpm 10, PostgreSQL 16. User database dev perlu hak `C
 - `pnpm load:seed` / `pnpm load:run` — dataset beban sintetis dan runner uji beban (hanya DB `*_load`, staging/lokal; lihat `docs/performance.md`)
 - `pnpm ops:backup` / `ops:restore` / `ops:verifikasi` — cadangan/restore (role BYPASSRLS khusus; lihat `docs/ops/restore.md`)
 - `pnpm ops:rotasi -- cek|jalan|verifikasi` — rotasi kunci enkripsi (`APP_ENCRYPTION_KEYS` berversi; butuh `ROTASI_DATABASE_URL` role BYPASSRLS; lihat `docs/ops/rotasi-kunci.md`)
-- Deploy: `docs/ops/deploy.md`, daftar blokir go-live `docs/ops/golive.md`; contoh di `deploy/` (bukan konfigurasi final). Produksi: `APP_BASE_URL` https, `STORAGE_DIR` wajib, `API_DOCS` bawaan off, `ABSENSI_SELFIE` bawaan off (samakan saat build web), `DB_POOL_MAX` opsional; `GET /ready` untuk readiness.
+- Deploy: `docs/ops/deploy.md`, daftar blokir go-live `docs/ops/golive.md`; contoh di `deploy/` (bukan konfigurasi final). Produksi: `APP_BASE_URL` https, `STORAGE_DIR` wajib, `API_DOCS` bawaan off, `ABSENSI_SELFIE` bawaan off (samakan saat build web), `DB_POOL_MAX` opsional, `BATAS_LAPORAN_BERAT` (bawaan 2; kueri laporan/rekap berat bersamaan); `GET /ready` untuk readiness.
 - OpenAPI: `GET /openapi.json`, UI di `/docs` (mati di produksi kecuali `API_DOCS=on`).
 
 ## Rujukan

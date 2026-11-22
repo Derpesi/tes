@@ -95,6 +95,12 @@ export const DaftarKoreksiQuery = z.object({
   personId: uuid('ID pekerja').optional(),
 });
 
+/** Rekap tanpa filter lokasi/pekerja membaca semua rekaman perusahaan pada rentang (O(rekaman)): 7 hari ≈ 0,6 dtk, 30 hari ≈ 2,3 dtk pada 10.000 pekerja (A-62, docs/performance.md). */
+export const RENTANG_REKAP_TANPA_FILTER_HARI = 7;
+export const RENTANG_REKAP_MAKS_HARI = 93;
+const PESAN_REKAP_TANPA_FILTER = `Tanpa filter lokasi atau pekerja, rentang rekap maksimal ${RENTANG_REKAP_TANPA_FILTER_HARI} hari. Pilih lokasi atau pekerja untuk rentang yang lebih panjang`;
+const selisihHari = (v: { from: string; to: string }) => (Date.parse(v.to) - Date.parse(v.from)) / 86400000;
+
 export const RekapQuery = z.object({
   ...halaman,
   from: tanggal('Dari tanggal'),
@@ -102,11 +108,13 @@ export const RekapQuery = z.object({
   locationId: uuid('ID lokasi').optional(),
   personId: uuid('ID pekerja').optional(),
 }).refine((v) => v.to >= v.from, { message: 'Sampai tanggal tidak boleh sebelum dari tanggal', path: ['to'] })
-  .refine((v) => (Date.parse(v.to) - Date.parse(v.from)) / 86400000 <= 92, { message: 'Rentang rekap maksimal 93 hari', path: ['to'] });
+  .refine((v) => selisihHari(v) <= RENTANG_REKAP_MAKS_HARI - 1, { message: `Rentang rekap maksimal ${RENTANG_REKAP_MAKS_HARI} hari`, path: ['to'] })
+  .refine((v) => Boolean(v.locationId || v.personId) || selisihHari(v) <= RENTANG_REKAP_TANPA_FILTER_HARI - 1, { message: PESAN_REKAP_TANPA_FILTER, path: ['locationId'] });
 export const RekapEksporQuery = z.object({
   from: tanggal('Dari tanggal'),
   to: tanggal('Sampai tanggal'),
   locationId: uuid('ID lokasi').optional(),
   personId: uuid('ID pekerja').optional(),
 }).refine((v) => v.to >= v.from, { message: 'Sampai tanggal tidak boleh sebelum dari tanggal', path: ['to'] })
-  .refine((v) => (Date.parse(v.to) - Date.parse(v.from)) / 86400000 <= 92, { message: 'Rentang rekap maksimal 93 hari', path: ['to'] });
+  .refine((v) => selisihHari(v) <= RENTANG_REKAP_MAKS_HARI - 1, { message: `Rentang rekap maksimal ${RENTANG_REKAP_MAKS_HARI} hari`, path: ['to'] })
+  .refine((v) => Boolean(v.locationId || v.personId) || selisihHari(v) <= RENTANG_REKAP_TANPA_FILTER_HARI - 1, { message: PESAN_REKAP_TANPA_FILTER, path: ['locationId'] });

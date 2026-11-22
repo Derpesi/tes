@@ -79,6 +79,8 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-72 | **Rotasi kunci enkripsi (ADR-0013):** `APP_ENCRYPTION_KEYS` berversi (id tertinggi = aktif; `APP_ENCRYPTION_KEY` = id 1), ciphertext berawalan `0xE1\|id` dengan fallback ke format lama, cincin kunci di `Kunci.enkripsi`; `member_profiles.key_version` = kunci aktif |
 | D-73 | Alat `rotasi-kunci` (`cek`/`jalan`/`verifikasi`, `--kering`, `--batas`, `--jeda-ms`): role BYPASSRLS wajib, idempoten, bandingan optimistis, objek ditimpa atomik (`ObjectStorage.timpa`), objek tertukar tidak dirotasi diam-diam, audit teknis hanya hitungan |
 | D-74 | Kunci lama dipertahankan selama masih ada cadangan sebelum rotasi dalam retensi; `verifikasi` membuktikan data terbaca hanya dengan kunci aktif sebelum kunci lama dibuang |
+| D-75 | **Rekap absensi tanpa filter lokasi/pekerja maksimal 7 hari** (dengan filter 93 hari) pada `GET /attendance/recap` dan ekspor CSV; ditegakkan di server (zod), UI memilih lokasi. `RecapService.ambil` (sumber snapshot payroll) tidak dibatasi |
+| D-76 | **Pembatas konkurensi kueri berat** (`LaporanBeratInterceptor`): bawaan 2 bersamaan, antrean 20, tunggu 10 dtk → 503 `SISTEM_SIBUK` + `Retry-After`; dipasang di `/reports/:nama(.csv)` dan `/attendance/recap(.csv)`; env `BATAS_LAPORAN_BERAT`. Bukti: scan 40 req/dtk tetap p95 88 ms saat 12 req/dtk pembacaan berat (tanpa pembatas p95 38 dtk). ADR-0014 |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -139,11 +141,12 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-54 | Provisioning role DB aplikasi (non-superuser, tanpa BYPASSRLS) mengikuti usulan `ops/deploy.md`; migrasi tidak membuat role/GRANT | Verifikasi di staging |
 | A-55 | Selfie ±100–300 KB × 2/hari/pekerja → 2–6 GB/hari; retensi 90 hari ≈ 180–540 GB. Driver S3 dan cadangan inkremental objek belum ada | Pemilik: retensi final dan penyimpanan objek — **Selama selfie off, tambahan penyimpanan selfie = 0** (D-71); selfie lama tetap dihapus sesuai retensi |
 | A-56 | Kebijakan retensi/cadangan: harian (RPO 24 jam), tanpa arsip WAL/PITR | Keputusan setelah hosting dipilih |
-| A-57 | Rekap absensi tanpa filter lokasi pada rentang panjang berat (2,3 s/30 hari di 10.000 pekerja); UI wajib mendorong filter | Pekerjaan UI/produk |
+| A-57 | Rekap absensi tanpa filter lokasi pada rentang panjang berat (2,3 s/30 hari di 10.000 pekerja); UI wajib mendorong filter | Pekerjaan UI/produk — **Ditangani (Fase 11C, D-75)**: server menolak rentang >7 hari tanpa filter; UI memilih lokasi |
 | A-58 | Audit dependensi penuh: 4 kerentanan moderate hanya transitif dev (jest: minimatch/glob); produksi bersih | Pantau pembaruan jest |
 | A-59 | Tanpa selfie, mitigasi titip absen bertumpu pada geofence GPS, perangkat terdaftar (perangkat tambahan = verifikasi), skor anomali, dan tinjauan dua langkah; risiko titip absen **naik** (GPS dapat dipalsukan, QR dapat difoto). Dievaluasi ulang setelah data pilot | Pemilik: tetap off, aktifkan kembali, atau pengganti lain |
 | A-60 | Rotasi `AUTH_HMAC_KEY` (indeks buta NIK/email/sub, hash kode pemulihan, CSRF) belum ada; butuh re-index dan verifikasi dua-kunci | Fase tersendiri sebelum produksi bila kebijakan rotasi HMAC dibutuhkan |
 | A-61 | Dokumen master (`company_documents`, kontrak layanan rekanan) disimpan apa adanya (tidak dienkripsi aplikasi); bukan PII, di luar rotasi. Enkripsi di penyimpanan (volume/bucket) direkomendasikan | Pemilik/penyedia penyimpanan |
+| A-62 | Ambang rekap tanpa filter 7 hari berdasar ukur (7 hari ≈ 0,6 dtk; 30 hari ≈ 2,3 dtk pada 10.000 pekerja, 1 VM); dapat disetel setelah ukur di staging | Pengukuran staging |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

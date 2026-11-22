@@ -447,6 +447,14 @@ jalan('Absensi staf: tinjauan, selfie, retensi, koreksi, dan rekap (PostgreSQL a
       expect(per(items, 'SINTETIS Dua')).toMatchObject({ status: 'HADIR', pendingVerification: 0 });
       expect(items).toHaveLength(5);
 
+      // A-62: tanpa filter lokasi/pekerja rentang maksimal 7 hari; dengan filter sampai 93 hari; berlaku juga untuk ekspor
+      const tolakLebar = await http('get', '/attendance/recap?from=2026-02-01&to=2026-02-10', s.dir).expect(400);
+      expect(JSON.stringify(tolakLebar.body)).toMatch(/maksimal 7 hari.*Pilih lokasi atau pekerja/);
+      await http('get', '/attendance/recap?from=2026-02-01&to=2026-02-07', s.dir).expect(200); // tepat 7 hari
+      await http('get', `/attendance/recap?from=2025-12-01&to=2026-02-10&locationId=${x.lok}`, s.dir).expect(200); // 72 hari dengan lokasi
+      await http('get', `/attendance/recap?from=2025-11-01&to=2026-02-10&locationId=${x.lok}`, s.dir).expect(400); // > 93 hari
+      await http('get', '/attendance/recap/export.csv?from=2026-02-01&to=2026-02-10', s.mo).expect(400);
+
       // filter pekerja, lokasi lain, rentang kosong
       expect(await ambil(`&personId=${p1.person}`)).toHaveLength(1);
       expect((await http('get', `/attendance/recap?from=${T}&to=${T}&locationId=${dA.lok}`, s.dir).expect(200)).body.items).toHaveLength(0);
