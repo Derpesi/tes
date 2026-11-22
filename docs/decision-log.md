@@ -76,6 +76,9 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-69 | Konfigurasi produksi gagal-cepat (https, `STORAGE_DIR`, kunci berbeda dan tidak lemah); `/ready` (DB + migrasi + status berhenti) selain `/health`; `DB_POOL_MAX`; CLI bootstrap dikompilasi ke `dist/cli` agar dapat dijalankan dari image |
 | D-70 | Persiapan deployment tanpa memilih hosting: Dockerfile API/web, compose + env + nginx **contoh**, runbook `docs/ops/*`. Image belum dibangun di lingkungan ini (tanpa daemon Docker). Tanpa deploy; keputusan hosting milik pemilik |
 | D-71 | **Selfie absensi ditiadakan sementara** atas permintaan pemilik: saklar `ABSENSI_SELFIE` (`on`/`off`, bawaan off). Off: server tidak mewajibkan/memvalidasi/menyimpan selfie (berkas terkirim diabaikan), UI tanpa kamera, izin kamera `/absen` ditutup. Kode, tabel, izin `selfie.view`, audit, retensi, dan akses ke selfie lama **dipertahankan** (reversibel tanpa migrasi). ADR-0012 |
+| D-72 | **Rotasi kunci enkripsi (ADR-0013):** `APP_ENCRYPTION_KEYS` berversi (id tertinggi = aktif; `APP_ENCRYPTION_KEY` = id 1), ciphertext berawalan `0xE1\|id` dengan fallback ke format lama, cincin kunci di `Kunci.enkripsi`; `member_profiles.key_version` = kunci aktif |
+| D-73 | Alat `rotasi-kunci` (`cek`/`jalan`/`verifikasi`, `--kering`, `--batas`, `--jeda-ms`): role BYPASSRLS wajib, idempoten, bandingan optimistis, objek ditimpa atomik (`ObjectStorage.timpa`), objek tertukar tidak dirotasi diam-diam, audit teknis hanya hitungan |
+| D-74 | Kunci lama dipertahankan selama masih ada cadangan sebelum rotasi dalam retensi; `verifikasi` membuktikan data terbaca hanya dengan kunci aktif sebelum kunci lama dibuang |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -132,13 +135,15 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-50 | Laporan dihitung saat diminta (tanpa materialized view); batas 5.000 baris dan rentang 366 hari | Uji beban (Fase 10) — **Fase 10:** **Terukur:** laporan absensi 30 hari 3,4 s, rekap tanpa filter 2,3 s; materialized view/ringkasan tetap ditunda, rekomendasi di `performance.md` |
 | A-51 | Tinjauan keamanan Fase 10 adalah uji otomatis + tinjauan sendiri, **bukan** uji penetrasi independen | Pemilik memutuskan uji penetrasi sebelum produksi |
 | A-52 | Satu instans API (worker latar tunggal, pembatas laju di memori). Skala horizontal butuh kunci worker terdistribusi dan pembatas bersama | Tinjau bila >100 req/dtk berkelanjutan dibutuhkan |
-| A-53 | Rotasi kunci enkripsi belum ada; rancangan `APP_ENCRYPTION_KEYS` berversi diusulkan (`ops/secrets.md`) | Disetujui sebagai fase tersendiri sebelum produksi |
+| A-53 | Rotasi kunci enkripsi belum ada; rancangan `APP_ENCRYPTION_KEYS` berversi diusulkan (`ops/secrets.md`) | Disetujui sebagai fase tersendiri sebelum produksi — **Ditutup (Fase 11B, D-72…D-74)** |
 | A-54 | Provisioning role DB aplikasi (non-superuser, tanpa BYPASSRLS) mengikuti usulan `ops/deploy.md`; migrasi tidak membuat role/GRANT | Verifikasi di staging |
 | A-55 | Selfie ±100–300 KB × 2/hari/pekerja → 2–6 GB/hari; retensi 90 hari ≈ 180–540 GB. Driver S3 dan cadangan inkremental objek belum ada | Pemilik: retensi final dan penyimpanan objek — **Selama selfie off, tambahan penyimpanan selfie = 0** (D-71); selfie lama tetap dihapus sesuai retensi |
 | A-56 | Kebijakan retensi/cadangan: harian (RPO 24 jam), tanpa arsip WAL/PITR | Keputusan setelah hosting dipilih |
 | A-57 | Rekap absensi tanpa filter lokasi pada rentang panjang berat (2,3 s/30 hari di 10.000 pekerja); UI wajib mendorong filter | Pekerjaan UI/produk |
 | A-58 | Audit dependensi penuh: 4 kerentanan moderate hanya transitif dev (jest: minimatch/glob); produksi bersih | Pantau pembaruan jest |
 | A-59 | Tanpa selfie, mitigasi titip absen bertumpu pada geofence GPS, perangkat terdaftar (perangkat tambahan = verifikasi), skor anomali, dan tinjauan dua langkah; risiko titip absen **naik** (GPS dapat dipalsukan, QR dapat difoto). Dievaluasi ulang setelah data pilot | Pemilik: tetap off, aktifkan kembali, atau pengganti lain |
+| A-60 | Rotasi `AUTH_HMAC_KEY` (indeks buta NIK/email/sub, hash kode pemulihan, CSRF) belum ada; butuh re-index dan verifikasi dua-kunci | Fase tersendiri sebelum produksi bila kebijakan rotasi HMAC dibutuhkan |
+| A-61 | Dokumen master (`company_documents`, kontrak layanan rekanan) disimpan apa adanya (tidak dienkripsi aplikasi); bukan PII, di luar rotasi. Enkripsi di penyimpanan (volume/bucket) direkomendasikan | Pemilik/penyedia penyimpanan |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

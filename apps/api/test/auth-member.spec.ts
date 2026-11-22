@@ -154,7 +154,7 @@ jalan('login member via Google OIDC (IdP palsu lokal)', () => {
       expect(r.rowCount).toBe(1);
       expect((r.rows[0].state_hash as Buffer).includes(Buffer.from(state))).toBe(false);
       expect((r.rows[0].binding_hash as Buffer).equals(sha(binding))).toBe(true);
-      expect((r.rows[0].code_verifier_enc as Buffer).length).toBe(12 + 16 + 43); // iv + tag + verifier 43 karakter (terenkripsi)
+      expect((r.rows[0].code_verifier_enc as Buffer).length).toBe(2 + 12 + 16 + 43); // awalan versi(2) + iv + tag + verifier 43 karakter (terenkripsi)
     });
   });
 

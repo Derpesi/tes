@@ -16,6 +16,53 @@ const kunciBase64 = (nama: string, byte: { min?: number; tepat?: number }) =>
       return byte.tepat !== undefined ? b.length === byte.tepat : b.length >= (byte.min ?? 0);
     }, byte.tepat !== undefined ? `${nama} harus base64 dari tepat ${byte.tepat} byte` : `${nama} harus base64 minimal ${byte.min} byte`);
 
+export interface KunciEnkripsiEnv {
+  id: number;
+  b64: string;
+}
+
+const base64Sah = (b64: string) => {
+  const b = Buffer.from(b64, 'base64');
+  return b.length === 32 && b.toString('base64').replace(/=+$/, '') === b64.replace(/=+$/, '');
+};
+
+/**
+ * Mengurai kunci enkripsi dari APP_ENCRYPTION_KEYS ("1:b64,2:b64") atau APP_ENCRYPTION_KEY (= id 1). Mengembalikan null bila gagal
+ * (isu dilaporkan ke ctx; nilai kunci tidak pernah masuk pesan).
+ */
+function urai(keys: string | undefined, tunggal: string | undefined, ctx: z.RefinementCtx): KunciEnkripsiEnv[] | null {
+  const isu = (path: string, message: string) => ctx.addIssue({ code: 'custom', path: [path], message });
+  if (!keys && !tunggal) {
+    isu('APP_ENCRYPTION_KEY', 'APP_ENCRYPTION_KEY wajib diisi (atau isi APP_ENCRYPTION_KEYS untuk kunci berversi)');
+    return null;
+  }
+  if (!keys) return [{ id: 1, b64: tunggal! }];
+  const hasil: KunciEnkripsiEnv[] = [];
+  for (const bagian of keys.split(',')) {
+    const m = /^(\d{1,3}):([A-Za-z0-9+/]+={0,2})$/.exec(bagian.trim());
+    const id = m ? Number(m[1]) : 0;
+    if (!m || id < 1 || id > 255) {
+      isu('APP_ENCRYPTION_KEYS', 'APP_ENCRYPTION_KEYS harus berformat "id:base64,id:base64" dengan id 1-255');
+      return null;
+    }
+    if (!base64Sah(m[2])) {
+      isu('APP_ENCRYPTION_KEYS', `Kunci enkripsi id ${id} harus base64 dari tepat 32 byte`);
+      return null;
+    }
+    hasil.push({ id, b64: m[2] });
+  }
+  if (new Set(hasil.map((k) => k.id)).size !== hasil.length) isu('APP_ENCRYPTION_KEYS', 'Id kunci enkripsi tidak boleh ganda');
+  if (new Set(hasil.map((k) => k.b64)).size !== hasil.length) isu('APP_ENCRYPTION_KEYS', 'Nilai kunci enkripsi tidak boleh sama antar versi');
+  if (tunggal && hasil.find((k) => k.id === 1)?.b64 !== tunggal) isu('APP_ENCRYPTION_KEY', 'APP_ENCRYPTION_KEY harus sama dengan kunci id 1 pada APP_ENCRYPTION_KEYS (atau kosongkan salah satunya)');
+  return hasil;
+}
+
+/** Daftar kunci enkripsi dari env yang sudah lolos validasi (id naik). */
+export const daftarKunciEnkripsi = (e: Pick<Env, 'APP_ENCRYPTION_KEYS' | 'APP_ENCRYPTION_KEY'>): KunciEnkripsiEnv[] =>
+  e.APP_ENCRYPTION_KEYS
+    ? e.APP_ENCRYPTION_KEYS.split(',').map((b) => { const [id, b64] = b.trim().split(':'); return { id: Number(id), b64 }; }).sort((a, b) => a.id - b.id)
+    : [{ id: 1, b64: e.APP_ENCRYPTION_KEY! }];
+
 const skema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -29,7 +76,10 @@ const skema = z
       .url('APP_BASE_URL harus berupa URL')
       .refine((v) => !v.endsWith('/'), 'APP_BASE_URL tidak boleh diakhiri garis miring'),
     AUTH_HMAC_KEY: kunciBase64('AUTH_HMAC_KEY', { min: 32 }),
-    APP_ENCRYPTION_KEY: kunciBase64('APP_ENCRYPTION_KEY', { tepat: 32 }),
+    /** Kunci enkripsi tunggal (id 1). Dipakai bila APP_ENCRYPTION_KEYS kosong. */
+    APP_ENCRYPTION_KEY: opsional(kunciBase64('APP_ENCRYPTION_KEY', { tepat: 32 })),
+    /** Kunci enkripsi berversi untuk rotasi: "1:<base64>,2:<base64>"; id tertinggi = aktif (penulisan baru). Lihat ADR-0013. */
+    APP_ENCRYPTION_KEYS: opsional(z.string().min(3)),
     // Opsional sampai pemilik membuat kredensial; bila diisi harus lengkap (semua-atau-tidak-sama-sekali).
     /** Jumlah proxy tepercaya di depan API (untuk IP klien yang benar). 0 = tidak ada. */
     TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
@@ -63,6 +113,10 @@ const skema = z
         ctx.addIssue({ code: 'custom', path: [kunci[0] as string], message: `${nama}: isi semua variabel (${kunci.join(', ')}) atau kosongkan semuanya` });
       }
     };
+    const kunciEnk = urai(v.APP_ENCRYPTION_KEYS, v.APP_ENCRYPTION_KEY, ctx);
+    if (kunciEnk) {
+      if (kunciEnk.some((k) => k.b64 === v.AUTH_HMAC_KEY)) ctx.addIssue({ code: 'custom', path: ['APP_ENCRYPTION_KEYS'], message: 'Kunci enkripsi dan AUTH_HMAC_KEY harus berbeda' });
+    }
     if (v.NODE_ENV === 'production' && v.GOOGLE_ISSUER !== ISSUER_GOOGLE) {
       ctx.addIssue({ code: 'custom', path: ['GOOGLE_ISSUER'], message: 'GOOGLE_ISSUER tidak boleh diubah di produksi' });
     }
@@ -71,9 +125,9 @@ const skema = z
       const loopback = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(v.APP_BASE_URL);
       if (!v.APP_BASE_URL.startsWith('https://') && !loopback) ctx.addIssue({ code: 'custom', path: ['APP_BASE_URL'], message: 'APP_BASE_URL harus https:// di produksi (cookie __Host- dan OIDC mensyaratkan HTTPS)' });
       if (!v.STORAGE_DIR) ctx.addIssue({ code: 'custom', path: ['STORAGE_DIR'], message: 'STORAGE_DIR wajib diisi di produksi (volume privat; tidak boleh memakai folder bawaan)' });
-      if (v.AUTH_HMAC_KEY === v.APP_ENCRYPTION_KEY) ctx.addIssue({ code: 'custom', path: ['APP_ENCRYPTION_KEY'], message: 'AUTH_HMAC_KEY dan APP_ENCRYPTION_KEY harus berbeda' });
-      for (const nama of ['AUTH_HMAC_KEY', 'APP_ENCRYPTION_KEY'] as const) {
-        if (new Set(Buffer.from(v[nama], 'base64')).size < 8) ctx.addIssue({ code: 'custom', path: [nama], message: `${nama} terlalu lemah (hampir seragam); bangkitkan dengan openssl rand -base64 32` });
+      if (new Set(Buffer.from(v.AUTH_HMAC_KEY, 'base64')).size < 8) ctx.addIssue({ code: 'custom', path: ['AUTH_HMAC_KEY'], message: 'AUTH_HMAC_KEY terlalu lemah (hampir seragam); bangkitkan dengan openssl rand -base64 32' });
+      for (const k of kunciEnk ?? []) {
+        if (new Set(Buffer.from(k.b64, 'base64')).size < 8) ctx.addIssue({ code: 'custom', path: ['APP_ENCRYPTION_KEYS'], message: `Kunci enkripsi id ${k.id} terlalu lemah (hampir seragam); bangkitkan dengan openssl rand -base64 32` });
       }
     }
     semuaAtauTidak('Google OAuth', ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']);

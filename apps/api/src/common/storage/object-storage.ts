@@ -8,6 +8,8 @@ export const OBJECT_STORAGE = Symbol('OBJECT_STORAGE');
  */
 export interface ObjectStorage {
   simpan(kunci: string, data: Buffer): Promise<void>;
+  /** Mengganti isi objek yang SUDAH ada secara atomik (pembaca melihat isi lama atau baru, tidak pernah setengah). Dipakai alat rotasi kunci. */
+  timpa(kunci: string, data: Buffer): Promise<void>;
   baca(kunci: string): Promise<Buffer>;
   hapus(kunci: string): Promise<void>;
 }

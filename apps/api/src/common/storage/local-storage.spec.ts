@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { LocalObjectStorage } from './local-storage';
@@ -18,6 +18,17 @@ describe('LocalObjectStorage', () => {
     await s.hapus(kunci);
     await expect(s.baca(kunci)).rejects.toBeInstanceOf(ObjekTidakDitemukan);
     await expect(s.hapus(kunci)).resolves.toBeUndefined(); // idempoten
+  });
+
+  it('timpa: mengganti isi objek yang ada secara atomik (izin 0600 tetap, tanpa sisa berkas sementara); objek yang tidak ada ditolak', async () => {
+    const kunci = buatKunciObjek(randomUUID());
+    await s.simpan(kunci, Buffer.from('lama'));
+    await s.timpa(kunci, Buffer.from('baru'));
+    expect((await s.baca(kunci)).toString()).toBe('baru');
+    expect(statSync(join(dir, kunci)).mode & 0o777).toBe(0o600);
+    expect(readdirSync(join(dir, kunci.split('/')[0])).filter((n) => n.endsWith('.tmp'))).toEqual([]);
+    await expect(s.timpa(buatKunciObjek(randomUUID()), Buffer.from('x'))).rejects.toBeInstanceOf(ObjekTidakDitemukan);
+    await expect(s.simpan(kunci, Buffer.from('lagi'))).rejects.toThrow(); // simpan tetap tidak pernah menimpa (O_EXCL)
   });
 
   it('izin berkas 0600 dan direktori 0700', async () => {

@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, Logger } fr
 import type { Pool, PoolClient } from 'pg';
 import { z } from 'zod';
 import { AuditService } from '../audit/audit.service';
-import { dekripsiNik, enkripsiNik, blindIndexNik, samarkanNik, VERSI_KUNCI_PII } from '../common/crypto/pii';
+import { dekripsiNik, enkripsiNik, blindIndexNik, samarkanNik } from '../common/crypto/pii';
 import { KUNCI, Kunci } from '../config/config.module';
 import { POOL } from '../database/tokens';
 import { MemberContextService } from './member-context.service';
@@ -106,7 +106,7 @@ export class MemberProfileService {
         }
       }
       if (b.nik !== undefined) {
-        nilai.push(enkripsiNik(b.nik, this.kunci.enkripsi, p.id as string), blindIndexNik(this.kunci.hmac, b.nik), VERSI_KUNCI_PII);
+        nilai.push(enkripsiNik(b.nik, this.kunci.enkripsi, p.id as string), blindIndexNik(this.kunci.hmac, b.nik), this.kunci.enkripsi.aktif);
         sets.push(`nik_enc = $${nilai.length - 2}`, `nik_hmac = $${nilai.length - 1}`, `key_version = $${nilai.length}`);
       }
       try {

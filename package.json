@@ -28,7 +28,8 @@
     "load:run": "node tests/load/runner.mjs",
     "ops:backup": "node scripts/ops/backup.mjs",
     "ops:restore": "node scripts/ops/restore.mjs",
-    "ops:verifikasi": "node scripts/ops/verifikasi-restore.mjs"
+    "ops:verifikasi": "node scripts/ops/verifikasi-restore.mjs",
+    "ops:rotasi": "node apps/api/dist/cli/rotasi-kunci.js"
   },
   "pnpm": {
     "overrides": {

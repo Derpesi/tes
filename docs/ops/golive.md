@@ -11,7 +11,7 @@ Status sistem: **kode siap staging**. Item berikut belum dapat diselesaikan oleh
 | 5 | Kebijakan retensi final (dokumen, audit; selfie bila diaktifkan lagi) vs UU PDP | Pemilik/Hukum | Selfie ditiadakan sementara (ADR-0012); usulan 90 hari berlaku bila diaktifkan. |
 | 6 | `LICENSE` + nama pemegang hak cipta | Pemilik | Repo proprietary; tidak diubah tanpa persetujuan. |
 | 7 | Branch protection `main` + wajib CI hijau | Pemilik | Pengaturan GitHub. |
-| 8 | **Rotasi kunci enkripsi** (`secrets.md`) | Pengembang (butuh persetujuan fase) | Direkomendasikan sebelum produksi. |
+| 8 | ~~Rotasi kunci enkripsi~~ **Selesai (Fase 11B, `rotasi-kunci.md`)**; tersisa rotasi `AUTH_HMAC_KEY` (A-60) | Pengembang | Latih prosedur di staging. |
 | 9 | Driver S3/penyimpanan objek terkelola + replikasi | Pengembang | Volume lokal = titik kegagalan tunggal tanpa cadangan. Kebutuhan ukuran jauh turun selama selfie off. |
 | 10 | Skala horizontal (kunci worker, pembatas bersama) | Pengembang | Perlu bila satu instans tidak cukup (lihat `performance.md`). |
 | 11 | **Uji penetrasi independen** | Pemilik | Uji otomatis dan tinjauan sendiri BUKAN penggantinya (`docs/security-review.md`). |

@@ -1,5 +1,6 @@
 # Runbook: Cadangan dan Restore
 
+> **Cadangan dan rotasi kunci (ADR-0013):** cadangan yang dibuat **sebelum** rotasi hanya terbaca dengan kunci enkripsi **lamanya**. Simpan kunci lama selama cadangan itu masih dalam retensi (`rotasi-kunci.md` langkah 7); restore memerlukan `APP_ENCRYPTION_KEYS` yang memuat semua id yang dipakai data cadangan.
 > **Selfie ditiadakan sementara (ADR-0012):** selama `ABSENSI_SELFIE=off` penyimpanan objek tidak bertambah oleh selfie; objek hanya dokumen kontrak dan selfie lama yang belum dihapus retensi. Angka ukuran selfie di bawah berlaku bila diaktifkan kembali.
 Target (asumsi A-02, bukan SLA): **RPO 24 jam**, **RTO 8 jam**. Skrip: `scripts/ops/backup.mjs`, `restore.mjs`, `verifikasi-restore.mjs` (Node tanpa dependency baru; butuh `pg_dump`, `pg_restore`, `openssl`, `tar` di PATH).
 

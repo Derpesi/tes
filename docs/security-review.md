@@ -19,7 +19,7 @@ Tanggal: 2026-11-22. Lingkup: API NestJS, web Next.js, skema PostgreSQL/RLS. Di 
 | T-4 | Cookie sesi palsu berulang → setiap permintaan memicu kueri DB (amplifikasi) | DoS ringan | **Diperbaiki**: pembatas cookie tidak sah per IP (60/menit → 429 `TERLALU_BANYAK_PERMINTAAN`) |
 | T-5 | API tanpa header keamanan; `/docs` dan `/openapi.json` terbuka di produksi | Permukaan serangan | **Diperbaiki**: `nosniff`, `no-store`, `no-referrer`, `X-Frame-Options: DENY`, `CORP same-origin`; dokumentasi mati di produksi kecuali `API_DOCS=on` |
 | T-6 | Audit penuh dependensi: 4 kerentanan *moderate* pada `minimatch`/`glob` **hanya transitif dev** (jest) | Tidak masuk runtime produksi (`pnpm audit --prod` bersih) | **Diterima & dicatat**; pantau pembaruan jest |
-| T-7 | Rotasi kunci enkripsi belum ada | Pemulihan pasca-kebocoran kunci sulit | **Terbuka** (`ops/secrets.md`; blokir go-live #8) |
+| T-7 | Rotasi kunci enkripsi belum ada | Pemulihan pasca-kebocoran kunci sulit | **Ditutup (Fase 11B, ADR-0013)**: kunci berversi + alat re-encrypt teruji; tersisa rotasi `AUTH_HMAC_KEY` (A-60) |
 | T-8 | Pembatas laju di memori per proses | Tidak berlaku lintas instans | **Terbuka** (satu instans; `ops/deploy.md`) |
 | T-9 | CSP web masih `'unsafe-inline'` untuk skrip/gaya (Next tanpa nonce) | XSS mitigasi lebih lemah | **Diterima sementara** (dicatat di `next.config.mjs`); nonce = pekerjaan lanjutan |
 

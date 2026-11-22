@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { ISSUER_GOOGLE, docsAktif, muatEnv, redirectUriGoogle, selfieAktif } from './env';
+import { ISSUER_GOOGLE, daftarKunciEnkripsi, docsAktif, muatEnv, redirectUriGoogle, selfieAktif } from './env';
 
 const sah = (): NodeJS.ProcessEnv =>
   ({
@@ -133,5 +133,43 @@ describe('selfieAktif (selfie absensi ditiadakan sementara)', () => {
     expect(muatEnv({ ...sah(), ABSENSI_SELFIE: 'on' }).ABSENSI_SELFIE).toBe('on');
     expect(muatEnv({ ...sah(), ABSENSI_SELFIE: '' }).ABSENSI_SELFIE).toBeUndefined();
     expect(() => muatEnv({ ...sah(), ABSENSI_SELFIE: 'ya' })).toThrow(/ABSENSI_SELFIE harus on atau off/);
+  });
+});
+
+describe('APP_ENCRYPTION_KEYS (kunci enkripsi berversi, ADR-0013)', () => {
+  const kb = () => randomBytes(32).toString('base64');
+  const dasar = (): NodeJS.ProcessEnv => {
+    const e = sah();
+    delete e.APP_ENCRYPTION_KEY;
+    return e;
+  };
+  it('tanpa APP_ENCRYPTION_KEYS dan APP_ENCRYPTION_KEY => ditolak; APP_ENCRYPTION_KEY saja = id 1', () => {
+    expect(() => muatEnv(dasar())).toThrow(/APP_ENCRYPTION_KEY wajib diisi/);
+    const e = sah();
+    expect(daftarKunciEnkripsi(muatEnv(e)).map((k) => k.id)).toEqual([1]);
+  });
+  it('APP_ENCRYPTION_KEYS berisi beberapa versi, diurutkan menurut id', () => {
+    const a = kb(), b = kb();
+    const m = muatEnv({ ...dasar(), APP_ENCRYPTION_KEYS: `2:${b},1:${a}` });
+    expect(daftarKunciEnkripsi(m)).toEqual([{ id: 1, b64: a }, { id: 2, b64: b }]);
+  });
+  it('menolak format salah, id di luar 1-255, id ganda, nilai sama, dan panjang bukan 32 byte', () => {
+    const a = kb(), b = kb();
+    for (const bad of ['xyz', `0:${a}`, `256:${a}`, `1:${a},1:${b}`, `1:${a},2:${a}`, `1:${randomBytes(16).toString('base64')}`, `1:${a},`]) {
+      expect(() => muatEnv({ ...dasar(), APP_ENCRYPTION_KEYS: bad })).toThrow(/APP_ENCRYPTION_KEYS/);
+    }
+  });
+  it('APP_ENCRYPTION_KEY bersama APP_ENCRYPTION_KEYS harus sama dengan kunci id 1', () => {
+    const a = kb(), b = kb();
+    expect(muatEnv({ ...sah(), APP_ENCRYPTION_KEY: a, APP_ENCRYPTION_KEYS: `1:${a},2:${b}` }).APP_ENCRYPTION_KEYS).toBeDefined();
+    expect(() => muatEnv({ ...sah(), APP_ENCRYPTION_KEY: b, APP_ENCRYPTION_KEYS: `1:${a},2:${b}` })).toThrow(/sama dengan kunci id 1/);
+  });
+  it('kunci enkripsi tidak boleh sama dengan AUTH_HMAC_KEY; kunci lemah ditolak di produksi tanpa membocorkan nilai', () => {
+    const e = dasar();
+    expect(() => muatEnv({ ...e, APP_ENCRYPTION_KEYS: `1:${kb()},2:${e.AUTH_HMAC_KEY}` })).toThrow(/harus berbeda/);
+    const lemah = Buffer.alloc(32, 9).toString('base64');
+    const prod = { ...e, NODE_ENV: 'production', STORAGE_DIR: '/var/lib/hris/objek', APP_ENCRYPTION_KEYS: `1:${kb()},2:${lemah}` } as NodeJS.ProcessEnv;
+    expect(() => muatEnv(prod)).toThrow(/id 2 terlalu lemah/);
+    try { muatEnv(prod); } catch (x) { expect(String(x)).not.toContain(lemah); }
   });
 });

@@ -8,6 +8,7 @@
 *.pfx
 credentials*
 secrets*
+!docs/ops/secrets.md
 *.keystore
 *.jks
 
