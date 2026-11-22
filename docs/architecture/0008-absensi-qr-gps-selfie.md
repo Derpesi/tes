@@ -3,6 +3,8 @@
 - Status: **Disetujui** (diimplementasikan dan diuji pada Fase 7)
 - Tanggal: 2026-11-21
 
+- **Diubah sebagian oleh ADR-0012:** selfie ditiadakan sementara (saklar `ABSENSI_SELFIE`, bawaan off).
+
 ## Konteks
 Karyawan dengan penempatan AKTIF perlu absen masuk/pulang di lokasi rekanan. Kebutuhan: validasi di backend (bukan UI), shift termasuk lintas tengah malam, hari libur, perangkat terdaftar, tinjauan manusia atas kasus ambigu, koreksi bernomor, retensi selfie, dan rekap. Aturan keras: online-only (tanpa absensi offline), QR statis hanya pengenal titik, tanpa face recognition otomatis, selfie hanya untuk petugas berwenang, waktu dari server.
 

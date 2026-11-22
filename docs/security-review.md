@@ -45,8 +45,8 @@ Kontrol ASVS yang **tidak** dinilai ada di sini karena bergantung infrastruktur:
 |---|---|---|---|
 | Login staf | Brute force, phishing, enumerasi | Argon2, kunci akun, TOTP wajib, respons seragam, throttle | Phishing TOTP (bukan WebAuthn) |
 | Login member | Pengambilalihan akun Google, CSRF OIDC | PKCE+state+nonce, `returnTo` aman (fuzz), konflik identitas ditinjau staf | Akun Google member dikuasai pihak lain |
-| Scan absen | Titip absen, GPS palsu, replay, QR difoto | Waktu server, idempotensi, geofence, perangkat terdaftar, anomali → tinjauan dua langkah, QR = pengenal titik bukan rahasia | **Tidak dapat dicegah penuh**: spoof GPS; mitigasi = tinjauan manusia |
-| Selfie | Akses tak sah, kebocoran | Enkripsi, URL via API (bukan publik), izin + audit tiap akses, retensi + legal hold, **tanpa face recognition** | Penyalahgunaan petugas berwenang (terdeteksi lewat audit, bukan dicegah) |
+| Scan absen | Titip absen, GPS palsu, replay, QR difoto. **Selfie ditiadakan sementara (ADR-0012): risiko titip absen naik (A-59)** | Waktu server, idempotensi, geofence, perangkat terdaftar, anomali → tinjauan dua langkah, QR = pengenal titik bukan rahasia | **Tidak dapat dicegah penuh**: spoof GPS; mitigasi = tinjauan manusia |
+| Selfie (hanya bila `ABSENSI_SELFIE=on`; selfie lama tetap dilindungi) | Akses tak sah, kebocoran | Enkripsi, URL via API (bukan publik), izin + audit tiap akses, retensi + legal hold, **tanpa face recognition** | Penyalahgunaan petugas berwenang (terdeteksi lewat audit, bukan dicegah) |
 | Payroll rekap | Manipulasi, penyetuju sama | 4 pelaku berbeda (CHECK DB + aplikasi), hash isi, koreksi bernomor, hanya-tambah | Kolusi antar-peran |
 | Ekspor | Formula injection, kebocoran | Netralisasi `= + - @ TAB CR`, izin per ekspor, audit | Penerima berkas menyebarkan data |
 | Admin/peran | Eskalasi | Persetujuan ganda peran tinggi, tidak ada Super Admin permanen, bootstrap sekali | Kompromi dua admin |

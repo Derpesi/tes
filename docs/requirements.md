@@ -1,6 +1,6 @@
 # Software Requirements Specification (SRS) — DAMARINDO GROUP HRIS
 
-Status: rancangan Fase 2A. Keputusan dan asumsi: lihat `decision-log.md`.
+Status: rancangan Fase 2A. **Selfie absensi ditiadakan sementara (ADR-0012, saklar `ABSENSI_SELFIE`, bawaan off)**; persyaratan selfie berlaku bila diaktifkan kembali. Keputusan dan asumsi: lihat `decision-log.md`.
 
 ## 1. Ruang lingkup
 HRIS web responsif (mobile-first, Android/tablet/desktop) untuk Damarindo Group (PT. Damarindo Mandiri, PT. OSI, PT. Pancormas Perkasa; perusahaan baru lewat master data). Mencakup: registrasi member, rekrutmen, PKWT, penempatan, absensi QR + GPS + selfie, rekap payroll, dashboard, laporan, audit.

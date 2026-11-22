@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { ISSUER_GOOGLE, docsAktif, muatEnv, redirectUriGoogle } from './env';
+import { ISSUER_GOOGLE, docsAktif, muatEnv, redirectUriGoogle, selfieAktif } from './env';
 
 const sah = (): NodeJS.ProcessEnv =>
   ({
@@ -120,5 +120,18 @@ describe('validasi konfigurasi produksi (gagal-cepat)', () => {
     expect(muatEnv({ ...sah(), DB_POOL_MAX: '25' }).DB_POOL_MAX).toBe(25);
     expect(() => muatEnv({ ...sah(), DB_POOL_MAX: '1' })).toThrow(/DB_POOL_MAX/);
     expect(() => muatEnv({ ...sah(), DB_POOL_MAX: '500' })).toThrow(/DB_POOL_MAX/);
+  });
+});
+
+describe('selfieAktif (selfie absensi ditiadakan sementara)', () => {
+  it('bawaan MATI; hanya "on" yang mengaktifkan', () => {
+    expect(selfieAktif({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(selfieAktif({ ABSENSI_SELFIE: 'off' } as NodeJS.ProcessEnv)).toBe(false);
+    expect(selfieAktif({ ABSENSI_SELFIE: 'on' } as NodeJS.ProcessEnv)).toBe(true);
+  });
+  it('skema menerima on/off/kosong dan menolak nilai lain', () => {
+    expect(muatEnv({ ...sah(), ABSENSI_SELFIE: 'on' }).ABSENSI_SELFIE).toBe('on');
+    expect(muatEnv({ ...sah(), ABSENSI_SELFIE: '' }).ABSENSI_SELFIE).toBeUndefined();
+    expect(() => muatEnv({ ...sah(), ABSENSI_SELFIE: 'ya' })).toThrow(/ABSENSI_SELFIE harus on atau off/);
   });
 });

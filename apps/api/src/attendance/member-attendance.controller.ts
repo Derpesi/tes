@@ -32,7 +32,7 @@ export class MemberAttendanceController {
       properties: {
         code: { type: 'string', format: 'uuid', description: 'Kode titik dari QR' }, kind: { type: 'string', enum: ['MASUK', 'PULANG'] },
         latitude: { type: 'number' }, longitude: { type: 'number' }, accuracy: { type: 'number' }, clientTime: { type: 'string', format: 'date-time' },
-        deviceId: { type: 'string' }, idempotencyKey: { type: 'string' }, selfie: { type: 'string', format: 'binary', description: 'JPEG dari kamera, maksimal 300 KB' },
+        deviceId: { type: 'string' }, idempotencyKey: { type: 'string' }, selfie: { type: 'string', format: 'binary', description: 'JPEG dari kamera, maksimal 300 KB. Wajib hanya bila selfie aktif (ABSENSI_SELFIE=on); bila nonaktif (bawaan) berkas diabaikan' },
       },
     },
   })
@@ -54,7 +54,7 @@ export class MemberAttendanceController {
 
   @Sesi({ realm: 'member' })
   @Get('today')
-  @ApiOkResponse({ description: 'Lokasi penempatan aktif dan rekaman 36 jam terakhir' })
+  @ApiOkResponse({ description: 'Lokasi penempatan aktif, rekaman 36 jam terakhir, dan selfieAktif (apakah selfie diwajibkan)' })
   hariIni(@Req() req: RequestDenganSesi) {
     return this.svc.hariIni(uid(req));
   }

@@ -3174,7 +3174,7 @@
                   "selfie": {
                     "type": "string",
                     "format": "binary",
-                    "description": "JPEG dari kamera, maksimal 300 KB"
+                    "description": "JPEG dari kamera, maksimal 300 KB. Wajib hanya bila selfie aktif (ABSENSI_SELFIE=on); bila nonaktif (bawaan) berkas diabaikan"
                   }
                 }
               }
@@ -3209,7 +3209,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Lokasi penempatan aktif dan rekaman 36 jam terakhir"
+            "description": "Lokasi penempatan aktif, rekaman 36 jam terakhir, dan selfieAktif (apakah selfie diwajibkan)"
           }
         },
         "tags": [

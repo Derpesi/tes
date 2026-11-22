@@ -12,7 +12,9 @@ COPY tests/package.json tests/
 RUN pnpm install --frozen-lockfile --filter @hris/web...
 COPY apps/web apps/web
 ARG API_URL=http://api:3001
-ENV API_URL=$API_URL NEXT_TELEMETRY_DISABLED=1
+# Izin kamera /absen hanya dibuka bila on (samakan dengan ABSENSI_SELFIE di API; ditanam saat build).
+ARG ABSENSI_SELFIE=off
+ENV API_URL=$API_URL ABSENSI_SELFIE=$ABSENSI_SELFIE NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @hris/web build \
  && pnpm --filter @hris/web deploy --prod --legacy /out \
  && cp -r apps/web/.next /out/.next \

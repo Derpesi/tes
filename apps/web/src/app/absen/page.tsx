@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Galat, Halaman, Lencana } from '../../components/ui';
 import { LABEL_FLAG, LABEL_STATUS_ABSEN } from '../../lib/absensi';
-import { ApiError, InfoSesi, ambilSesi, unggah } from '../../lib/api';
+import { ApiError, InfoSesi, ambilSesi, api, unggah } from '../../lib/api';
 
 interface Hasil { id: string; kind: string; status: string; message: string; flags: string[]; rejectReason: string | null }
 interface Lokasi { latitude: number; longitude: number; akurasi: number }
@@ -40,6 +40,8 @@ function Absen() {
   const [jenis, setJenis] = useState<'MASUK' | 'PULANG'>('MASUK');
   const [lokasi, setLokasi] = useState<Lokasi | null>(null);
   const [mencari, setMencari] = useState(false);
+  // null = belum diketahui. Selfie ditiadakan sementara di server (ABSENSI_SELFIE=off, bawaan); UI mengikuti keputusan server.
+  const [selfieAktif, setSelfieAktif] = useState<boolean | null>(null);
   const [kameraAktif, setKameraAktif] = useState(false);
   const [foto, setFoto] = useState<Blob | null>(null);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
@@ -55,6 +57,7 @@ function Absen() {
         if (!s) return router.replace(`/masuk?returnTo=${encodeURIComponent(`/absen${kode ? `?t=${kode}` : ''}`)}`);
         if (s.realm !== 'member') return router.replace('/staff');
         setSesi(s);
+        return api<{ selfieAktif: boolean }>('/member/attendance/today').then((h) => setSelfieAktif(h.selfieAktif));
       })
       .catch((e: ApiError) => setGalat(e.message));
   }, [router, kode]);
@@ -129,7 +132,7 @@ function Absen() {
   }
 
   async function kirim() {
-    if (!sesi || !lokasi || !foto) return;
+    if (!sesi || !lokasi || selfieAktif === null || (selfieAktif && !foto)) return;
     setGalat(null);
     setMengirim(true);
     const f = new FormData();
@@ -141,7 +144,7 @@ function Absen() {
     f.set('clientTime', new Date().toISOString());
     f.set('deviceId', idPerangkat());
     f.set('idempotencyKey', kunci); // pengiriman ulang dengan kunci sama tidak membuat rekaman ganda
-    f.set('selfie', foto, 'selfie.jpg');
+    if (selfieAktif && foto) f.set('selfie', foto, 'selfie.jpg');
     try {
       setHasil(await unggah<Hasil>('/member/attendance', f, sesi.csrfToken));
     } catch (e) {
@@ -218,6 +221,7 @@ function Absen() {
               {mencari ? 'Mencari lokasi…' : lokasi ? 'Ambil ulang lokasi' : 'Ambil lokasi saya'}
             </button>
           </section>
+          {selfieAktif ? (
           <section className="kartu langkah" aria-labelledby="h-selfie">
             <h3 id="h-selfie">Selfie</h3>
             <p className="bantuan">Selfie diambil langsung dari kamera dan hanya dilihat petugas berwenang. Tidak ada pengenalan wajah otomatis.</p>
@@ -242,7 +246,8 @@ function Absen() {
               </button>
             )}
           </section>
-          <button className="tombol" type="button" onClick={kirim} disabled={!lokasi || !foto || mengirim}>
+          ) : null}
+          <button className="tombol" type="button" onClick={kirim} disabled={!lokasi || selfieAktif === null || (selfieAktif && !foto) || mengirim}>
             {mengirim ? 'Mengirim…' : `Kirim absen ${jenis === 'MASUK' ? 'masuk' : 'pulang'}`}
           </button>
           <p className="bantuan">Waktu absen dicatat oleh server (WIB), bukan jam perangkat. Absensi hanya dapat dilakukan saat online.</p>

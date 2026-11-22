@@ -8,11 +8,11 @@ Status sistem: **kode siap staging**. Item berikut belum dapat diselesaikan oleh
 | 2 | OAuth Google (client id/secret, redirect URI) | Pemilik | `docs/google-oauth-setup.md`; tanpa ini member tidak dapat login. |
 | 3 | SMTP produksi (invitasi/reset staf) | Pemilik | Tanpa SMTP outbox tidak mengirim. |
 | 4 | Template PKWT resmi + (opsional) PSrE tanda tangan | Pemilik/Hukum | Tidak ada klausul hukum karangan; tombol setuju bukan tanda tangan sah. |
-| 5 | Kebijakan retensi final (selfie, dokumen, audit) vs UU PDP | Pemilik/Hukum | Bawaan selfie 90 hari adalah usulan. |
+| 5 | Kebijakan retensi final (dokumen, audit; selfie bila diaktifkan lagi) vs UU PDP | Pemilik/Hukum | Selfie ditiadakan sementara (ADR-0012); usulan 90 hari berlaku bila diaktifkan. |
 | 6 | `LICENSE` + nama pemegang hak cipta | Pemilik | Repo proprietary; tidak diubah tanpa persetujuan. |
 | 7 | Branch protection `main` + wajib CI hijau | Pemilik | Pengaturan GitHub. |
 | 8 | **Rotasi kunci enkripsi** (`secrets.md`) | Pengembang (butuh persetujuan fase) | Direkomendasikan sebelum produksi. |
-| 9 | Driver S3/penyimpanan objek terkelola + replikasi | Pengembang | Volume lokal = titik kegagalan tunggal tanpa cadangan. |
+| 9 | Driver S3/penyimpanan objek terkelola + replikasi | Pengembang | Volume lokal = titik kegagalan tunggal tanpa cadangan. Kebutuhan ukuran jauh turun selama selfie off. |
 | 10 | Skala horizontal (kunci worker, pembatas bersama) | Pengembang | Perlu bila satu instans tidak cukup (lihat `performance.md`). |
 | 11 | **Uji penetrasi independen** | Pemilik | Uji otomatis dan tinjauan sendiri BUKAN penggantinya (`docs/security-review.md`). |
 | 12 | Latihan restore di infrastruktur produksi/staging nyata | Operator | Latihan di sini memakai data sintetis pada 1 VM. |

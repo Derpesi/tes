@@ -20,6 +20,7 @@ process.env.APP_BASE_URL = ORIGIN;
 process.env.AUTH_HMAC_KEY = randomBytes(32).toString('base64');
 process.env.APP_ENCRYPTION_KEY = randomBytes(32).toString('base64');
 process.env.TRUST_PROXY = '1';
+process.env.ABSENSI_SELFIE = 'on'; // suite utama menguji jalur selfie yang masih didukung; blok "selfie ditiadakan" menguji bawaan produk (off)
 const STORAGE = mkdtempSync(join(tmpdir(), 'hris-absen-'));
 process.env.STORAGE_DIR = STORAGE;
 
@@ -157,6 +158,49 @@ jalan('Absensi member: scan QR + GPS + selfie (PostgreSQL asli)', () => {
   };
   const baris = async (personId: string) => (await tenant([A, B], (c) => c.query(`SELECT * FROM attendance_records WHERE person_id = $1 ORDER BY occurred_at, created_at`, [personId]))).rows;
   const auditRows = async (aksi: string, objekId: string) => tenant([A, B], async (c) => (await c.query(`SELECT detail, actor_id FROM audit_logs WHERE action = $1 AND object_id = $2`, [aksi, objekId])).rows);
+
+  describe('selfie ditiadakan (ABSENSI_SELFIE=off, bawaan produk)', () => {
+    beforeEach(() => { process.env.ABSENSI_SELFIE = 'off'; });
+    afterEach(() => { process.env.ABSENSI_SELFIE = 'on'; });
+    const jumlahObjek = () => fs.readdirSync(STORAGE, { recursive: true }).length;
+    const jumlahSelfie = async (personId: string) => Number((await tenant([A, B], (c) => c.query(`SELECT count(*) AS n FROM attendance_selfies s JOIN attendance_records r ON r.id = s.record_id WHERE r.person_id = $1`, [personId]))).rows[0].n);
+
+    it('absen tanpa selfie diterima (201 VALID); tidak ada baris selfie dan tidak ada objek tersimpan', async () => {
+      const m = await karyawan(lokA, { jadwal: 'pagi' });
+      waktu = wib('2026-03-12 07:02');
+      const sebelum = jumlahObjek();
+      const r = await absen(m, { selfie: null }).expect(201);
+      expect(r.body).toMatchObject({ kind: 'MASUK', status: 'VALID', rejectReason: null });
+      expect(await jumlahSelfie(m.personId)).toBe(0);
+      expect(jumlahObjek()).toBe(sebelum);
+    });
+
+    it('berkas selfie yang tetap terkirim diabaikan: tidak divalidasi, tidak disimpan (bahkan bila bukan JPEG)', async () => {
+      const m = await karyawan(lokA, { jadwal: 'pagi' });
+      waktu = wib('2026-03-12 07:03');
+      const sebelum = jumlahObjek();
+      const r = await absen(m, { selfie: Buffer.from('bukan-jpeg-sama-sekali') }).expect(201);
+      expect(r.body.status).toBe('VALID');
+      expect(await jumlahSelfie(m.personId)).toBe(0);
+      expect(jumlahObjek()).toBe(sebelum);
+    });
+
+    it('aturan lain tetap berlaku tanpa selfie: luar radius DITOLAK, masuk ganda DUPLIKAT, pindai titik perusahaan lain 403', async () => {
+      const m = await karyawan(lokA, { jadwal: 'pagi' });
+      waktu = wib('2026-03-12 07:04');
+      expect((await absen(m, { selfie: null, lat: geser(500) }).expect(201)).body).toMatchObject({ status: 'DITOLAK', rejectReason: 'LUAR_RADIUS' });
+      await absen(m, { selfie: null }).expect(201);
+      expect((await absen(m, { selfie: null }).expect(201)).body).toMatchObject({ status: 'DITOLAK', rejectReason: 'DUPLIKAT' });
+      await absen(m, { selfie: null, lok: lokB }).expect(403);
+    });
+
+    it('GET /member/attendance/today melaporkan selfieAktif: false saat off dan true saat on', async () => {
+      const m = await karyawan(lokA, { jadwal: 'pagi' });
+      expect((await http('get', '/member/attendance/today', m).expect(200)).body.selfieAktif).toBe(false);
+      process.env.ABSENSI_SELFIE = 'on';
+      expect((await http('get', '/member/attendance/today', m).expect(200)).body.selfieAktif).toBe(true);
+    });
+  });
 
   describe('jalur normal dan waktu server', () => {
     it('masuk VALID: waktu = waktu SERVER (bukan jam klien), selfie terenkripsi, audit tanpa koordinat/selfie', async () => {

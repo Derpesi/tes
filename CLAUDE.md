@@ -13,7 +13,7 @@ Komunikasi, UI, pesan validasi, laporan, dokumen: Bahasa Indonesia. Identifier k
 - Member: Google OIDC saja. Staff: password HRIS + MFA wajib. Jangan minta password Gmail.
 - Isolasi perusahaan ditegakkan di backend + RLS, bukan filter frontend.
 - Karyawan aktif diblokir melamar di backend (403), bukan hanya disembunyikan di UI.
-- Tidak ada face recognition otomatis. Selfie hanya untuk petugas berwenang, bucket privat, retensi dapat dikonfigurasi.
+- Tidak ada face recognition otomatis. Selfie **ditiadakan sementara** (`ABSENSI_SELFIE=off`, ADR-0012); bila diaktifkan: hanya petugas berwenang, bucket privat, retensi dapat dikonfigurasi.
 - Tidak ada absensi offline. QR statis = pengenal titik, bukan rahasia.
 - Payroll tahap awal = rekap & ekspor. Dilarang: hitung gaji final, slip, transfer dana otomatis.
 - Uang: NUMERIC/Decimal, bukan float. Tarif/aturan regulasi = data berversi, bukan konstanta.
@@ -43,7 +43,7 @@ Prasyarat: Node ≥22.12, pnpm 10, PostgreSQL 16. User database dev perlu hak `C
 - `pnpm export:openapi` — perbarui `docs/openapi/openapi.json` (CI gagal bila kontrak berubah tanpa commit ini)
 - `pnpm load:seed` / `pnpm load:run` — dataset beban sintetis dan runner uji beban (hanya DB `*_load`, staging/lokal; lihat `docs/performance.md`)
 - `pnpm ops:backup` / `ops:restore` / `ops:verifikasi` — cadangan/restore (role BYPASSRLS khusus; lihat `docs/ops/restore.md`)
-- Deploy: `docs/ops/deploy.md`, daftar blokir go-live `docs/ops/golive.md`; contoh di `deploy/` (bukan konfigurasi final). Produksi: `APP_BASE_URL` https, `STORAGE_DIR` wajib, `API_DOCS` bawaan off, `DB_POOL_MAX` opsional; `GET /ready` untuk readiness.
+- Deploy: `docs/ops/deploy.md`, daftar blokir go-live `docs/ops/golive.md`; contoh di `deploy/` (bukan konfigurasi final). Produksi: `APP_BASE_URL` https, `STORAGE_DIR` wajib, `API_DOCS` bawaan off, `ABSENSI_SELFIE` bawaan off (samakan saat build web), `DB_POOL_MAX` opsional; `GET /ready` untuk readiness.
 - OpenAPI: `GET /openapi.json`, UI di `/docs` (mati di produksi kecuali `API_DOCS=on`).
 
 ## Rujukan

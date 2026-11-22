@@ -8,6 +8,7 @@ import { enkripsiBerkas } from '../common/crypto/pii';
 import { buatKunciObjek, OBJECT_STORAGE, ObjectStorage } from '../common/storage/object-storage';
 import type { BerkasMasuk } from '../common/storage/upload';
 import { KUNCI, Kunci } from '../config/config.module';
+import { selfieAktif } from '../config/env';
 import { ScopedDb } from '../database/scoped-db';
 import { MemberContextService } from '../member/member-context.service';
 import { nilaiAnomali } from './anomali';
@@ -156,10 +157,12 @@ export class MemberAttendanceService {
         const lng = bulat6(b.longitude);
         const jarak = jarakMeter(lat, lng, Number(lok.latitude), Number(lok.longitude));
         let tolak: string | null = null;
-        const foto = selfie?.buffer;
-        if (!foto || foto.length === 0) tolak = 'SELFIE_WAJIB';
-        else if (foto.length > BATAS_SELFIE_BYTE) tolak = 'SELFIE_TERLALU_BESAR';
-        else if (!(foto.length >= 3 && foto[0] === 0xff && foto[1] === 0xd8 && foto[2] === 0xff)) tolak = 'SELFIE_TIDAK_VALID';
+        // Selfie ditiadakan sementara (ABSENSI_SELFIE=off, bawaan): berkas yang terkirim diabaikan, tidak divalidasi maupun disimpan.
+        const pakaiSelfie = selfieAktif();
+        const foto = pakaiSelfie ? selfie?.buffer : undefined;
+        if (pakaiSelfie && (!foto || foto.length === 0)) tolak = 'SELFIE_WAJIB';
+        else if (foto && foto.length > BATAS_SELFIE_BYTE) tolak = 'SELFIE_TERLALU_BESAR';
+        else if (foto && !(foto.length >= 3 && foto[0] === 0xff && foto[1] === 0xd8 && foto[2] === 0xff)) tolak = 'SELFIE_TIDAK_VALID';
         else if (jarak > Number(lok.geofence_radius_m)) tolak = 'LUAR_RADIUS';
         if (!tolak) {
           const dup = paksaDuplikat || (await c.query(`SELECT 1 FROM attendance_records WHERE person_id = $1 AND point_id = $2 AND kind = $3 AND shift_date = $4::date AND status <> 'DITOLAK'`, [personId, titik.id, b.kind, tanggalShift])).rowCount;
@@ -273,7 +276,7 @@ export class MemberAttendanceService {
            FROM attendance_records r WHERE r.person_id = $1 AND r.occurred_at >= $2 ORDER BY r.occurred_at DESC, r.id DESC LIMIT 20`,
         [personId, new Date(sekarang.getTime() - 36 * 3600000)],
       );
-      return { today: tanggalWib(sekarang), placements: p.rows.map((x) => ({ placementId: x.id, locationId: x.location_id, locationName: x.location_name })), records: r.rows.map((x) => peta(x, x.flags as string[])) };
+      return { today: tanggalWib(sekarang), selfieAktif: selfieAktif(), placements: p.rows.map((x) => ({ placementId: x.id, locationId: x.location_id, locationName: x.location_name })), records: r.rows.map((x) => peta(x, x.flags as string[])) };
     });
   }
 }

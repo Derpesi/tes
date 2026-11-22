@@ -1,5 +1,8 @@
 # Keamanan
 
+> **Pembaruan (selfie ditiadakan sementara, ADR-0012):** saklar `ABSENSI_SELFIE` bawaan **off**. Saat off, langkah selfie tidak ada: server tidak mewajibkan, tidak memvalidasi, dan tidak menyimpan selfie; UI tidak meminta kamera. Aturan selfie di dokumen ini berlaku bila saklar diaktifkan kembali (`on`).
+
+
 ## Prinsip
 Least privilege, deny-by-default, pertahanan berlapis, audit untuk aksi sensitif, data sensitif dilindungi, tidak ada rahasia di repo.
 

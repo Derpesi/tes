@@ -1,5 +1,6 @@
 # Runbook: Cadangan dan Restore
 
+> **Selfie ditiadakan sementara (ADR-0012):** selama `ABSENSI_SELFIE=off` penyimpanan objek tidak bertambah oleh selfie; objek hanya dokumen kontrak dan selfie lama yang belum dihapus retensi. Angka ukuran selfie di bawah berlaku bila diaktifkan kembali.
 Target (asumsi A-02, bukan SLA): **RPO 24 jam**, **RTO 8 jam**. Skrip: `scripts/ops/backup.mjs`, `restore.mjs`, `verifikasi-restore.mjs` (Node tanpa dependency baru; butuh `pg_dump`, `pg_restore`, `openssl`, `tar` di PATH).
 
 ## Yang dicadangkan

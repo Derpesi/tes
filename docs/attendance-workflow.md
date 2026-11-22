@@ -1,5 +1,8 @@
 # Alur Absensi
 
+> **Pembaruan (selfie ditiadakan sementara, ADR-0012):** saklar `ABSENSI_SELFIE` bawaan **off**. Saat off, langkah selfie tidak ada: server tidak mewajibkan, tidak memvalidasi, dan tidak menyimpan selfie; UI tidak meminta kamera. Aturan selfie di dokumen ini berlaku bila saklar diaktifkan kembali (`on`).
+
+
 ## Alur: login → scan QR → GPS → selfie → validasi backend → simpan
 1. Karyawan login Google dan membuka menu absensi.
 2. Memindai QR cetak. QR hanya berisi pengenal titik publik (UUID acak), **bukan rahasia** karena dapat difoto atau disalin.

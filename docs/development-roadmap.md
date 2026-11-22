@@ -19,6 +19,8 @@ Tiap fase: acceptance criteria → implementasi → tes → review → persetuju
 | 10 | Uji keamanan, uji beban (k6), latihan restore, persiapan deployment | Laporan uji; validasi A-01…A-05 — **selesai diimplementasikan, menunggu persetujuan pemilik; sistem siap staging (belum produksi): lihat `ops/golive.md`** |
 | Berikutnya | Payroll penuh, slip, pembayaran, PSrE, WhatsApp/push (persetujuan terpisah) | — |
 
+> Catatan (2026-11-22): selfie absensi ditiadakan sementara atas permintaan pemilik (ADR-0012, saklar `ABSENSI_SELFIE`).
+
 ## Prioritas
 - **MVP-1:** Fase 2 sampai 7 (operasional: member, rekrutmen, PKWT, penempatan, absensi).
 - **MVP-2:** Fase 8 dan 9 (rekap payroll, dashboard, laporan).

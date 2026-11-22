@@ -38,6 +38,9 @@ const tunggu = async (url, nama) => {
 };
 const berhenti = () => proses.forEach((p) => p.kill('SIGTERM'));
 
+// Selfie ditiadakan sementara (bawaan off). ABSENSI_SELFIE=on menguji jalur selfie; harus sama saat `pnpm build` web (header izin kamera ditanam saat build).
+const SELFIE = process.env.ABSENSI_SELFIE === 'on';
+
 async function utama() {
   execFileSync('node', [join(akar, 'apps/api/scripts/migrate.js'), 'up'], { env: { ...process.env, DATABASE_URL: DB, MIGRATE_SCHEMA: SKEMA } });
   const pool = new Pool({ connectionString: `${DB}${DB.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c search_path=${SKEMA}`)}`, max: 2 });
@@ -49,7 +52,7 @@ async function utama() {
   const envApi = {
     ...process.env, NODE_ENV: 'production', PORT: '3001', APP_BASE_URL: WEB,
     DATABASE_URL: `${DB}${DB.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c search_path=${SKEMA}`)}`,
-    AUTH_HMAC_KEY: randomBytes(32).toString('base64'), APP_ENCRYPTION_KEY: KUNCI_ENK, TRUST_PROXY: '0', STORAGE_DIR: join(OUT, 'penyimpanan'),
+    AUTH_HMAC_KEY: randomBytes(32).toString('base64'), APP_ENCRYPTION_KEY: KUNCI_ENK, TRUST_PROXY: '0', STORAGE_DIR: join(OUT, 'penyimpanan'), ABSENSI_SELFIE: SELFIE ? 'on' : 'off',
   };
   delete envApi.GOOGLE_CLIENT_ID; delete envApi.GOOGLE_CLIENT_SECRET;
   proses.push(spawn('node', [join(akar, 'apps/api/dist/main.js')], { env: envApi, stdio: 'ignore' }));
@@ -569,7 +572,7 @@ async function utama() {
   assert.equal(qr.status(), 200);
   assert.equal((await qr.body()).subarray(0, 5).toString(), '%PDF-');
   const cekHeader = async (jalur) => (await page.request.get(`${WEB}${jalur}`)).headers()['permissions-policy'];
-  assert.equal(await cekHeader('/absen'), 'camera=(self), microphone=(), geolocation=(self)');
+  assert.equal(await cekHeader('/absen'), `${SELFIE ? 'camera=(self)' : 'camera=()'}, microphone=(), geolocation=(self)`);
   assert.equal(await cekHeader('/'), 'camera=(), microphone=(), geolocation=()');
   assert.equal(await cekHeader('/staff'), 'camera=(), microphone=(), geolocation=()');
   await ctx.clearCookies();
@@ -605,9 +608,14 @@ async function utama() {
     await page.click(`label:has(#jenis-${jenis})`);
     await page.click('button:has-text("lokasi")');
     await page.waitForSelector('text=Lokasi terambil');
-    await page.click('button:has-text("Buka kamera")'); await page.waitForSelector('video.kamera');
-    await page.waitForFunction(() => { const v = document.querySelector('video.kamera'); return v && v.videoWidth > 0; });
-    await page.click('button:has-text("Ambil foto")'); await page.waitForSelector('img.kamera');
+    if (SELFIE) {
+      await page.click('button:has-text("Buka kamera")'); await page.waitForSelector('video.kamera');
+      await page.waitForFunction(() => { const v = document.querySelector('video.kamera'); return v && v.videoWidth > 0; });
+      await page.click('button:has-text("Ambil foto")'); await page.waitForSelector('img.kamera');
+    } else {
+      assert.equal(await page.locator('button:has-text("Buka kamera")').count(), 0, 'selfie ditiadakan: tidak ada tombol kamera');
+      assert.equal(await page.locator('#h-selfie').count(), 0, 'selfie ditiadakan: tidak ada bagian selfie');
+    }
     await page.click('button:has-text("Kirim absen")'); await page.waitForSelector('[role=status].kartu');
     return page.textContent('[role=status].kartu');
   };
@@ -639,20 +647,25 @@ async function utama() {
   assert.match(await page.textContent('.butir'), /Perangkat baru/);
   assert.match(await page.textContent('.butir'), /Menunggu pemeriksaan/);
   await page.click('button:has-text("Buka rincian")'); await page.waitForSelector('#alasan-periksa');
-  await page.fill('#alasan-periksa', 'Wajah dan lokasi sesuai'); await page.click('button:has-text("Catat pemeriksaan")');
+  await page.fill('#alasan-periksa', 'Lokasi dan perangkat sesuai'); await page.click('button:has-text("Catat pemeriksaan")');
   assert.match(await page.textContent('[role=status].sukses'), /Pemeriksaan dicatat/);
-  await page.click('button:has-text("Tampilkan selfie")');
-  await page.waitForFunction(() => { const i = document.querySelector('img.foto-tinjau'); return i && i.complete && i.naturalWidth > 0; });
+  if (SELFIE) {
+    await page.click('button:has-text("Tampilkan selfie")');
+    await page.waitForFunction(() => { const i = document.querySelector('img.foto-tinjau'); return i && i.complete && i.naturalWidth > 0; });
+  } else {
+    assert.equal(await page.locator('button:has-text("Tampilkan selfie")').count(), 0, 'selfie ditiadakan: rekaman baru tanpa selfie');
+  }
   assert.ok(!(await page.isVisible('#putusan')), 'PayAbs tidak dapat memutuskan');
   await periksa('tinjauan-absensi'); await foto('36-tinjauan-absensi');
   const rekPerlu = (await tenantQ((c) => c.query(`SELECT id FROM attendance_records WHERE status = 'PERLU_VERIFIKASI' ORDER BY created_at DESC LIMIT 1`))).rows[0].id;
   const dilihat = await tenantQ((c) => c.query(`SELECT actor_id FROM audit_logs WHERE action = 'attendance.selfie.viewed' AND object_id = $1`, [rekPerlu]));
-  assert.ok(dilihat.rows.some((r) => r.actor_id === payabs7.uid), 'akses selfie tercatat di audit');
+  if (SELFIE) assert.ok(dilihat.rows.some((r) => r.actor_id === payabs7.uid), 'akses selfie tercatat di audit');
+  else assert.equal(dilihat.rows.length, 0, 'tanpa selfie tidak ada akses selfie');
   await ctx.clearCookies();
   await masukSesi(ops7);
   await page.goto(`${WEB}/staff/tinjauan-absensi`); await page.waitForSelector('.butir');
   await page.click('button:has-text("Buka rincian")'); await page.waitForSelector('#putusan');
-  assert.ok(await page.isVisible('button:has-text("Tampilkan selfie")'), 'Mgr Ops memegang selfie.view per matriks, sehingga tombol tampil');
+  if (SELFIE) assert.ok(await page.isVisible('button:has-text("Tampilkan selfie")'), 'Mgr Ops memegang selfie.view per matriks, sehingga tombol tampil');
   await page.selectOption('#putusan', 'DISETUJUI'); await page.selectOption('#perangkat', 'SETUJUI'); await page.fill('#alasan-putus', 'Perangkat milik pekerja');
   await page.click('button:has-text("Simpan putusan")');
   assert.match(await page.textContent('[role=status].sukses'), /Putusan dicatat/);

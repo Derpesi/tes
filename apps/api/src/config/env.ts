@@ -44,6 +44,8 @@ const skema = z
     ),
     /** Dokumentasi API (/docs, /openapi.json). Bawaan: mati di produksi, hidup selain itu (mengurangi permukaan serangan). */
     API_DOCS: opsional(z.enum(['on', 'off'], { error: 'API_DOCS harus on atau off' })),
+    /** Selfie absensi (Fase 10+): bawaan MATI (ditiadakan sementara atas keputusan pemilik). `on` mewajibkan selfie JPEG dari kamera seperti rancangan ADR-0008. */
+    ABSENSI_SELFIE: opsional(z.enum(['on', 'off'], { error: 'ABSENSI_SELFIE harus on atau off' })),
     /** Ukuran maksimum pool koneksi PostgreSQL per proses API. */
     DB_POOL_MAX: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(2, 'DB_POOL_MAX minimal 2').max(100, 'DB_POOL_MAX maksimal 100').default(10)),
     /** Direktori penyimpanan objek (driver lokal). Bawaan ./.penyimpanan; di produksi gunakan volume privat. */
@@ -83,6 +85,9 @@ export type Env = z.infer<typeof skema>;
 
 /** Apakah dokumentasi API dilayani. Produksi: mati kecuali API_DOCS=on. */
 export const docsAktif = (e: Pick<Env, 'NODE_ENV' | 'API_DOCS'>): boolean => (e.API_DOCS ? e.API_DOCS === 'on' : e.NODE_ENV !== 'production');
+
+/** Apakah selfie absensi diwajibkan/disimpan. Dibaca langsung dari lingkungan (murah, aman dipanggil per permintaan); nilainya divalidasi saat start oleh skema. */
+export const selfieAktif = (sumber: NodeJS.ProcessEnv = process.env): boolean => sumber.ABSENSI_SELFIE === 'on';
 
 /** URL callback yang HARUS didaftarkan di Google Cloud Console (tepat sama). */
 export function redirectUriGoogle(env: Pick<Env, 'APP_BASE_URL' | 'API_PUBLIC_PATH'>): string {

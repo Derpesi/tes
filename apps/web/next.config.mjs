@@ -1,5 +1,7 @@
 const apiUrl = process.env.API_URL ?? 'http://localhost:3001';
 const dev = process.env.NODE_ENV !== 'production';
+// Selfie absensi ditiadakan sementara (bawaan off). Izin kamera hanya dibuka bila ABSENSI_SELFIE=on saat BUILD (header ditanam saat build; samakan dengan API).
+const kameraUntukAbsen = process.env.ABSENSI_SELFIE === 'on' ? 'camera=(self)' : 'camera=()';
 
 // Catatan CSP: Next.js menyisipkan skrip/gaya inline sehingga 'unsafe-inline' masih diperlukan (tanpa nonce).
 // 'unsafe-eval' hanya di pengembangan. Pengetatan dengan nonce menjadi pekerjaan lanjutan.
@@ -30,8 +32,8 @@ const nextConfig = {
       { key: 'Referrer-Policy', value: 'no-referrer' },
     ];
     return [
-      // Kamera dan lokasi hanya dibuka untuk halaman absen (selfie dan GPS); halaman lain tetap menutupnya.
-      { source: '/absen', headers: [...umum, { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self)' }] },
+      // Lokasi (dan kamera, bila selfie aktif) hanya dibuka untuk halaman absen; halaman lain tetap menutupnya.
+      { source: '/absen', headers: [...umum, { key: 'Permissions-Policy', value: `${kameraUntukAbsen}, microphone=(), geolocation=(self)` }] },
       { source: '/:path((?!absen$).*)', headers: [...umum, { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' }] },
     ];
   },

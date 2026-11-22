@@ -75,13 +75,14 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-68 | Cadangan: `pg_dump` satu snapshot + hitungan baris + arsip objek tanpa kompresi + manifes checksum, dienkripsi `openssl aes-256-cbc -pbkdf2`; role cadangan/restore khusus **BYPASSRLS** (RLS dipaksa → role aplikasi tidak bisa); restore hanya ke database kosong, diverifikasi otomatis; kunci enkripsi dicadangkan terpisah |
 | D-69 | Konfigurasi produksi gagal-cepat (https, `STORAGE_DIR`, kunci berbeda dan tidak lemah); `/ready` (DB + migrasi + status berhenti) selain `/health`; `DB_POOL_MAX`; CLI bootstrap dikompilasi ke `dist/cli` agar dapat dijalankan dari image |
 | D-70 | Persiapan deployment tanpa memilih hosting: Dockerfile API/web, compose + env + nginx **contoh**, runbook `docs/ops/*`. Image belum dibangun di lingkungan ini (tanpa daemon Docker). Tanpa deploy; keputusan hosting milik pemilik |
+| D-71 | **Selfie absensi ditiadakan sementara** atas permintaan pemilik: saklar `ABSENSI_SELFIE` (`on`/`off`, bawaan off). Off: server tidak mewajibkan/memvalidasi/menyimpan selfie (berkas terkirim diabaikan), UI tanpa kamera, izin kamera `/absen` ditutup. Kode, tabel, izin `selfie.view`, audit, retensi, dan akses ke selfie lama **dipertahankan** (reversibel tanpa migrasi). ADR-0012 |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
 |---|---|---|
 | A-01 | Awal: 1.000 pekerja, 50 rekanan, 100 lokasi. Target 2 tahun: 10.000, 300, 500 | Data riil + uji beban — **Fase 10:** tervalidasi di lingkungan ini (10.000 pekerja/500 lokasi/1 juta rekaman dimuat, dioperasikan, dicadangkan, dipulihkan); perlu staging (`performance.md`) |
 | A-02 | RPO 24 jam, RTO 8 jam (bukan SLA) | Latihan restore — **Fase 10:** latihan restore 31,7 dtk untuk 805 MB DB + 2,5 GB objek, 7/7 verifikasi dan 115 tes isolasi lulus; perlu infrastruktur nyata (`ops/restore.md`) |
-| A-03 | Retensi selfie 90 hari | Tinjauan hukum/PDP + operasional |
+| A-03 | Retensi selfie 90 hari | Tinjauan hukum/PDP + operasional — **Ditunda selama selfie off (D-71):** retensi hanya relevan bila selfie diaktifkan lagi |
 | A-04 | Halaman mobile ≤3 dtk di 4G; scan absensi p95 ≤1–2 dtk pada 100 req/dtk | Uji beban k6 — **Fase 10:** scan p95 ≈ 40 ms pada 100 req/dtk (VM tunggal, pembangkit satu mesin); tervalidasi di lingkungan ini; halaman mobile 4G tidak diukur (`performance.md`) |
 | A-05 | Puncak absensi: 10.000 check-in dalam ±15 menit (≈11 req/dtk rata-rata, burst ≈100) | Pola shift riil — **Fase 10:** 10.000 check-in/15 menit + pembacaan staf bersamaan: p95 46,6 ms, 0 galat; tervalidasi di lingkungan ini |
 | A-06 | Antrean latar pakai PostgreSQL (pg-boss), tanpa Redis di awal | Uji beban |
@@ -133,10 +134,11 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-52 | Satu instans API (worker latar tunggal, pembatas laju di memori). Skala horizontal butuh kunci worker terdistribusi dan pembatas bersama | Tinjau bila >100 req/dtk berkelanjutan dibutuhkan |
 | A-53 | Rotasi kunci enkripsi belum ada; rancangan `APP_ENCRYPTION_KEYS` berversi diusulkan (`ops/secrets.md`) | Disetujui sebagai fase tersendiri sebelum produksi |
 | A-54 | Provisioning role DB aplikasi (non-superuser, tanpa BYPASSRLS) mengikuti usulan `ops/deploy.md`; migrasi tidak membuat role/GRANT | Verifikasi di staging |
-| A-55 | Selfie ±100–300 KB × 2/hari/pekerja → 2–6 GB/hari; retensi 90 hari ≈ 180–540 GB. Driver S3 dan cadangan inkremental objek belum ada | Pemilik: retensi final dan penyimpanan objek |
+| A-55 | Selfie ±100–300 KB × 2/hari/pekerja → 2–6 GB/hari; retensi 90 hari ≈ 180–540 GB. Driver S3 dan cadangan inkremental objek belum ada | Pemilik: retensi final dan penyimpanan objek — **Selama selfie off, tambahan penyimpanan selfie = 0** (D-71); selfie lama tetap dihapus sesuai retensi |
 | A-56 | Kebijakan retensi/cadangan: harian (RPO 24 jam), tanpa arsip WAL/PITR | Keputusan setelah hosting dipilih |
 | A-57 | Rekap absensi tanpa filter lokasi pada rentang panjang berat (2,3 s/30 hari di 10.000 pekerja); UI wajib mendorong filter | Pekerjaan UI/produk |
 | A-58 | Audit dependensi penuh: 4 kerentanan moderate hanya transitif dev (jest: minimatch/glob); produksi bersih | Pantau pembaruan jest |
+| A-59 | Tanpa selfie, mitigasi titip absen bertumpu pada geofence GPS, perangkat terdaftar (perangkat tambahan = verifikasi), skor anomali, dan tinjauan dua langkah; risiko titip absen **naik** (GPS dapat dipalsukan, QR dapat difoto). Dievaluasi ulang setelah data pilot | Pemilik: tetap off, aktifkan kembali, atau pengganti lain |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

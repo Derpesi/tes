@@ -21,6 +21,7 @@ process.env.APP_BASE_URL = ORIGIN;
 process.env.AUTH_HMAC_KEY = randomBytes(32).toString('base64');
 process.env.APP_ENCRYPTION_KEY = randomBytes(32).toString('base64');
 process.env.TRUST_PROXY = '1';
+process.env.ABSENSI_SELFIE = 'on'; // suite ini menguji tinjauan/selfie yang masih didukung; selfie lama tetap dapat ditinjau meski saklar off
 const STORAGE = mkdtempSync(join(tmpdir(), 'hris-absen-ops-'));
 process.env.STORAGE_DIR = STORAGE;
 
@@ -254,6 +255,21 @@ jalan('Absensi staf: tinjauan, selfie, retensi, koreksi, dan rekap (PostgreSQL a
       await http('get', `/attendance/records/${UUID_NOL}/selfie`, s.mo).expect(404);
       const tanpa = await rekaman(dA, { tanggal: '2026-03-10' });
       expect((await http('get', `/attendance/records/${tanpa}/selfie`, s.mo).expect(404)).body.kode).toBe('SELFIE_TIDAK_DITEMUKAN');
+    });
+
+    it('ABSENSI_SELFIE=off tidak menutup selfie lama: tetap dapat dilihat (berizin + diaudit) dan muncul di detail tinjauan', async () => {
+      const id = await rekaman(dA, { tanggal: '2026-03-21' });
+      const { foto } = await selfie(dA, id);
+      process.env.ABSENSI_SELFIE = 'off';
+      try {
+        const r = await http('get', `/attendance/records/${id}/selfie`, s.mo).buffer(true).parse((res, cb) => { const d: Buffer[] = []; res.on('data', (x: Buffer) => d.push(x)); res.on('end', () => cb(null, Buffer.concat(d))); }).expect(200);
+        expect((r.body as Buffer).equals(foto)).toBe(true);
+        await http('get', `/attendance/records/${id}/selfie`, s.dir).expect(403); // izin tetap ditegakkan
+        expect((await http('get', `/attendance/review/${id}`, s.mo).expect(200)).body.selfie).toMatchObject({ available: true });
+        expect((await audit('attendance.selfie.viewed', id)).length).toBe(1);
+      } finally {
+        process.env.ABSENSI_SELFIE = 'on';
+      }
     });
 
     it('detail tinjauan tidak membawa isi foto; hanya status selfie', async () => {

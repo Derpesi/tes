@@ -3,7 +3,7 @@
 // tidak menunggu respons sebelumnya, sehingga antrean server tampak sebagai kenaikan latensi (bukan melambatnya pengirim).
 // Pakai (staging/lokal SAJA, data sintetis hasil seed-besar.mjs; jangan arahkan ke production):
 //   BASE_URL=http://127.0.0.1:3001 APP_BASE_URL=<sama dengan API> AUTH_HMAC_KEY=<sama dengan API> \
-//   node tests/load/runner.mjs --skenario scan --rps 100 --durasi 60 [--ramp 10] [--keluaran hasil.json]
+//   node tests/load/runner.mjs --skenario scan --rps 100 --durasi 60 [--ramp 10] [--selfie] [--keluaran hasil.json]
 // Skenario: scan (POST /member/attendance + selfie sintetis ~100 KB, pekerja berbeda per permintaan),
 //           baca (campuran GET staf: dashboard, rekap, tinjauan, laporan, audit), ekspor (CSV laporan absensi, sinkron; ekspor rekap butuh izin khusus dan filter lokasi, tidak diukur di sini).
 import { createHmac, randomBytes } from 'node:crypto';
@@ -21,6 +21,7 @@ const rps = Number(arg('rps', 20));
 const durasi = Number(arg('durasi', 30));
 const ramp = Number(arg('ramp', 0));
 const mulaiNo = Number(arg('mulai', 0));
+const denganSelfie = process.argv.includes('--selfie'); // selfie ditiadakan sementara (bawaan produk); aktifkan hanya bila API memakai ABSENSI_SELFIE=on
 const sesi = JSON.parse(readFileSync(arg('sesi', 'tests/load/.keluaran/sesi.json'), 'utf8'));
 const kunci = Buffer.from(KUNCI, 'base64');
 const csrf = (id) => createHmac('sha256', kunci).update(`csrf:${id}`).digest('base64url');
@@ -37,7 +38,7 @@ const aksi = {
     const f = new FormData();
     f.set('code', m.kode); f.set('kind', 'MASUK'); f.set('latitude', String(m.lat)); f.set('longitude', String(m.lng)); f.set('accuracy', '15');
     f.set('deviceId', `perangkat-beban-${m.no}`.padEnd(16, 'x')); f.set('idempotencyKey', `beban-${m.no}-${randomBytes(6).toString('hex')}`);
-    f.set('selfie', new Blob([selfie], { type: 'image/jpeg' }), 'selfie.jpg');
+    if (denganSelfie) f.set('selfie', new Blob([selfie], { type: 'image/jpeg' }), 'selfie.jpg');
     return { nama: 'scan', url: `${BASE}/member/attendance`, init: { method: 'POST', headers: hdr(m), body: f } };
   },
   baca: (i) => {
