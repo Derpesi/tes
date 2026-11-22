@@ -148,6 +148,11 @@ export default function BerandaStaff() {
                 Rekap payroll
               </Link>
             ) : null}
+            {info.permissions?.includes('report_consolidated.view') ? (
+              <Link className="tombol-sekunder" href="/staff/laporan">
+                Laporan konsolidasi
+              </Link>
+            ) : null}
             {info.permissions?.includes('audit_log.view') ? (
               <Link className="tombol-sekunder" href="/staff/audit">
                 Audit log

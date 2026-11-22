@@ -771,6 +771,68 @@ async function utama() {
   assert.equal(v1.rows[0].status, 'DIFINALISASI', 'versi 1 tetap utuh sampai versi koreksi disetujui');
   await ctx.clearCookies();
 
+  // 13. Fase 9: dashboard staf per izin, laporan konsolidasi, dan penampil audit (kategori per peran).
+  await ctx.clearCookies();
+  const dari13 = hariWib(-30);
+  await masukSesi(dir8);
+  await page.waitForSelector('.butir:has-text("Karyawan aktif")');
+  assert.match(await page.textContent('.butir:has-text("Karyawan aktif")'), /Karyawan aktif\s*[1-9]/); // karyawan E2E ditempatkan
+  assert.ok(await page.isVisible('.butir:has-text("Rekap payroll")'), 'Direktur melihat widget payroll');
+  assert.ok(await page.isVisible('a:has-text("Laporan konsolidasi")') && await page.isVisible('a:has-text("Audit log")'));
+  await periksa('beranda-direktur'); await foto('42-beranda-direktur');
+  await page.goto(`${WEB}/staff/laporan`); await page.waitForSelector('#laporan');
+  await page.selectOption('#laporan', 'workforce'); await page.fill('#dari', dari13); await page.fill('#sampai', hariIni7);
+  await page.click('button:has-text("Tampilkan laporan")'); await page.waitForSelector('section:has-text("Karyawan aktif")');
+  assert.match(await page.textContent('section:has-text("Karyawan aktif")'), /Karyawan aktif/);
+  assert.doesNotMatch(await page.textContent('main'), /SINTETIS Pelamar E2E/, 'laporan tanpa nama pekerja');
+  await periksa('laporan-workforce'); await foto('43-laporan-workforce');
+  await page.selectOption('#laporan', 'attendance'); await page.click('button:has-text("Tampilkan laporan")'); await page.waitForSelector('section:has-text("Absensi per lokasi")');
+  assert.match(await page.textContent('section:has-text("Absensi per lokasi")'), /Rekaman valid/);
+  await page.selectOption('#laporan', 'payroll'); await page.click('button:has-text("Tampilkan laporan")'); await page.waitForSelector('section:has-text("Payroll rekanan")');
+  assert.match(await page.textContent('section:has-text("Payroll rekanan")'), /subtotal tunjangan[^0-9]*150000\.50/);
+  const csvLap = await page.request.get(`${WEB}/api/reports/payroll/export.csv?from=${dari13}&to=${hariIni7}`);
+  assert.equal(csvLap.status(), 200); assert.equal((await csvLap.body()).toString('utf8').charCodeAt(0), 0xfeff);
+  await page.goto(`${WEB}/staff/audit`); await page.waitForSelector('.butir');
+  const kategoriDir = await page.locator('.butir h3').allTextContents();
+  assert.ok(kategoriDir.some((a) => a.startsWith('payroll.')) && kategoriDir.some((a) => a.startsWith('attendance.') || a.startsWith('master.') || a.startsWith('pkwt.')), 'Direktur melihat banyak kategori');
+  await periksa('audit-direktur'); await foto('44-audit-direktur');
+  await ctx.clearCookies();
+
+  // IT: dashboard tanpa data bisnis; audit hanya TEKNIS dan TANPA rincian; tanpa menu laporan
+  const it9 = await buatStaffScope('it9', ['IT_ADMIN']);
+  await masukSesi(it9);
+  await page.waitForSelector('.butir:has-text("Pengguna staf")');
+  assert.ok(!(await page.isVisible('.butir:has-text("Karyawan aktif")')), 'IT tidak melihat widget karyawan');
+  assert.ok(!(await page.isVisible('a:has-text("Laporan konsolidasi")')), 'IT tidak memiliki laporan konsolidasi');
+  await page.goto(`${WEB}/staff/audit`); await page.waitForSelector('.butir');
+  const aksiIt = await page.locator('.butir h3').allTextContents();
+  assert.ok(aksiIt.length > 0 && aksiIt.every((a) => a.startsWith('auth.')), `IT hanya melihat aksi teknis: ${aksiIt.slice(0, 5).join(',')}`);
+  assert.equal(await page.locator('summary:has-text("Rincian")').count(), 0, 'IT tidak melihat rincian audit');
+  assert.equal((await (await page.request.get(`${WEB}/api/audit-logs?action=payroll.&limit=5`)).json()).items.length, 0);
+  assert.equal((await page.request.get(`${WEB}/api/reports/workforce?from=${dari13}&to=${hariIni7}`)).status(), 403);
+  await periksa('audit-it'); await foto('45-audit-it');
+  await ctx.clearCookies();
+
+  // Keuangan: audit hanya transaksi (payroll/laporan); HRD: laporan tanpa bagian payroll
+  const keu9 = await buatStaffScope('keu9', ['STAFF_KEUANGAN']);
+  await masukSesi(keu9);
+  await page.goto(`${WEB}/staff/audit`); await page.waitForSelector('.butir');
+  const aksiKeu = await page.locator('.butir h3').allTextContents();
+  assert.ok(aksiKeu.length > 0 && aksiKeu.every((a) => a.startsWith('payroll.') || a.startsWith('report.')), `Keuangan hanya melihat transaksi: ${aksiKeu.slice(0, 5).join(',')}`);
+  await ctx.clearCookies();
+  const hrd9 = await buatStaffScope('hrd9', ['HRD']);
+  await masukSesi(hrd9);
+  assert.ok(!(await page.isVisible('.butir:has-text("Rekap payroll")')), 'HRD tidak melihat widget payroll');
+  assert.ok(!(await page.isVisible('a:has-text("Audit log")')), 'HRD tidak memiliki audit log');
+  await page.goto(`${WEB}/staff/laporan`); await page.waitForSelector('#laporan');
+  await page.selectOption('#laporan', 'payroll'); await page.fill('#dari', dari13); await page.fill('#sampai', hariIni7);
+  await page.click('button:has-text("Tampilkan laporan")');
+  await page.waitForSelector('text=Tidak ada bagian laporan yang dapat Anda lihat');
+  assert.ok(!(await page.isVisible('a:has-text("Ekspor CSV")')), 'HRD tidak memegang izin ekspor laporan');
+  await page.selectOption('#laporan', 'recruitment'); await page.click('button:has-text("Tampilkan laporan")'); await page.waitForSelector('section:has-text("Lowongan")');
+  await periksa('laporan-hrd'); await foto('46-laporan-hrd');
+  await ctx.clearCookies();
+
   assert.deepEqual(galatKonsol, [], `galat konsol/CSP: ${galatKonsol.join(' | ')}`);
   await browser.close();
   await pool.end();

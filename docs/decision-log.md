@@ -61,6 +61,12 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-54 | Snapshot absensi bersumber dari rekap absensi (rekaman efektif + koreksi); verifikasi diblokir bila masih ada rekaman PERLU_VERIFIKASI (dicek langsung ke data) |
 | D-55 | Ekspor CSV/xlsx/PDF hanya untuk rekap disetujui; dicatat (SHA-256) dan diaudit tanpa nominal; sel berawalan = + - @ dinetralkan di semua format |
 | D-56 | `exceljs` ditolak (lisensi dan kerentanan); xlsx ditulis penulis OOXML/ZIP minimal tanpa dependency baru |
+| D-57 | Audit berkategori menurut peran (TEKNIS/TRANSAKSI/OPERASIONAL dari awalan aksi), ditegakkan di SQL; IT teknis tanpa detail; Keuangan transaksi; peran lain tanpa akses (ADR-0010) |
+| D-58 | Detail audit disaring daftar putih kunci; tes penelusuran sumber memastikan semua aksi audit memakai awalan dikenal |
+| D-59 | Dashboard staf berbasis widget dan izin: hanya angka agregat, di bawah RLS scope, jam disuntikkan; tidak ada dashboard rekanan |
+| D-60 | Laporan konsolidasi agregat per perusahaan; tiap bagian mensyaratkan izin domain; bagian tanpa izin dihilangkan; payroll hanya subtotal rekap disetujui |
+| D-61 | Ekspor laporan CSV (Direktur, Keuangan) anti formula injection, ≤ 5.000 baris, diaudit `report.exported` (kategori transaksi) |
+| D-62 | Fase 9 tanpa tabel/migrasi baru; materialized view ditunda ke Fase 10 bila uji beban menuntut |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
@@ -110,6 +116,11 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-43 | Rekap INTERNAL berbasis masukan manual (staf internal tidak memakai absensi QR); orang dipilih lewat ID | Pemilik menentukan sumber data internal |
 | A-44 | Ekspor sinkron (≤ 5.000 baris), tidak disimpan; antrean latar dan bucket privat bila beban menuntut | Uji beban (Fase 10) |
 | A-45 | Rekap hanya memuat orang yang punya rekaman absensi atau koreksi pada periode; hari tanpa absen belum diturunkan dari jadwal | Pemilik |
+| A-46 | Aksi audit tak terpetakan dikategorikan OPERASIONAL (tidak terlihat IT dan Keuangan) | Pemilik meninjau pemetaan |
+| A-47 | Mgr Ops melihat audit operasional + transaksi (bukan teknis); Keuangan hanya transaksi; IT hanya teknis tanpa detail | Pemilik |
+| A-48 | Laporan: karyawan aktif dihitung per tanggal akhir rentang; kontrak akan berakhir = ≤ 30 hari tanpa kontrak lanjutan | Pemilik |
+| A-49 | Status member pada laporan ditampilkan global ('Seluruh Group') karena data member tidak ber-perusahaan | Pemilik |
+| A-50 | Laporan dihitung saat diminta (tanpa materialized view); batas 5.000 baris dan rentang 366 hari | Uji beban (Fase 10) |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

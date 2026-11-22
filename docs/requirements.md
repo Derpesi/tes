@@ -58,7 +58,7 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | PKW-3 | Template PKWT | Tanpa teks hukum bawaan; verifikasi dicatat Direktur (pemverifikasi ≠ pembuat); terkunci dan berversi; variabel daftar putih (6A) |
 | PKW-4 | Alur kontrak | Pembuat/pemeriksa/penyetuju berbeda (aplikasi + DB); nomor otomatis; PDF sesuai permintaan; scan terenkripsi diverifikasi HRD (6B) |
 | PEN-2 | Status otomatis | Kontrak + penempatan aktif → KARYAWAN_AKTIF; akan berakhir/berakhir otomatis; lamaran 403 oleh alur nyata; kembali pencari kerja hanya lewat verifikasi HRD (6C) |
-| DSH-1 | Dashboard | Member melihat kontrak/penempatan miliknya; staf melihat karyawan aktif dalam scope; notifikasi kontrak akan berakhir sekali (6D) |
+| DSH-1 | Dashboard | Member melihat kontrak/penempatan miliknya; staf melihat karyawan aktif dalam scope; notifikasi kontrak akan berakhir sekali (6D); dashboard staf berbasis widget dan izin, hanya angka agregat, scope lewat RLS (9B) |
 | ORG-1 | Isolasi perusahaan | Pengguna scope A tidak dapat membaca data B lewat API, ID langsung, ekspor |
 | ORG-2 | Perusahaan baru | Tambah perusahaan lewat master data tanpa deploy ulang |
 | REK-1 | Rekanan hanya data | Tidak ada tabel, rute, atau role login rekanan (diuji otomatis) |
@@ -73,4 +73,5 @@ Pengguna hanya dua kategori: **Member/Tenaga Kerja** dan **Staff Internal**. **P
 | ABS-4 | Retensi selfie | Selfie melewati masa retensi terhapus oleh pekerjaan harian; legal hold dikecualikan; penghapusan teraudit (7D) |
 | PAY-1 | Rekap absensi | Rekap per periode sesuai data absensi; setelah disetujui tak bisa diubah tanpa koreksi resmi (rekap absensi 7D; rekap payroll, verifikasi, persetujuan, finalisasi, dan koreksi bernomor 8C) |
 | EXP-1 | Ekspor | xlsx, CSV, PDF terbentuk; sel berawalan `=+-@` dinetralkan; ekspor teraudit (CSV absensi 7D; CSV/xlsx/PDF rekap payroll 8D) |
-| AUD-1 | Audit | Aksi sensitif tercatat; tabel tidak bisa UPDATE/DELETE |
+| AUD-1 | Audit | Aksi sensitif tercatat; tabel tidak bisa UPDATE/DELETE; penampil audit berkategori per peran (IT teknis tanpa detail, Keuangan transaksi) dengan scope RLS (9A) |
+| LAP-1 | Laporan konsolidasi | Laporan ketenagakerjaan/rekrutmen/absensi/payroll agregat per perusahaan dalam scope; bagian sesuai izin domain; tanpa data pribadi; ekspor CSV Direktur/Keuangan aman dan diaudit (9C) |

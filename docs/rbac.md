@@ -68,3 +68,6 @@ Kode: **V** lihat, **C** buat, **U** ubah, **D** nonaktifkan, **K** periksa/veri
 
 ## Catatan penegakan Fase 8
 Rekap payroll: izin dipisah per jenis (`payroll_recap_partner.*` untuk rekanan, `payroll_recap_internal.*` untuk internal) dan diperiksa di layanan; rute baca terbuka bagi pemegang izin apa pun lalu disaring per jenis. Persetujuan dan finalisasi memakai `payroll_approval.approve|finalize` untuk kedua jenis (A-41). Pembuat, pemeriksa, penyetuju, finalisator harus orang berbeda (aplikasi + database).
+
+## Catatan penegakan Fase 9
+Audit: izin tunggal `audit_log.view`, tetapi kategori yang terlihat diturunkan dari peran di server (Direktur semua; Mgr Ops operasional + transaksi; IT teknis tanpa detail; Keuangan transaksi). Laporan: `report_consolidated.view` saja tidak cukup; setiap bagian juga membutuhkan izin domainnya (mis. payroll membutuhkan izin rekap payroll jenis itu), dan bagian tanpa izin dihilangkan. Dashboard staf: setiap staf dengan sesi penuh, isi mengikuti izin.

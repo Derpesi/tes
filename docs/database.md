@@ -107,6 +107,9 @@ payroll_recaps 1─* payroll_recap_status_histories ; payroll_recaps 1─* payro
 ```
 Pelindung database: periode tidak tumpang tindih (exclusion), rentang ≤ 93 hari; satu versi terbuka per periode; versi ≥ 2 wajib bernomor dan beralasan; empat pelaku berbeda dan penyunting terakhir bukan pemeriksa (CHECK); kelengkapan pelaku/hash menurut status; transisi status sah; identitas/pelaku/hash tidak berubah setelah disetujui; rekap tidak dihapus; baris dan komponen hanya berubah saat DRAFT; nominal `NUMERIC(14,2) ≥ 0`.
 
+## Fase 9
+Tidak ada tabel atau migrasi baru. Dashboard, laporan, dan penampil audit membaca tabel yang ada lewat SQL agregat di bawah RLS (ADR-0010). Indeks tambahan dan materialized view ditunda sampai uji beban (Fase 10) menunjukkan kebutuhan.
+
 ## Dirancang tapi belum dibuat (menunggu persetujuan fase payroll penuh)
 `payroll_runs`, `payroll_items`, `payment_records`, `payroll_rule_versions` (hitung gaji, PPh 21, BPJS, slip, pembayaran).
 
