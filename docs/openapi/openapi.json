@@ -3695,6 +3695,20 @@
         ]
       }
     },
+    "/dashboard/staff": {
+      "get": {
+        "operationId": "StaffDashboardController_staf",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Widget dashboard sesuai izin pemanggil (angka agregat, scope perusahaan lewat RLS)"
+          }
+        },
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
     "/vacancies": {
       "get": {
         "operationId": "RecruitmentController_daftarLowongan",

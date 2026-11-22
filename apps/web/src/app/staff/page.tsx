@@ -6,10 +6,13 @@ import { useEffect, useState } from 'react';
 import { Galat, Halaman } from '../../components/ui';
 import { ApiError, InfoSesi, ambilSesi, api } from '../../lib/api';
 
+interface Widget { id: string; title: string; link: string; items: { key: string; label: string; value: number }[] }
+
 export default function BerandaStaff() {
   const router = useRouter();
   const [info, setInfo] = useState<InfoSesi | null>(null);
   const [galat, setGalat] = useState<string | null>(null);
+  const [widgets, setWidgets] = useState<Widget[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -20,6 +23,8 @@ export default function BerandaStaff() {
         if (s.state === 'MENUNGGU_ENROLL_MFA') return router.replace('/staff/daftar-mfa');
         if (s.state === 'MENUNGGU_MFA') return router.replace('/staff/masuk');
         setInfo(await api<InfoSesi>('/auth/me'));
+        // Widget mengikuti izin (angka agregat, scope perusahaan lewat RLS di backend); kegagalan widget tidak menghalangi menu.
+        api<{ widgets: Widget[] }>('/dashboard/staff').then((d) => setWidgets(d.widgets), () => undefined);
       } catch (e) {
         setGalat((e as ApiError).message);
       }
@@ -48,6 +53,25 @@ export default function BerandaStaff() {
             <p>Peran: {info.roles && info.roles.length ? info.roles.join(', ') : 'belum ada peran'}</p>
             <p className="bantuan">Izin aktif: {info.permissions?.length ?? 0}. Akses perusahaan: {info.allCompanies ? 'seluruh perusahaan' : `${info.companyIds?.length ?? 0} perusahaan`}.</p>
           </div>
+          {widgets.length ? (
+            <section aria-label="Ringkasan" className="bagian">
+              {widgets.map((w) => (
+                <div className="butir" key={w.id}>
+                  <h3>
+                    <Link className="tautan" href={w.link}>
+                      {w.title}
+                    </Link>
+                  </h3>
+                  {w.items.map((i) => (
+                    <div className="komponen" key={i.key}>
+                      <span>{i.label}</span>
+                      <strong>{i.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </section>
+          ) : null}
           <nav className="menu" aria-label="Menu utama">
             {info.permissions?.includes('company.view') ? (
               <Link className="tombol-sekunder" href="/staff/perusahaan">
