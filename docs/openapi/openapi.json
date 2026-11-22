@@ -635,7 +635,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Audit log terbatas scope (RLS); keyset pagination"
+            "description": "Audit log terbatas scope (RLS) dan kategori menurut peran (IT: teknis tanpa detail; Keuangan: transaksi); keyset pagination"
           }
         },
         "tags": [

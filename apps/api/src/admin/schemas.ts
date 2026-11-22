@@ -35,6 +35,11 @@ export const ApprovalQuery = z.object({ status: z.enum(['MENUNGGU', 'DISETUJUI',
 
 export const AuditQuery = z.object({
   action: z.string().trim().max(100).optional(),
+  kategori: z.enum(['TEKNIS', 'TRANSAKSI', 'OPERASIONAL'], { error: 'Kategori harus TEKNIS, TRANSAKSI, atau OPERASIONAL' }).optional(),
+  objectType: z.string().trim().max(60).optional(),
+  objectId: z.string().trim().max(100).optional(),
+  actorId: z.string().uuid('ID aktor tidak valid').optional(),
+  companyId: z.string().uuid('ID perusahaan tidak valid').optional(),
   from: z.string().datetime({ message: 'Format "from" tidak valid' }).optional(),
   to: z.string().datetime({ message: 'Format "to" tidak valid' }).optional(),
   cursor: z.string().max(500).optional(),

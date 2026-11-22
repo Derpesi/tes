@@ -123,8 +123,8 @@ export class AdminController {
   // ----- audit -----
   @RequirePermission('audit_log.view')
   @Get('audit-logs')
-  @ApiOkResponse({ description: 'Audit log terbatas scope (RLS); keyset pagination' })
+  @ApiOkResponse({ description: 'Audit log terbatas scope (RLS) dan kategori menurut peran (IT: teknis tanpa detail; Keuangan: transaksi); keyset pagination' })
   audit(@AksesStaff() a: Akses, @Query(new ZodPipe(AuditQuery)) q: z.infer<typeof AuditQuery>) {
-    return this.auditViewer.baca(a, { action: q.action, from: q.from ? new Date(q.from) : undefined, to: q.to ? new Date(q.to) : undefined, cursor: q.cursor, limit: q.limit });
+    return this.auditViewer.baca(a, { action: q.action, kategori: q.kategori, objectType: q.objectType, objectId: q.objectId, actorId: q.actorId, companyId: q.companyId, from: q.from ? new Date(q.from) : undefined, to: q.to ? new Date(q.to) : undefined, cursor: q.cursor, limit: q.limit });
   }
 }

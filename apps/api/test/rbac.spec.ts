@@ -602,8 +602,8 @@ jalan('RBAC, scope, persetujuan ganda, dan penampil audit (PostgreSQL asli)', ()
     it('Direktur (izin global) melihat perusahaan dalam scope dan baris global', async () => {
       expect((await lihat(sDirektur)).sort()).toEqual(['1', '2', '3', '4']);
     });
-    it('IT Administrator tanpa scope hanya melihat baris global (teknis)', async () => {
-      expect(await lihat(sIt)).toEqual(['4']);
+    it('IT Administrator hanya melihat kategori TEKNIS: baris global OPERASIONAL ini tidak terlihat (lihat audit-penampil.spec untuk baris teknis)', async () => {
+      expect(await lihat(sIt)).toEqual([]);
     });
     it('Staff Keuangan tanpa scope dan tanpa izin global tidak melihat apa pun', async () => {
       expect(await lihat(sKeuangan)).toEqual([]);

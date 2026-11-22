@@ -124,6 +124,11 @@ export default function BerandaStaff() {
                 Rekap payroll
               </Link>
             ) : null}
+            {info.permissions?.includes('audit_log.view') ? (
+              <Link className="tombol-sekunder" href="/staff/audit">
+                Audit log
+              </Link>
+            ) : null}
             {info.permissions?.includes('user_role.view') ? (
               <Link className="tombol-sekunder" href="/staff/persetujuan">
                 Persetujuan
