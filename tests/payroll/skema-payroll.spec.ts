@@ -92,7 +92,8 @@ ada('Payroll rekap: invarian skema, pelindung database, dan isolasi RLS', () => 
         const r1 = await rekap(c, A, p);
         await harusGagal(c, `INSERT INTO payroll_recaps (company_id, period_id, version_no, recap_number, correction_reason, created_by) VALUES ($1, $2, 2, 'KRP/1', 'alasan', $3)`, [A, p, u[0]], /satu_terbuka/);
         await verifikasi(c, r1);
-        await harusGagal(c, `INSERT INTO payroll_recaps (company_id, period_id, version_no, recap_number, correction_reason, created_by) VALUES ($1, $2, 1, NULL, NULL, $3)`, [A, p, u[0]], /versi_unik/);
+        // Duplikat versi 1 melanggar DUA indeks unik sekaligus; PostgreSQL melaporkan yang diperiksa lebih dulu (urutan OID, berubah setelah restore). Keduanya sah.
+        await harusGagal(c, `INSERT INTO payroll_recaps (company_id, period_id, version_no, recap_number, correction_reason, created_by) VALUES ($1, $2, 1, NULL, NULL, $3)`, [A, p, u[0]], /versi_unik|satu_terbuka/);
         await setujui(c, r1);
         const nomorKrp = `KRP/2100/${randomBytes(3).toString('hex')}`;
         await c.query(`INSERT INTO payroll_recaps (company_id, period_id, version_no, recap_number, correction_reason, created_by) VALUES ($1, $2, 2, $3, 'alasan', $4)`, [A, p, nomorKrp, u[0]]);
