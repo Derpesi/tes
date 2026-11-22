@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 import { variabelTidakDikenal } from './variabel';
 
 const uuid = (nama: string) => z.string({ error: `${nama} wajib diisi` }).uuid(`${nama} tidak valid`);
@@ -30,7 +31,7 @@ const tanggal = (nama: string) =>
   z
     .string({ error: `${nama} wajib diisi` })
     .regex(/^\d{4}-\d{2}-\d{2}$/, `${nama}: format harus YYYY-MM-DD`)
-    .refine((v) => new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), `${nama} bukan tanggal yang valid`);
+    .refine((v) => tanggalValid(v), `${nama} bukan tanggal yang valid`);
 const jabatan = z.string({ error: 'Jabatan wajib diisi' }).trim().min(1, 'Jabatan wajib diisi').max(100, 'Jabatan terlalu panjang (maksimal 100 karakter)');
 const periodeOk = (v: { startDate?: string; endDate?: string }) => !v.startDate || !v.endDate || v.endDate >= v.startDate;
 const PESAN_PERIODE = 'Tanggal berakhir tidak boleh sebelum tanggal mulai';

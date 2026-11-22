@@ -1,11 +1,12 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 
 const uuid = (nama: string) => z.string({ error: `${nama} wajib diisi` }).uuid(`${nama} tidak valid`);
 const tanggal = (nama: string) =>
   z
     .string({ error: `${nama} wajib diisi` })
     .regex(/^\d{4}-\d{2}-\d{2}$/, `${nama}: format harus YYYY-MM-DD`)
-    .refine((v) => new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), `${nama} bukan tanggal yang valid`);
+    .refine((v) => tanggalValid(v), `${nama} bukan tanggal yang valid`);
 const jam = (nama: string) => z.string({ error: `${nama} wajib diisi` }).regex(/^([01]\d|2[0-3]):[0-5]\d$/, `${nama}: format harus HH:MM (00:00-23:59)`);
 const toleransi = (nama: string) => z.coerce.number({ error: `${nama} harus berupa angka` }).int(`${nama} harus bilangan bulat`).min(0, `${nama} minimal 0`).max(240, `${nama} maksimal 240 menit`);
 

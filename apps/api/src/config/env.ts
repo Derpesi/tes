@@ -42,6 +42,8 @@ const skema = z
       (v) => (v === '' ? undefined : v),
       z.string().regex(/^(\/[a-z0-9_-]+)+$/, 'API_PUBLIC_PATH harus berupa jalur seperti /api').default('/api'),
     ),
+    /** Dokumentasi API (/docs, /openapi.json). Bawaan: mati di produksi, hidup selain itu (mengurangi permukaan serangan). */
+    API_DOCS: opsional(z.enum(['on', 'off'], { error: 'API_DOCS harus on atau off' })),
     /** Direktori penyimpanan objek (driver lokal). Bawaan ./.penyimpanan; di produksi gunakan volume privat. */
     STORAGE_DIR: opsional(z.string().min(1)),
     SMTP_HOST: opsional(z.string().min(1)),
@@ -66,6 +68,9 @@ const skema = z
   });
 
 export type Env = z.infer<typeof skema>;
+
+/** Apakah dokumentasi API dilayani. Produksi: mati kecuali API_DOCS=on. */
+export const docsAktif = (e: Pick<Env, 'NODE_ENV' | 'API_DOCS'>): boolean => (e.API_DOCS ? e.API_DOCS === 'on' : e.NODE_ENV !== 'production');
 
 /** URL callback yang HARUS didaftarkan di Google Cloud Console (tepat sama). */
 export function redirectUriGoogle(env: Pick<Env, 'APP_BASE_URL' | 'API_PUBLIC_PATH'>): string {

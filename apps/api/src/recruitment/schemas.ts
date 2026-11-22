@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 
 const teks = (nama: string, max: number) => z.string({ error: `${nama} wajib diisi` }).trim().min(1, `${nama} wajib diisi`).max(max, `${nama} terlalu panjang (maksimal ${max} karakter)`);
 const opsi = (nama: string, max: number) =>
@@ -12,7 +13,7 @@ const tanggal = (nama: string) =>
   z
     .string({ error: `${nama} harus berupa teks` })
     .regex(/^\d{4}-\d{2}-\d{2}$/, `${nama}: format harus YYYY-MM-DD`)
-    .refine((v) => new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), `${nama} bukan tanggal yang valid`);
+    .refine((v) => tanggalValid(v), `${nama} bukan tanggal yang valid`);
 const uuid = (nama: string) => z.string({ error: `${nama} wajib diisi` }).uuid(`${nama} tidak valid`);
 
 export const IdParam = z.string({ error: 'ID wajib diisi' }).uuid('ID tidak valid');

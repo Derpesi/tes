@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 
 const teks = (nama: string, max: number) => z.string({ error: `${nama} wajib diisi` }).trim().min(1, `${nama} wajib diisi`).max(max, `${nama} terlalu panjang (maksimal ${max} karakter)`);
 const opsi = (nama: string, max: number) =>
@@ -77,7 +78,7 @@ const tanggal = (nama: string) =>
   z
     .string({ error: `${nama} wajib diisi` })
     .regex(/^\d{4}-\d{2}-\d{2}$/, `${nama}: format harus YYYY-MM-DD`)
-    .refine((v) => !Number.isNaN(Date.parse(`${v}T00:00:00Z`)) && new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), `${nama} bukan tanggal yang valid`);
+    .refine((v) => !Number.isNaN(Date.parse(`${v}T00:00:00Z`)) && tanggalValid(v), `${nama} bukan tanggal yang valid`);
 const lat = z.number({ error: 'Lintang harus angka' }).min(-90, 'Lintang harus antara -90 dan 90').max(90, 'Lintang harus antara -90 dan 90');
 const lng = z.number({ error: 'Bujur harus angka' }).min(-180, 'Bujur harus antara -180 dan 180').max(180, 'Bujur harus antara -180 dan 180');
 const radius = z.number({ error: 'Radius harus angka' }).int('Radius harus bilangan bulat').min(20, 'Radius minimal 20 meter').max(1000, 'Radius maksimal 1000 meter');

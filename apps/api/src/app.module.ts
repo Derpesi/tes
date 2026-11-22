@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
@@ -24,7 +23,7 @@ import { HealthController } from './health/health.controller';
 @Module({
   imports: [
     LoggerModule.forRoot({ pinoHttp: opsiPinoHttp(process.env.NODE_ENV) }),
-    // Pembatas laju bawaan per IP (memori, instance tunggal; keterbatasan dicatat di docs/security.md).
+    // Pembatas laju: per pengguna (sesi sah) atau per IP (memori, instance tunggal; keterbatasan dicatat di docs/security.md).
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     ConfigModule,
     StorageModule,
@@ -44,6 +43,5 @@ import { HealthController } from './health/health.controller';
     RecruitmentModule,
   ],
   controllers: [HealthController],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

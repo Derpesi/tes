@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 
 const teks = (nama: string, max: number) =>
   z
@@ -29,7 +30,7 @@ export const BiodataSimpan = z
     birthDate: z
       .string({ error: 'Tanggal lahir harus berupa teks' })
       .regex(/^\d{4}-\d{2}-\d{2}$/, 'Tanggal lahir: format harus YYYY-MM-DD')
-      .refine((v) => new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), 'Tanggal lahir bukan tanggal yang valid')
+      .refine((v) => tanggalValid(v), 'Tanggal lahir bukan tanggal yang valid')
       .refine((v) => v >= '1900-01-01' && v <= new Date().toISOString().slice(0, 10), 'Tanggal lahir di luar rentang yang wajar')
       .optional(),
     gender: z.enum(['L', 'P'], { error: 'Jenis kelamin harus L atau P' }).optional(),

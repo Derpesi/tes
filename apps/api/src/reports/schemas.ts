@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { tanggalValid } from '../common/tanggal';
 
 const tanggal = (nama: string) =>
   z
     .string({ error: `${nama} wajib diisi` })
     .regex(/^\d{4}-\d{2}-\d{2}$/, `${nama}: format harus YYYY-MM-DD`)
-    .refine((v) => new Date(`${v}T00:00:00Z`).toISOString().startsWith(v), `${nama} bukan tanggal yang valid`);
+    .refine((v) => tanggalValid(v), `${nama} bukan tanggal yang valid`);
 
 export const NAMA_LAPORAN = ['workforce', 'recruitment', 'attendance', 'payroll'] as const;
 export type NamaLaporan = (typeof NAMA_LAPORAN)[number];

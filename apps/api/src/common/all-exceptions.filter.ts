@@ -21,7 +21,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const res = host.switchToHttp().getResponse<Response>();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    // Galat 4xx dari middleware/library HTTP (body-parser: JSON rusak 400, body terlalu besar 413; URL rusak 400) membawa `status`; jangan dijadikan 500.
+    const kodeLib = exception instanceof HttpException ? undefined : (exception as { status?: unknown; statusCode?: unknown } | null)?.status ?? (exception as { statusCode?: unknown } | null)?.statusCode;
+    const status = exception instanceof HttpException ? exception.getStatus() : typeof kodeLib === 'number' && kodeLib >= 400 && kodeLib < 500 ? kodeLib : HttpStatus.INTERNAL_SERVER_ERROR;
 
     // Pesan bawaan framework/library berbahasa Inggris tidak boleh bocor ke pengguna. Pesan khusus hanya
     // dipakai bila exception membawa `kode` (dibuat oleh aplikasi ini, berbahasa Indonesia).

@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { samaAman } from '../common/crypto/crypto';
@@ -9,6 +9,10 @@ import { IZIN, IZIN_ALTERNATIF } from '../rbac/rbac.decorators';
 import { COOKIE_SESI } from './auth.constants';
 import { OPSI_SESI, OpsiSesi, PUBLIK } from './decorators';
 import { SesiAktif, SessionService } from './session.service';
+
+/** Batas pencarian sesi dengan cookie TIDAK SAH per IP per menit (cookie palsu memicu kueri database; tanpa cookie tidak). */
+const BATAS_COOKIE_TIDAK_SAH = 60;
+const JENDELA_MS = 60_000;
 
 export type RequestDenganSesi = Request & { sesi?: SesiAktif; akses?: Akses };
 
@@ -21,6 +25,7 @@ const METHOD_AMAN = new Set(['GET', 'HEAD', 'OPTIONS']);
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly origin: string;
+  private readonly cookieTidakSah = new Map<string, { n: number; reset: number }>();
   constructor(
     private readonly reflector: Reflector,
     private readonly sesi: SessionService,
@@ -39,6 +44,7 @@ export class AuthGuard implements CanActivate {
     const publik = this.reflector.getAllAndOverride<boolean>(PUBLIK, target) === true;
     const token = req.cookies?.[COOKIE_SESI] as string | undefined;
     const sesi = token ? await this.sesi.cari(token) : null;
+    if (token && !sesi) this.catatCookieTidakSah(req.ip ?? 'tanpa-ip');
 
     if (publik) {
       req.sesi = sesi ?? undefined;
@@ -74,6 +80,16 @@ export class AuthGuard implements CanActivate {
       req.akses = a;
     }
     return true;
+  }
+
+  /** Membatasi banjir cookie palsu dari satu IP (429) agar tidak menjadi pengungkit beban database. Pengguna sah tidak terdampak. */
+  private catatCookieTidakSah(ip: string): void {
+    const kini = Date.now();
+    if (this.cookieTidakSah.size > 5000) for (const [k, v] of this.cookieTidakSah) if (v.reset < kini) this.cookieTidakSah.delete(k);
+    const c = this.cookieTidakSah.get(ip);
+    if (!c || c.reset < kini) return void this.cookieTidakSah.set(ip, { n: 1, reset: kini + JENDELA_MS });
+    c.n += 1;
+    if (c.n > BATAS_COOKIE_TIDAK_SAH) throw new HttpException({ kode: 'TERLALU_BANYAK_PERMINTAAN', message: 'Terlalu banyak permintaan, coba lagi nanti' }, HttpStatus.TOO_MANY_REQUESTS);
   }
 
   private periksaOrigin(req: Request): void {

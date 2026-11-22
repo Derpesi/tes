@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { ISSUER_GOOGLE, muatEnv, redirectUriGoogle } from './env';
+import { ISSUER_GOOGLE, docsAktif, muatEnv, redirectUriGoogle } from './env';
 
 const sah = (): NodeJS.ProcessEnv =>
   ({
@@ -67,5 +67,18 @@ describe('muatEnv', () => {
     expect(() => muatEnv({ ...sah(), API_PUBLIC_PATH: 'api' })).toThrow(/API_PUBLIC_PATH/);
     expect(() => muatEnv({ ...sah(), API_PUBLIC_PATH: '/api/' })).toThrow(/API_PUBLIC_PATH/);
     expect(redirectUriGoogle(muatEnv(sah()))).toBe('https://hris.contoh.invalid/api/auth/member/google/callback');
+  });
+});
+
+describe('docsAktif (dokumentasi API)', () => {
+  it('bawaan: hidup di luar produksi, MATI di produksi', () => {
+    expect(docsAktif({ NODE_ENV: 'development', API_DOCS: undefined })).toBe(true);
+    expect(docsAktif({ NODE_ENV: 'test', API_DOCS: undefined })).toBe(true);
+    expect(docsAktif({ NODE_ENV: 'production', API_DOCS: undefined })).toBe(false);
+  });
+  it('API_DOCS menimpa bawaan; nilai selain on/off ditolak skema', () => {
+    expect(docsAktif({ NODE_ENV: 'production', API_DOCS: 'on' })).toBe(true);
+    expect(docsAktif({ NODE_ENV: 'development', API_DOCS: 'off' })).toBe(false);
+    expect(() => muatEnv({ ...sah(), API_DOCS: 'ya' })).toThrow(/API_DOCS harus on atau off/);
   });
 });

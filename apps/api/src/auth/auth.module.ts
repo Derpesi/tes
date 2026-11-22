@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuditModule } from '../audit/audit.module';
 import { RbacModule } from '../rbac/rbac.module';
+import { ThrottlerSesiGuard } from '../common/throttler-sesi.guard';
 import { AuthGuard } from './auth.guard';
 import { BootstrapService } from './bootstrap.service';
 import { InvitationService } from './invitation.service';
@@ -28,6 +29,8 @@ import { TotpService } from './totp.service';
     MemberAuthService,
     // Guard global: semua rute wajib bersesi kecuali @Public() (deny-by-default).
     { provide: APP_GUARD, useClass: AuthGuard },
+    // Pembatas laju SETELAH AuthGuard: sesi sah dihitung per pengguna (NAT/lokasi kerja tidak saling memblokir), selain itu per IP.
+    { provide: APP_GUARD, useClass: ThrottlerSesiGuard },
   ],
   exports: [SessionService, InvitationService, PasswordService, BootstrapService],
 })
