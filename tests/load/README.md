@@ -1,15 +1,8 @@
-# Uji Beban (k6) — kerangka
+# Uji Beban — Fase 10B
 
-Status: **kerangka saja, belum dieksekusi**. Tidak ada hasil uji beban yang boleh diklaim dari berkas ini.
+Hasil, metode, dan keterbatasan: **`docs/performance.md`**. Berkas:
+- `seed-besar.mjs` — dataset sintetis besar (10.000 pekerja, 500 lokasi, ≥1 juta rekaman). Menolak database yang namanya tidak berakhiran `_load`/`_beban`. Menulis `.keluaran/sesi.json` (token sesi sintetis; **diabaikan git**, jangan dibagikan).
+- `runner.mjs` — pembangkit beban open-loop tanpa dependency (`scan`, `baca`, `ekspor`); menolak `BASE_URL` yang tampak production.
+- `smoke-health.js` — kerangka k6 (belum dijalankan; k6 bukan dependency repo). Ambang A-04 adalah asumsi, bukan SLA.
 
-- `smoke-health.js`: skenario asap terhadap `/health`. Ambang `p95 < 1000 ms` dan `error < 1%` adalah asumsi A-04 (bukan SLA).
-- `BASE_URL` wajib diisi; arahkan hanya ke **staging**, tidak pernah ke production.
-- Tanpa data nyata: skenario berikutnya wajib memakai data sintetis (lihat `tests/helpers/data-sintetis.ts`).
-
-## Skenario yang akan dibuat
-| Skenario | Fase | Asumsi yang divalidasi |
-|---|---|---|
-| Puncak check-in absensi (10.000 pekerja dalam ±15 menit, burst ≈100 req/dtk) | 7 | A-04, A-05 |
-| Daftar besar dengan keyset pagination (lowongan, lamaran, rekap) | 5, 8 | A-04 |
-| Ekspor rekap via pekerjaan latar | 8 | A-04 |
-| Latihan restore database dan bucket (RPO 24 jam, RTO 8 jam) | 10 | A-02 |
+Aturan: hanya **staging/lokal**, hanya **data sintetis**, tidak pernah production, tanpa kredensial nyata.
