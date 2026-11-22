@@ -1,12 +1,12 @@
 # Image API HRIS (multi-stage, non-root). Bangun dari AKAR repo:
 #   docker build -f apps/api/Dockerfile -t hris-api:<tag> .
-# Image TIDAK berisi rahasia: semua konfigurasi lewat variabel lingkungan saat dijalankan (lihat .env.production.example).
+# Image TIDAK berisi rahasia: semua konfigurasi lewat variabel lingkungan saat dijalankan (lihat env.production.contoh).
 # Migrasi dijalankan sebagai langkah terpisah: docker run --rm --env-file ... hris-api:<tag> node scripts/migrate.js up
 FROM node:22-bookworm-slim AS build
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true
 RUN corepack enable
 WORKDIR /repo
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY tests/package.json tests/

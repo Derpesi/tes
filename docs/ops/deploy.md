@@ -9,7 +9,7 @@ Status: **siap staging; belum pernah dideploy ke hosting mana pun**. Hosting, do
 | Web (Next.js) | `apps/web/Dockerfile` | `API_URL` ditanam saat **build** (rewrite `/api/*`); ganti alamat API = bangun ulang image. |
 | Reverse proxy + TLS | `deploy/nginx.example.conf` | Contoh. Batas body 12 MB, HSTS, `/api/health` dan `/api/ready` tidak dipublikasikan. |
 | PostgreSQL 16 | terkelola / mandiri | Role aplikasi **bukan superuser dan tanpa BYPASSRLS** (RLS ditegakkan). Role migrasi terpisah (pemilik skema). |
-| Compose contoh | `deploy/docker-compose.prod.example.yml` | Variabel di `deploy/.env.production.example` (isi di server; **jangan commit**). |
+| Compose contoh | `deploy/docker-compose.prod.example.yml` | Variabel di `deploy/env.production.contoh` (isi di server; **jangan commit**). |
 
 > Image **belum pernah dibangun** di lingkungan pengembangan ini (daemon Docker tidak tersedia). Verifikasi pengganti yang sudah dijalankan: `pnpm --filter @hris/api deploy --prod --legacy`, start dari `dist` dengan env produksi, tes konfigurasi produksi, uji SIGTERM. Bangun dan uji image di staging sebelum dipakai.
 

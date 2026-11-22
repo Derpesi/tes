@@ -1,5 +1,5 @@
 # CONTOH deployment produksi. Bukan konfigurasi final: hosting, domain, TLS, dan database dikelola ditentukan pemilik.
-# Salin ke luar repo, isi .env.production dari .env.production.example (JANGAN commit), lalu:
+# Salin ke luar repo, isi .env.production dari env.production.contoh (JANGAN commit), lalu:
 #   docker compose --env-file .env.production -f docker-compose.prod.example.yml run --rm migrasi
 #   docker compose --env-file .env.production -f docker-compose.prod.example.yml up -d api web proxy
 # Catatan penting:
