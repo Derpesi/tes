@@ -20,7 +20,7 @@ if (skema && !/^[a-z_][a-z0-9_]{0,40}$/.test(skema)) {
 }
 runner({
   databaseUrl: url,
-  dir: path.join(__dirname, '..', '..', '..', 'db', 'migrations'),
+  dir: process.env.MIGRATIONS_DIR || path.join(__dirname, '..', '..', '..', 'db', 'migrations'), // MIGRATIONS_DIR: dipakai image produksi (tata letak berbeda)
   direction: arah,
   count: arah === 'down' ? 1 : Infinity,
   migrationsTable: 'schema_migrations',

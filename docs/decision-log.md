@@ -67,15 +67,23 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | D-60 | Laporan konsolidasi agregat per perusahaan; tiap bagian mensyaratkan izin domain; bagian tanpa izin dihilangkan; payroll hanya subtotal rekap disetujui |
 | D-61 | Ekspor laporan CSV (Direktur, Keuangan) anti formula injection, ≤ 5.000 baris, diaudit `report.exported` (kategori transaksi) |
 | D-62 | Fase 9 tanpa tabel/migrasi baru; materialized view ditunda ke Fase 10 bila uji beban menuntut |
+| D-63 | Fase 10: sapuan keamanan otomatis berbasis OpenAPI atas semua rute (`keamanan-sapuan.spec.ts`) ikut tes integrasi; temuan T-1…T-5 diperbaiki dengan tes regresi dan uji mutasi (`security-review.md`) |
+| D-64 | Pembatas laju: per pengguna untuk rute bersesi (guard setelah `AuthGuard`), per IP untuk rute tanpa sesi, dan pembatas cookie sesi palsu per IP (60/menit); NAT kantor rekanan tidak saling memblokir |
+| D-65 | API: header keamanan global; dokumentasi (`/docs`, `/openapi.json`) mati di produksi kecuali `API_DOCS=on`; galat 4xx middleware (body besar/JSON rusak) tidak menjadi 500 |
+| D-66 | Uji beban memakai runner Node tanpa dependency (k6 tidak ditambahkan ke repo) dengan dataset sintetis besar `tests/load/seed-besar.mjs`; hasil dilaporkan dengan batas lingkungan (1 VM, bukan staging) |
+| D-67 | Migrasi 021: indeks `attendance_records (location_id, shift_date DESC)` (rekap per lokasi 11× lebih cepat). Indeks cakupan laporan dan `work_mem` dicoba lalu ditolak (manfaat kecil); partisi (A-40) dan materialized view (A-50) tetap ditunda |
+| D-68 | Cadangan: `pg_dump` satu snapshot + hitungan baris + arsip objek tanpa kompresi + manifes checksum, dienkripsi `openssl aes-256-cbc -pbkdf2`; role cadangan/restore khusus **BYPASSRLS** (RLS dipaksa → role aplikasi tidak bisa); restore hanya ke database kosong, diverifikasi otomatis; kunci enkripsi dicadangkan terpisah |
+| D-69 | Konfigurasi produksi gagal-cepat (https, `STORAGE_DIR`, kunci berbeda dan tidak lemah); `/ready` (DB + migrasi + status berhenti) selain `/health`; `DB_POOL_MAX`; CLI bootstrap dikompilasi ke `dist/cli` agar dapat dijalankan dari image |
+| D-70 | Persiapan deployment tanpa memilih hosting: Dockerfile API/web, compose + env + nginx **contoh**, runbook `docs/ops/*`. Image belum dibangun di lingkungan ini (tanpa daemon Docker). Tanpa deploy; keputusan hosting milik pemilik |
 
 ## Asumsi Sementara (belum divalidasi)
 | ID | Asumsi | Validasi |
 |---|---|---|
-| A-01 | Awal: 1.000 pekerja, 50 rekanan, 100 lokasi. Target 2 tahun: 10.000, 300, 500 | Data riil + uji beban |
-| A-02 | RPO 24 jam, RTO 8 jam (bukan SLA) | Latihan restore |
+| A-01 | Awal: 1.000 pekerja, 50 rekanan, 100 lokasi. Target 2 tahun: 10.000, 300, 500 | Data riil + uji beban — **Fase 10:** tervalidasi di lingkungan ini (10.000 pekerja/500 lokasi/1 juta rekaman dimuat, dioperasikan, dicadangkan, dipulihkan); perlu staging (`performance.md`) |
+| A-02 | RPO 24 jam, RTO 8 jam (bukan SLA) | Latihan restore — **Fase 10:** latihan restore 31,7 dtk untuk 805 MB DB + 2,5 GB objek, 7/7 verifikasi dan 115 tes isolasi lulus; perlu infrastruktur nyata (`ops/restore.md`) |
 | A-03 | Retensi selfie 90 hari | Tinjauan hukum/PDP + operasional |
-| A-04 | Halaman mobile ≤3 dtk di 4G; scan absensi p95 ≤1–2 dtk pada 100 req/dtk | Uji beban k6 |
-| A-05 | Puncak absensi: 10.000 check-in dalam ±15 menit (≈11 req/dtk rata-rata, burst ≈100) | Pola shift riil |
+| A-04 | Halaman mobile ≤3 dtk di 4G; scan absensi p95 ≤1–2 dtk pada 100 req/dtk | Uji beban k6 — **Fase 10:** scan p95 ≈ 40 ms pada 100 req/dtk (VM tunggal, pembangkit satu mesin); tervalidasi di lingkungan ini; halaman mobile 4G tidak diukur (`performance.md`) |
+| A-05 | Puncak absensi: 10.000 check-in dalam ±15 menit (≈11 req/dtk rata-rata, burst ≈100) | Pola shift riil — **Fase 10:** 10.000 check-in/15 menit + pembacaan staf bersamaan: p95 46,6 ms, 0 galat; tervalidasi di lingkungan ini |
 | A-06 | Antrean latar pakai PostgreSQL (pg-boss), tanpa Redis di awal | Uji beban |
 | A-07 | Migrasi SQL-first + query builder (mis. Kysely), bukan ORM penuh | ADR-0002 |
 | A-08 | Selfie terkompresi ≤150 KB: ≈4 GB/hari dan ≈360 GB pada retensi 90 hari (10.000 pekerja) | Ukur di staging |
@@ -88,7 +96,7 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-15 | Kunci akun: 5 gagal berturut-turut (kata sandi atau MFA) mengunci 15 menit, juga untuk email tak terdaftar; undangan berlaku 7 hari, tautan reset 30 menit (maks 3 permintaan/jam/akun) | Divalidasi pemilik |
 | A-16 | argon2id (`@node-rs/argon2`) m=19 MiB, t=2, p=1 (minimum OWASP) | Disetel ulang setelah uji beban |
 | A-17 | TOTP via `otplib` 13 (toleransi ±30 detik, proteksi pakai-ulang); **tanpa OTP email**; 10 kode pemulihan sekali pakai | Pemilik |
-| A-18 | Pembatas laju per IP di memori (instance tunggal): 10 permintaan/menit untuk endpoint auth, 120/menit umum. Di balik proxy wajib set `TRUST_PROXY` | Redis dievaluasi bila perlu (A-06) |
+| A-18 | Pembatas laju per IP di memori (instance tunggal): 10 permintaan/menit untuk endpoint auth, 120/menit umum. Di balik proxy wajib set `TRUST_PROXY` | Redis dievaluasi bila perlu (A-06) — **Fase 10:** **Diubah:** pembatas laju rute bersesi kini per pengguna (setelah AuthGuard), rute tanpa sesi per IP, cookie palsu dibatasi per IP (D-64) |
 | A-19 | Node minimal 22.12 (otplib memakai dependency ESM yang dimuat lewat `require`) | CI memakai `.nvmrc` |
 | A-20 | Login Google: `prompt=select_account` (perangkat bersama), scope `openid email profile`, tanpa refresh token; tanda tangan id_token diverifikasi ulang dengan JWKS (di atas TLS) | Uji dengan klien Google sungguhan oleh pemilik |
 | A-21 | Permintaan persetujuan kedaluwarsa dalam 72 jam | Divalidasi pemilik |
@@ -120,7 +128,15 @@ Pisahkan **keputusan final** dari **asumsi sementara**. Asumsi tidak boleh diper
 | A-47 | Mgr Ops melihat audit operasional + transaksi (bukan teknis); Keuangan hanya transaksi; IT hanya teknis tanpa detail | Pemilik |
 | A-48 | Laporan: karyawan aktif dihitung per tanggal akhir rentang; kontrak akan berakhir = ≤ 30 hari tanpa kontrak lanjutan | Pemilik |
 | A-49 | Status member pada laporan ditampilkan global ('Seluruh Group') karena data member tidak ber-perusahaan | Pemilik |
-| A-50 | Laporan dihitung saat diminta (tanpa materialized view); batas 5.000 baris dan rentang 366 hari | Uji beban (Fase 10) |
+| A-50 | Laporan dihitung saat diminta (tanpa materialized view); batas 5.000 baris dan rentang 366 hari | Uji beban (Fase 10) — **Fase 10:** **Terukur:** laporan absensi 30 hari 3,4 s, rekap tanpa filter 2,3 s; materialized view/ringkasan tetap ditunda, rekomendasi di `performance.md` |
+| A-51 | Tinjauan keamanan Fase 10 adalah uji otomatis + tinjauan sendiri, **bukan** uji penetrasi independen | Pemilik memutuskan uji penetrasi sebelum produksi |
+| A-52 | Satu instans API (worker latar tunggal, pembatas laju di memori). Skala horizontal butuh kunci worker terdistribusi dan pembatas bersama | Tinjau bila >100 req/dtk berkelanjutan dibutuhkan |
+| A-53 | Rotasi kunci enkripsi belum ada; rancangan `APP_ENCRYPTION_KEYS` berversi diusulkan (`ops/secrets.md`) | Disetujui sebagai fase tersendiri sebelum produksi |
+| A-54 | Provisioning role DB aplikasi (non-superuser, tanpa BYPASSRLS) mengikuti usulan `ops/deploy.md`; migrasi tidak membuat role/GRANT | Verifikasi di staging |
+| A-55 | Selfie ±100–300 KB × 2/hari/pekerja → 2–6 GB/hari; retensi 90 hari ≈ 180–540 GB. Driver S3 dan cadangan inkremental objek belum ada | Pemilik: retensi final dan penyimpanan objek |
+| A-56 | Kebijakan retensi/cadangan: harian (RPO 24 jam), tanpa arsip WAL/PITR | Keputusan setelah hosting dipilih |
+| A-57 | Rekap absensi tanpa filter lokasi pada rentang panjang berat (2,3 s/30 hari di 10.000 pekerja); UI wajib mendorong filter | Pekerjaan UI/produk |
+| A-58 | Audit dependensi penuh: 4 kerentanan moderate hanya transitif dev (jest: minimatch/glob); produksi bersih | Pantau pembaruan jest |
 
 ## Masih Terbuka
 Pembuatan OAuth client Google oleh pemilik (lihat `google-oauth-setup.md`); penyedia hosting dan operator server; identitas admin awal dan Direktur; template PKWT resmi; warna dan logo final; penyedia email; format kolom ekspor payroll; nama badan hukum pemegang hak cipta; visibilitas repo dan lisensi proprietary.

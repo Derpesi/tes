@@ -1,0 +1,49 @@
+# CONTOH deployment produksi. Bukan konfigurasi final: hosting, domain, TLS, dan database dikelola ditentukan pemilik.
+# Salin ke luar repo, isi .env.production dari .env.production.example (JANGAN commit), lalu:
+#   docker compose --env-file .env.production -f docker-compose.prod.example.yml run --rm migrasi
+#   docker compose --env-file .env.production -f docker-compose.prod.example.yml up -d api web proxy
+# Catatan penting:
+# - api HARUS satu instans (worker latar outbox/kontrak/selfie tunggal; pembatas laju di memori per proses). Lihat docs/ops/deploy.md.
+# - PostgreSQL diasumsikan terkelola/terpisah (DATABASE_URL). Role aplikasi: BUKAN superuser, tanpa BYPASSRLS (RLS ditegakkan).
+services:
+  migrasi:
+    image: ${API_IMAGE:?isi API_IMAGE}
+    command: ["node", "scripts/migrate.js", "up"]
+    env_file: .env.production
+    environment:
+      DATABASE_URL: ${MIGRATE_DATABASE_URL:?isi MIGRATE_DATABASE_URL (role pemilik skema, hanya untuk migrasi)}
+    restart: "no"
+  api:
+    image: ${API_IMAGE:?isi API_IMAGE}
+    env_file: .env.production
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes: ["objek:/var/lib/hris/objek"]
+    stop_grace_period: 30s
+    deploy: { replicas: 1 }
+    networks: [dalam]
+  web:
+    image: ${WEB_IMAGE:?isi WEB_IMAGE}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp", "/app/.next/cache"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on: [api]
+    networks: [dalam]
+  proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports: ["443:443", "80:80"]
+    volumes:
+      - ./nginx.example.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${TLS_DIR:?isi TLS_DIR (berisi fullchain.pem dan privkey.pem)}:/etc/nginx/tls:ro
+    depends_on: [web]
+    networks: [dalam]
+volumes:
+  objek:
+networks:
+  dalam:

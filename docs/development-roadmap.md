@@ -16,7 +16,7 @@ Tiap fase: acceptance criteria → implementasi → tes → review → persetuju
 | 7 | Absensi QR + GPS + selfie, shift lintas tengah malam, hari libur, retensi selfie, koreksi, tinjauan — **selesai, menunggu persetujuan pemilik** | Skenario duplikat, luar radius, perangkat baru, lintas tengah malam lolos |
 | 8 | Rekap payroll tahap awal + ekspor xlsx/CSV/PDF — **selesai, menunggu persetujuan pemilik** | Rekap dapat disetujui dan diekspor |
 | 9 | Dashboard, laporan, penampil audit — **selesai, menunggu persetujuan pemilik** | Laporan sesuai role |
-| 10 | Uji keamanan, uji beban (k6), latihan restore, persiapan deployment | Laporan uji; validasi A-01…A-05 |
+| 10 | Uji keamanan, uji beban (k6), latihan restore, persiapan deployment | Laporan uji; validasi A-01…A-05 — **selesai diimplementasikan, menunggu persetujuan pemilik; sistem siap staging (belum produksi): lihat `ops/golive.md`** |
 | Berikutnya | Payroll penuh, slip, pembayaran, PSrE, WhatsApp/push (persetujuan terpisah) | — |
 
 ## Prioritas

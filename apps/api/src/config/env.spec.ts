@@ -61,7 +61,7 @@ describe('muatEnv', () => {
   it('GOOGLE_ISSUER tidak boleh diubah di produksi, boleh di tes/pengembangan', () => {
     expect(() => muatEnv({ ...sah(), NODE_ENV: 'production', GOOGLE_ISSUER: 'http://127.0.0.1:9999' })).toThrow(/produksi/);
     expect(muatEnv({ ...sah(), NODE_ENV: 'test', GOOGLE_ISSUER: 'http://127.0.0.1:9999' }).GOOGLE_ISSUER).toBe('http://127.0.0.1:9999');
-    expect(muatEnv({ ...sah(), NODE_ENV: 'production' }).GOOGLE_ISSUER).toBe(ISSUER_GOOGLE);
+    expect(muatEnv({ ...sah(), NODE_ENV: 'production', STORAGE_DIR: '/var/lib/hris/objek' }).GOOGLE_ISSUER).toBe(ISSUER_GOOGLE);
   });
   it('API_PUBLIC_PATH harus berupa jalur dan membentuk redirect URI persis', () => {
     expect(() => muatEnv({ ...sah(), API_PUBLIC_PATH: 'api' })).toThrow(/API_PUBLIC_PATH/);
@@ -80,5 +80,45 @@ describe('docsAktif (dokumentasi API)', () => {
     expect(docsAktif({ NODE_ENV: 'production', API_DOCS: 'on' })).toBe(true);
     expect(docsAktif({ NODE_ENV: 'development', API_DOCS: 'off' })).toBe(false);
     expect(() => muatEnv({ ...sah(), API_DOCS: 'ya' })).toThrow(/API_DOCS harus on atau off/);
+  });
+});
+
+describe('validasi konfigurasi produksi (gagal-cepat)', () => {
+  const prod = (): NodeJS.ProcessEnv => ({ ...sah(), NODE_ENV: 'production', STORAGE_DIR: '/var/lib/hris/objek' }) as NodeJS.ProcessEnv;
+  it('konfigurasi produksi yang benar diterima', () => {
+    expect(muatEnv(prod()).NODE_ENV).toBe('production');
+  });
+  it('menolak APP_BASE_URL non-https di produksi, tetapi boleh di pengembangan', () => {
+    expect(() => muatEnv({ ...prod(), APP_BASE_URL: 'http://hris.contoh.invalid' })).toThrow(/https/);
+    expect(muatEnv({ ...sah(), APP_BASE_URL: 'http://localhost:3000' }).APP_BASE_URL).toBe('http://localhost:3000');
+  });
+  it('produksi: http hanya diizinkan untuk loopback (E2E lokal), bukan domain publik', () => {
+    expect(muatEnv({ ...prod(), APP_BASE_URL: 'http://localhost:3000' }).APP_BASE_URL).toBe('http://localhost:3000');
+    expect(muatEnv({ ...prod(), APP_BASE_URL: 'http://127.0.0.1:3000' }).APP_BASE_URL).toBe('http://127.0.0.1:3000');
+    expect(() => muatEnv({ ...prod(), APP_BASE_URL: 'http://localhost.evil.invalid' })).toThrow(/https/);
+  });
+  it('menolak produksi tanpa STORAGE_DIR (folder bawaan tidak boleh dipakai)', () => {
+    const e = prod();
+    delete e.STORAGE_DIR;
+    expect(() => muatEnv(e)).toThrow(/STORAGE_DIR wajib diisi di produksi/);
+  });
+  it('menolak kunci yang sama untuk HMAC dan enkripsi', () => {
+    const k = randomBytes(32).toString('base64');
+    expect(() => muatEnv({ ...prod(), AUTH_HMAC_KEY: k, APP_ENCRYPTION_KEY: k })).toThrow(/harus berbeda/);
+  });
+  it('menolak kunci lemah (byte hampir seragam) tanpa menampilkan nilainya', () => {
+    const lemah = Buffer.alloc(32, 7).toString('base64');
+    expect(() => muatEnv({ ...prod(), AUTH_HMAC_KEY: lemah })).toThrow(/AUTH_HMAC_KEY terlalu lemah/);
+    try {
+      muatEnv({ ...prod(), AUTH_HMAC_KEY: lemah });
+    } catch (e) {
+      expect(String(e)).not.toContain(lemah);
+    }
+  });
+  it('DB_POOL_MAX: bawaan 10, batas 2..100', () => {
+    expect(muatEnv(sah()).DB_POOL_MAX).toBe(10);
+    expect(muatEnv({ ...sah(), DB_POOL_MAX: '25' }).DB_POOL_MAX).toBe(25);
+    expect(() => muatEnv({ ...sah(), DB_POOL_MAX: '1' })).toThrow(/DB_POOL_MAX/);
+    expect(() => muatEnv({ ...sah(), DB_POOL_MAX: '500' })).toThrow(/DB_POOL_MAX/);
   });
 });

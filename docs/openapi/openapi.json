@@ -15,6 +15,20 @@
         ]
       }
     },
+    "/ready": {
+      "get": {
+        "operationId": "HealthController_siap",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Siap menerima lalu lintas"
+          }
+        },
+        "tags": [
+          "Kesehatan"
+        ]
+      }
+    },
     "/auth/staff/invitation/accept": {
       "post": {
         "operationId": "StaffAuthController_terimaUndangan",

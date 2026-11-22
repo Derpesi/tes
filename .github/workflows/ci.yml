@@ -52,6 +52,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:scripts
+      - name: Sintaks skrip ops dan uji beban
+        run: for f in scripts/ops/*.mjs tests/load/*.mjs; do node --check "$f"; done
       - run: pnpm build
 
   integrasi:
@@ -120,3 +122,18 @@ jobs:
         run: pnpm audit --prod --audit-level=high
       - name: Kebijakan lisensi
         run: pnpm check:licenses
+
+  image-docker:
+    name: Bangun image Docker (tanpa push)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Image API
+        run: docker build -f apps/api/Dockerfile -t hris-api:ci .
+      - name: Image web
+        run: docker build -f apps/web/Dockerfile --build-arg API_URL=http://api:3001 -t hris-web:ci .
+      - name: Uji asap image API (konfigurasi produksi buruk harus gagal-cepat)
+        run: |
+          if docker run --rm -e NODE_ENV=production -e DATABASE_URL=postgres://u:p@localhost/db -e APP_BASE_URL=http://x.invalid hris-api:ci; then
+            echo "Seharusnya gagal-cepat"; exit 1
+          fi

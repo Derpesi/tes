@@ -23,7 +23,12 @@
     "test:rbac": "pnpm --filter @hris/tests test",
     "bootstrap": "pnpm --filter @hris/api bootstrap",
     "test:e2e": "node tests/e2e/smoke-staff.mjs",
-    "seed:perusahaan": "pnpm --filter @hris/api seed:perusahaan"
+    "seed:perusahaan": "pnpm --filter @hris/api seed:perusahaan",
+    "load:seed": "node tests/load/seed-besar.mjs",
+    "load:run": "node tests/load/runner.mjs",
+    "ops:backup": "node scripts/ops/backup.mjs",
+    "ops:restore": "node scripts/ops/restore.mjs",
+    "ops:verifikasi": "node scripts/ops/verifikasi-restore.mjs"
   },
   "pnpm": {
     "overrides": {

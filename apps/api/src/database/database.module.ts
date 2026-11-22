@@ -17,7 +17,7 @@ class PoolShutdown implements OnApplicationShutdown {
 @Global()
 @Module({
   providers: [
-    { provide: POOL, useFactory: () => new Pool({ connectionString: muatEnv().DATABASE_URL, max: 10 }) },
+    { provide: POOL, useFactory: () => new Pool({ connectionString: muatEnv().DATABASE_URL, max: muatEnv().DB_POOL_MAX }) },
     PoolShutdown,
     ScopedDb,
   ],

@@ -18,7 +18,7 @@ import { StorageModule } from './common/storage/storage.module';
 import { ConfigModule } from './config/config.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DatabaseModule } from './database/database.module';
-import { HealthController } from './health/health.controller';
+import { HealthController, StatusProses } from './health/health.controller';
 
 @Module({
   imports: [
@@ -43,5 +43,6 @@ import { HealthController } from './health/health.controller';
     RecruitmentModule,
   ],
   controllers: [HealthController],
+  providers: [StatusProses],
 })
 export class AppModule {}

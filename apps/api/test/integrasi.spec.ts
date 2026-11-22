@@ -41,6 +41,21 @@ jalan('integrasi (PostgreSQL asli)', () => {
     expect(res.body).toEqual({ status: 'ok', database: 'ok' });
   });
 
+  it('GET /ready: siap bila database dan migrasi tersedia; 503 setelah proses ditandai berhenti', async () => {
+    const res = await request(app.getHttpServer()).get('/ready').expect(200);
+    expect(res.body).toEqual({ status: 'siap' });
+    const { StatusProses } = await import('../src/health/health.controller');
+    const status = app.get(StatusProses);
+    status.berhenti = true;
+    try {
+      const r = await request(app.getHttpServer()).get('/ready').expect(503);
+      expect(r.body.pesan).toMatch(/berhenti/);
+      await request(app.getHttpServer()).get('/health').expect(200); // liveness tidak terpengaruh
+    } finally {
+      status.berhenti = false;
+    }
+  });
+
   it('menghasilkan dokumen OpenAPI yang memuat /health', async () => {
     const res = await request(app.getHttpServer()).get('/openapi.json').expect(200);
     expect(res.body.openapi).toMatch(/^3\./);

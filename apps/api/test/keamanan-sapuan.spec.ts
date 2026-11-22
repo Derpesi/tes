@@ -23,7 +23,7 @@ interface Sesi { cookie: string; csrf: string; userId: string }
 interface Rute { metode: Metode; path: string; templ: string; tulis: boolean; multipart: boolean }
 
 // Rute publik yang SAH (sisanya wajib 401 tanpa sesi). Menambah rute publik baru harus disengaja: tes ini gagal sampai daftar ini diperbarui.
-const PUBLIK_SAH = new Set(['/health', '/auth/staff/invitation/accept', '/auth/staff/login', '/auth/staff/password/forgot', '/auth/staff/password/reset', '/auth/member/google/start', '/auth/member/google/callback']);
+const PUBLIK_SAH = new Set(['/health', '/ready', '/auth/staff/invitation/accept', '/auth/staff/login', '/auth/staff/password/forgot', '/auth/staff/password/reset', '/auth/member/google/start', '/auth/member/google/callback']);
 // Rute staf yang sah dibuka untuk staf tanpa peran apa pun (isi dibatasi izin di dalamnya).
 const STAF_TANPA_IZIN_SAH = new Set(['/dashboard/staff']);
 const PAYLOAD = [

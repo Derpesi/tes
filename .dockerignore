@@ -1,0 +1,12 @@
+.git
+**/node_modules
+**/dist
+**/.next
+.env
+.env.*
+!.env.example
+!.env.production.example
+**/.penyimpanan
+tests/load/.keluaran
+docs
+*.md

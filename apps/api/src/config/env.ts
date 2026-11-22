@@ -44,6 +44,8 @@ const skema = z
     ),
     /** Dokumentasi API (/docs, /openapi.json). Bawaan: mati di produksi, hidup selain itu (mengurangi permukaan serangan). */
     API_DOCS: opsional(z.enum(['on', 'off'], { error: 'API_DOCS harus on atau off' })),
+    /** Ukuran maksimum pool koneksi PostgreSQL per proses API. */
+    DB_POOL_MAX: z.preprocess((v) => (v === '' ? undefined : v), z.coerce.number().int().min(2, 'DB_POOL_MAX minimal 2').max(100, 'DB_POOL_MAX maksimal 100').default(10)),
     /** Direktori penyimpanan objek (driver lokal). Bawaan ./.penyimpanan; di produksi gunakan volume privat. */
     STORAGE_DIR: opsional(z.string().min(1)),
     SMTP_HOST: opsional(z.string().min(1)),
@@ -61,6 +63,16 @@ const skema = z
     };
     if (v.NODE_ENV === 'production' && v.GOOGLE_ISSUER !== ISSUER_GOOGLE) {
       ctx.addIssue({ code: 'custom', path: ['GOOGLE_ISSUER'], message: 'GOOGLE_ISSUER tidak boleh diubah di produksi' });
+    }
+    if (v.NODE_ENV === 'production') {
+      // http hanya untuk loopback (localhost = konteks aman bagi browser; dipakai E2E lokal). Domain publik wajib https.
+      const loopback = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(v.APP_BASE_URL);
+      if (!v.APP_BASE_URL.startsWith('https://') && !loopback) ctx.addIssue({ code: 'custom', path: ['APP_BASE_URL'], message: 'APP_BASE_URL harus https:// di produksi (cookie __Host- dan OIDC mensyaratkan HTTPS)' });
+      if (!v.STORAGE_DIR) ctx.addIssue({ code: 'custom', path: ['STORAGE_DIR'], message: 'STORAGE_DIR wajib diisi di produksi (volume privat; tidak boleh memakai folder bawaan)' });
+      if (v.AUTH_HMAC_KEY === v.APP_ENCRYPTION_KEY) ctx.addIssue({ code: 'custom', path: ['APP_ENCRYPTION_KEY'], message: 'AUTH_HMAC_KEY dan APP_ENCRYPTION_KEY harus berbeda' });
+      for (const nama of ['AUTH_HMAC_KEY', 'APP_ENCRYPTION_KEY'] as const) {
+        if (new Set(Buffer.from(v[nama], 'base64')).size < 8) ctx.addIssue({ code: 'custom', path: [nama], message: `${nama} terlalu lemah (hampir seragam); bangkitkan dengan openssl rand -base64 32` });
+      }
     }
     semuaAtauTidak('Google OAuth', ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']);
     semuaAtauTidak('SMTP', ['SMTP_HOST', 'SMTP_PORT', 'SMTP_FROM']);
